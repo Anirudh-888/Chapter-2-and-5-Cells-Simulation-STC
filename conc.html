@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cell Tonicity Lab | Grade 9 Interactive Simulation</title>
+  
+  <!-- Premium UI Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #020617;
+      --bg-panel: rgba(15, 23, 42, 0.75);
+      --bg-card: rgba(30, 41, 59, 0.55);
+      --border-color: rgba(0, 229, 255, 0.22);
+      --border-glow: 0 0 15px rgba(0, 229, 255, 0.12);
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --cyan-accent: #00e5ff;
+      --cyan-glow: rgba(0, 229, 255, 0.45);
+      --amber-accent: #ffab00;
+      --amber-glow: rgba(255, 171, 0, 0.45);
+      --red-accent: #ff1744;
+      --red-glow: rgba(255, 23, 68, 0.45);
+      --green-accent: #00e676;
+      --green-glow: rgba(0, 230, 118, 0.45);
+      
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(13, 30, 61, 0.65) 0px, transparent 55%),
+        radial-gradient(at 100% 100%, rgba(8, 20, 44, 0.65) 0px, transparent 55%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Mobile Warning */
+    .mobile-warning {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #020617;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .mobile-warning p {
+      font-size: 1.15rem;
+      color: var(--amber-accent);
+      margin-top: 15px;
+      line-height: 1.5;
+    }
+
+    /* Header */
+    header {
+      background: rgba(2, 6, 23, 0.9);
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.6);
+      z-index: 10;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--red-accent), var(--green-accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #000;
+      font-size: 1.15rem;
+      box-shadow: 0 0 15px rgba(255, 23, 68, 0.3);
+    }
+
+    h1 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: linear-gradient(to right, #fff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-badge {
+      background: rgba(0, 229, 255, 0.08);
+      border: 1px solid var(--cyan-accent);
+      color: var(--cyan-accent);
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: var(--border-glow);
+    }
+
+    /* Grid Layout */
+    .main-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 310px 1fr 340px;
+      gap: 15px;
+      padding: 15px;
+      height: calc(100vh - 60px);
+    }
+
+    /* Glass Panels */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--cyan-accent);
+      text-transform: uppercase;
+    }
+
+    .panel-content {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Center Viewport Beaker */
+    .viewport-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #01040a;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.95);
+      outline: none;
+    }
+
+    #viewportCanvas {
+      width: 100%;
+      height: 100%;
+      max-width: 800px;
+      max-height: 600px;
+      aspect-ratio: 4/3;
+      display: block;
+      background: transparent;
+    }
+
+    /* HUD elements */
+    .hud-element {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      background: rgba(2, 6, 23, 0.85);
+      border: 1px solid rgba(0, 229, 255, 0.18);
+      padding: 6px 12px;
+      border-radius: 6px;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+    }
+
+    .hud-top-left { top: 15px; left: 15px; border-left: 3px solid var(--cyan-accent); color: #fff; font-weight: bold; }
+    .hud-top-right { top: 15px; right: 15px; text-align: right; }
+    .hud-bottom-center { bottom: 15px; left: 50%; transform: translateX(-50%); width: 90%; text-align: center; }
+
+    /* Control widgets */
+    .control-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .mode-btn-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .mode-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      padding: 11px 6px;
+      border-radius: 8px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
+    .mode-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+
+    .mode-btn.active {
+      background: rgba(0, 229, 255, 0.08);
+      border-color: var(--cyan-accent);
+      color: var(--cyan-accent);
+      box-shadow: var(--border-glow);
+    }
+
+    .mode-btn.active.plant {
+      background: rgba(0, 230, 118, 0.08);
+      border-color: var(--green-accent);
+      color: var(--green-accent);
+      box-shadow: 0 0 15px rgba(0, 230, 118, 0.15);
+    }
+
+    .mode-btn.active.animal {
+      background: rgba(255, 23, 68, 0.08);
+      border-color: var(--red-accent);
+      color: var(--red-accent);
+      box-shadow: 0 0 15px rgba(255, 23, 68, 0.15);
+    }
+
+    .tonicity-btn-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+    }
+
+    .tonicity-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      padding: 9px 4px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .tonicity-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+
+    .tonicity-btn.active {
+      color: #000;
+      font-weight: bold;
+    }
+
+    .tonicity-btn.active.hypo {
+      background: var(--cyan-accent);
+      border-color: var(--cyan-accent);
+      box-shadow: 0 0 10px var(--cyan-glow);
+    }
+
+    .tonicity-btn.active.iso {
+      background: var(--green-accent);
+      border-color: var(--green-accent);
+      box-shadow: 0 0 10px var(--green-glow);
+    }
+
+    .tonicity-btn.active.hyper {
+      background: var(--amber-accent);
+      border-color: var(--amber-accent);
+      box-shadow: 0 0 10px var(--amber-glow);
+    }
+
+    /* Sliders and Switch Row */
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .slider-header span:last-child {
+      color: var(--cyan-accent);
+      font-weight: bold;
+    }
+
+    .horizontal-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .horizontal-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--cyan-accent);
+      box-shadow: 0 0 8px var(--cyan-glow);
+      transition: transform 0.1s ease;
+    }
+
+    .horizontal-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .switch-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: .3s;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 12px;
+      width: 12px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-muted);
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: rgba(0, 229, 255, 0.15);
+      border-color: var(--cyan-accent);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(18px);
+      background-color: var(--cyan-accent);
+      box-shadow: 0 0 8px var(--cyan-accent);
+    }
+
+    /* Valve grid control */
+    .valve-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .valve-btn {
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(0, 229, 255, 0.02));
+      border: 1px solid rgba(0, 229, 255, 0.25);
+      color: var(--cyan-accent);
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
+    .valve-btn:hover {
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.18), rgba(0, 229, 255, 0.05));
+      border-color: var(--cyan-accent);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .valve-btn:active {
+      transform: translateY(0);
+    }
+
+    .valve-btn.btn-remove {
+      background: linear-gradient(135deg, rgba(255, 171, 0, 0.1), rgba(255, 171, 0, 0.02));
+      border: 1px solid rgba(255, 171, 0, 0.25);
+      color: var(--amber-accent);
+    }
+
+    .valve-btn.btn-remove:hover {
+      background: linear-gradient(135deg, rgba(255, 171, 0, 0.18), rgba(255, 171, 0, 0.05));
+      border-color: var(--amber-accent);
+      box-shadow: 0 0 10px rgba(255, 171, 0, 0.15);
+    }
+
+    /* RIGHT PANEL: STATS & DIALS */
+    .stats-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-title-bar {
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge-tonicity {
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .badge-normal { background: rgba(0, 230, 118, 0.12); border: 1px solid var(--green-accent); color: var(--green-accent); }
+    .badge-shriveled { background: rgba(255, 171, 0, 0.12); border: 1px solid var(--amber-accent); color: var(--amber-accent); }
+    .badge-lys { background: rgba(255, 23, 68, 0.12); border: 1px solid var(--red-accent); color: var(--red-accent); }
+
+    .dial-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dial-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .dial-val {
+      font-size: 1.1rem;
+      font-family: var(--font-mono);
+      font-weight: bold;
+      color: #fff;
+    }
+
+    /* Fluid levels display */
+    .level-indicator-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .level-bar-fill {
+      height: 100%;
+      transition: width 0.3s ease, background-color 0.3s ease;
+    }
+
+    /* Flow meter HUD */
+    .flow-meter-card {
+      background: linear-gradient(135deg, rgba(13, 24, 48, 0.8), rgba(20, 35, 70, 0.5));
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.03);
+    }
+
+    .flow-label {
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .flow-arrow-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      height: 40px;
+    }
+
+    .flow-arrow {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+    }
+
+    .flow-arrow.active-in {
+      color: var(--cyan-accent);
+      text-shadow: 0 0 10px var(--cyan-glow);
+      animation: pullIn 1s infinite linear;
+    }
+
+    .flow-arrow.active-out {
+      color: var(--amber-accent);
+      text-shadow: 0 0 10px var(--amber-glow);
+      animation: pushOut 1s infinite linear;
+    }
+
+    .flow-arrow.balanced {
+      color: var(--green-accent);
+      text-shadow: 0 0 10px var(--green-glow);
+    }
+
+    .flow-status-text {
+      font-size: 0.82rem;
+      font-family: var(--font-mono);
+      font-weight: bold;
+      color: #fff;
+      text-align: center;
+    }
+
+    @keyframes pullIn {
+      0% { transform: scale(0.8); opacity: 0.3; }
+      50% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(0.8); opacity: 0.3; }
+    }
+
+    @keyframes pushOut {
+      0% { transform: scale(1.1); opacity: 1; }
+      50% { transform: scale(0.8); opacity: 0.3; }
+      100% { transform: scale(1.1); opacity: 1; }
+    }
+
+    /* Responsive styling */
+    @media (max-width: 1024px) {
+      .main-container {
+        grid-template-columns: 260px 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
+        overflow-y: auto;
+      }
+      body {
+        overflow-y: auto;
+        height: auto;
+      }
+      header {
+        position: sticky;
+        top: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mobile-warning {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Warning overlay for tiny screens -->
+  <div class="mobile-warning" id="mobileWarning">
+    <div class="logo-icon">T</div>
+    <p>This biological Cell Tonicity lab requires a larger screen (Tablet or Desktop) for microscopic visual details and click controls.</p>
+  </div>
+
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">🔬</div>
+      <h1>CELL TONICITY LAB</h1>
+    </div>
+    <span class="nav-badge">Grade 9 Biology Interactive Lab</span>
+  </header>
+
+  <main class="main-container">
+    
+    <!-- LEFT PANEL: CONTROLS & MEDIUMS -->
+    <section class="glass-panel" id="leftPanel">
+      <div class="panel-header">
+        <div class="panel-title">🎛️ CONTROL CENTER</div>
+      </div>
+      
+      <div class="panel-content">
+        <!-- Cell Type -->
+        <div class="control-section">
+          <div class="control-label">Cell Specimen</div>
+          <div class="mode-btn-container">
+            <button class="mode-btn active animal" id="btnAnimal" onclick="setCellType('animal')">Animal (RBC)</button>
+            <button class="mode-btn plant" id="btnPlant" onclick="setCellType('plant')">Plant (Onion)</button>
+          </div>
+        </div>
+
+        <!-- Medium Selection -->
+        <div class="control-section">
+          <div class="control-label">Beaker Solution Medium</div>
+          <div class="tonicity-btn-container">
+            <button class="tonicity-btn active hypo" id="btnHypo" onclick="setSolution('hypotonic')">Hypotonic</button>
+            <button class="tonicity-btn iso" id="btnIso" onclick="setSolution('isotonic')">Isotonic</button>
+            <button class="tonicity-btn hyper" id="btnHyper" onclick="setSolution('hypertonic')">Hypertonic</button>
+          </div>
+        </div>
+
+        <!-- Solution Salt Percentage Slider -->
+        <div class="control-section">
+          <div class="control-label">Fine Salt Adjuster</div>
+          <div class="slider-row">
+            <div class="slider-header">
+              <span>Beaker Solute (Salt %):</span>
+              <span id="saltReadout">0.1% (Pure Water)</span>
+            </div>
+            <input type="range" min="0.1" max="5.0" step="0.1" value="0.1" class="horizontal-slider" id="saltSlider" oninput="adjustSalt(this.value)">
+          </div>
+        </div>
+
+        <!-- Action Valves -->
+        <div class="control-section" style="margin-top: 10px;">
+          <div class="control-label">Cell Placement Valve</div>
+          <div class="valve-grid">
+            <button class="valve-btn" id="btnImmerse" onclick="immerseCell()">Immerse Cell Specimen</button>
+            <button class="valve-btn btn-remove" id="btnRemove" onclick="removeCell()" style="display: none;">Remove Cell Specimen</button>
+          </div>
+        </div>
+
+        <!-- Toggles -->
+        <div class="control-section" style="margin-top: 10px;">
+          <div class="control-label">Render Toggles</div>
+          <div class="switch-container">
+            <span class="switch-label">Water Molecules</span>
+            <label class="switch">
+              <input type="checkbox" checked id="waterToggle" onchange="toggleWaterDisplay(this.checked)">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Audio Synth -->
+        <div class="control-section">
+          <div class="control-label">Sound FX</div>
+          <div class="switch-container">
+            <span class="switch-label">Audio Synth</span>
+            <label class="switch">
+              <input type="checkbox" checked id="soundToggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTER PANEL: INTERACTIVE BEAKER VIEWPORT -->
+    <section class="viewport-container" id="centerPanel" tabindex="0">
+      <canvas id="viewportCanvas" width="800" height="600"></canvas>
+      
+      <!-- HUD Overlays -->
+      <div class="hud-element hud-top-left" id="hudMedium">MEDIUM: HYPOTONIC ENVIRONMENT (0.1% SALT)</div>
+      <div class="hud-element hud-top-right">
+        <div>CELL PLACED: <span id="hudPlaced" style="color:var(--red-accent); font-weight:bold;">NO</span></div>
+        <div style="margin-top: 4px;">TONICITY RATE: <span id="hudRate" style="color:var(--cyan-accent); font-weight:bold;">0.0x</span></div>
+      </div>
+      <div class="hud-element hud-bottom-center" id="hudTip">
+        💡 Select a Cell Specimen and Solution, then click "Immerse Cell Specimen" to start the osmosis reaction.
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: ANALYTICS & READOUTS -->
+    <section class="glass-panel" id="rightPanel">
+      <div class="panel-header">
+        <div class="panel-title">📊 DIAGNOSTIC MONITOR</div>
+      </div>
+      
+      <div class="panel-content stats-layout">
+        <!-- Concentration Dials card -->
+        <div class="stat-card">
+          <div class="card-title-bar">
+            <span>Concentration Gradient</span>
+          </div>
+          
+          <div class="dial-row">
+            <div class="dial-label">Beaker Solute (Salt %)</div>
+            <div class="dial-val" id="beakerSaltVal" style="color: var(--amber-accent);">0.1%</div>
+          </div>
+          
+          <div class="dial-row" style="margin-top: 5px;">
+            <div class="dial-label">Cytoplasm Solute (Salt %)</div>
+            <div class="dial-val" id="cellSaltVal" style="color: #fff;">0.9%</div>
+          </div>
+        </div>
+
+        <!-- Cell Condition metrics card -->
+        <div class="stat-card">
+          <div class="card-title-bar">
+            <span>Cell Specimen State</span>
+            <span class="badge-tonicity badge-normal" id="cellStateBadge">Normal</span>
+          </div>
+          
+          <div class="dial-row">
+            <div class="dial-label">Relative Cell Volume</div>
+            <div class="dial-val" id="cellVolVal">100%</div>
+          </div>
+          
+          <div class="dial-row" style="margin-top: 4px;">
+            <div class="dial-label">Turgor / Osmotic Pressure</div>
+            <div class="dial-val" id="turgorVal">Normal (Flaccid)</div>
+          </div>
+
+          <div class="level-indicator-bar">
+            <div class="level-bar-fill" id="volumeIndicatorBar" style="width: 50%; background-color: var(--green-accent);"></div>
+          </div>
+        </div>
+
+        <!-- Osmotic Net Flow direction HUD -->
+        <div class="flow-meter-card">
+          <div class="flow-label">Osmotic Water Transport</div>
+          <div class="flow-arrow-container">
+            <div class="flow-arrow" id="flowArrowSymbol">&harr;</div>
+          </div>
+          <div class="flow-status-text" id="flowStatusText">DYNAMIC EQUILIBRIUM<br><span style="font-size: 0.68rem; color: var(--text-muted);">Equal flow in and out</span></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* ----------------------------------------------------
+       AUDIO SYSTEM (WEB AUDIO API)
+       ---------------------------------------------------- */
+    let audioCtx = null;
+    const soundToggle = document.getElementById('soundToggle');
+
+    function playSound(type, pitch = 1.0) {
+      if (!soundToggle.checked) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        
+        const now = audioCtx.currentTime;
+        if (type === 'click') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(500 * pitch, now);
+          osc.frequency.exponentialRampToValueAtTime(800 * pitch, now + 0.05);
+          gain.gain.setValueAtTime(0.008, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.05);
+        } else if (type === 'lysis') {
+          // RBC bursting pop sound - Low frequency thud and noise burst
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(150 * pitch, now);
+          osc.frequency.exponentialRampToValueAtTime(15 * pitch, now + 0.18);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        } else if (type === 'immerse') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(350 * pitch, now);
+          osc.frequency.exponentialRampToValueAtTime(650 * pitch, now + 0.15);
+          gain.gain.setValueAtTime(0.015, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } else if (type === 'remove') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(650 * pitch, now);
+          osc.frequency.exponentialRampToValueAtTime(300 * pitch, now + 0.15);
+          gain.gain.setValueAtTime(0.015, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } else if (type === 'mode') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440 * pitch, now);
+          gain.gain.setValueAtTime(0.005, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        }
+      } catch (e) {
+        console.warn('Synth sound blocked.', e);
+      }
+    }
+
+    /* ----------------------------------------------------
+       STATE VARIABLES & DOM ELEMENT CACHES
+       ---------------------------------------------------- */
+    let cellType = 'animal';
+    let solutionType = 'hypotonic'; // hypotonic, isotonic, hypertonic
+    let saltPercentage = 0.1;       // Beaker solute concentration
+    const cellSaltPercentage = 0.9; // Constant cytoplasm solute concentration
+    
+    let isImmersed = false;
+    let cellVolume = 1.0;           // 1.0 is normal 100%
+    let cellState = 'normal';       // normal, swollen, lysed, shrunken (crenated / plasmolyzed)
+    let animationProgress = 0;      // immerse/remove animation lerp index
+    
+    let showWater = true;
+    let timeTicker = 0;
+    
+    // Lists
+    const particles = [];
+    const maxParticles = 60;
+    const cellDebris = [];          // Holds fragments if lysed
+
+    // DOM Caches
+    const canvas = document.getElementById('viewportCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const hudMedium = document.getElementById('hudMedium');
+    const hudPlaced = document.getElementById('hudPlaced');
+    const hudRate = document.getElementById('hudRate');
+    const hudTip = document.getElementById('hudTip');
+    
+    const saltSlider = document.getElementById('saltSlider');
+    const saltReadout = document.getElementById('saltReadout');
+    
+    const btnImmerse = document.getElementById('btnImmerse');
+    const btnRemove = document.getElementById('btnRemove');
+    const waterToggle = document.getElementById('waterToggle');
+    
+    const beakerSaltVal = document.getElementById('beakerSaltVal');
+    const cellSaltVal = document.getElementById('cellSaltVal');
+    const cellStateBadge = document.getElementById('cellStateBadge');
+    const cellVolVal = document.getElementById('cellVolVal');
+    const turgorVal = document.getElementById('turgorVal');
+    const volumeIndicatorBar = document.getElementById('volumeIndicatorBar');
+    
+    const flowArrowSymbol = document.getElementById('flowArrowSymbol');
+    const flowStatusText = document.getElementById('flowStatusText');
+
+    /* ----------------------------------------------------
+       INTERACTIVE HANDLERS
+       ---------------------------------------------------- */
+    function setCellType(type) {
+      if (cellType === type) return;
+      cellType = type;
+      
+      document.getElementById('btnAnimal').classList.toggle('active', type === 'animal');
+      document.getElementById('btnPlant').classList.toggle('active', type === 'plant');
+      
+      if (type === 'animal') {
+        hudTip.innerHTML = '💡 Animal cells (RBC) swell and pop in hypotonic solutions because they lack a cell wall.';
+      } else {
+        hudTip.innerHTML = '💡 Plant cells develop high turgor pressure in hypotonic solution, but cell walls prevent bursting.';
+      }
+      
+      resetCellState();
+      playSound('mode', 0.9);
+    }
+
+    function setSolution(sol) {
+      if (solutionType === sol) return;
+      solutionType = sol;
+      
+      document.getElementById('btnHypo').classList.toggle('active', sol === 'hypotonic');
+      document.getElementById('btnIso').classList.toggle('active', sol === 'isotonic');
+      document.getElementById('btnHyper').classList.toggle('active', sol === 'hypertonic');
+      
+      // Update salt slider values to presets
+      if (sol === 'hypotonic') {
+        saltSlider.value = 0.1;
+        adjustSalt(0.1, false);
+      } else if (sol === 'isotonic') {
+        saltSlider.value = 0.9;
+        adjustSalt(0.9, false);
+      } else if (sol === 'hypertonic') {
+        saltSlider.value = 3.5;
+        adjustSalt(3.5, false);
+      }
+      playSound('mode', 1.1);
+    }
+
+    function adjustSalt(val, autoUpdateButtons = true) {
+      saltPercentage = parseFloat(val);
+      saltReadout.textContent = `${saltPercentage.toFixed(1)}% (${saltPercentage <= 0.3 ? 'Pure Water' : saltPercentage >= 2.0 ? 'Highly Salty' : 'Saline Solution'})`;
+      beakerSaltVal.textContent = `${saltPercentage.toFixed(1)}%`;
+      hudMedium.textContent = `MEDIUM: ${getTonicityLabel(saltPercentage)} ENVIRONMENT (${saltPercentage.toFixed(1)}% SALT)`;
+      
+      if (autoUpdateButtons) {
+        // Automatically switch buttons based on salt slider values
+        if (saltPercentage < cellSaltPercentage - 0.15) {
+          solutionType = 'hypotonic';
+        } else if (saltPercentage > cellSaltPercentage + 0.15) {
+          solutionType = 'hypertonic';
+        } else {
+          solutionType = 'isotonic';
+        }
+        document.getElementById('btnHypo').classList.toggle('active', solutionType === 'hypotonic');
+        document.getElementById('btnIso').classList.toggle('active', solutionType === 'isotonic');
+        document.getElementById('btnHyper').classList.toggle('active', solutionType === 'hypertonic');
+      }
+      
+      // Re-trigger particle colors ratio
+      setupBeakerParticles();
+    }
+
+    function getTonicityLabel(salt) {
+      if (salt < cellSaltPercentage - 0.15) return 'HYPOTONIC';
+      if (salt > cellSaltPercentage + 0.15) return 'HYPERTONIC';
+      return 'ISOTONIC';
+    }
+
+    function immerseCell() {
+      if (isImmersed) return;
+      isImmersed = true;
+      hudPlaced.textContent = 'YES';
+      hudPlaced.style.color = 'var(--green-accent)';
+      
+      btnImmerse.style.display = 'none';
+      btnRemove.style.display = 'block';
+      
+      if (cellState === 'lysed') {
+        resetCellState();
+      }
+      playSound('immerse', 1.0);
+    }
+
+    function removeCell() {
+      if (!isImmersed) return;
+      isImmersed = false;
+      hudPlaced.textContent = 'NO';
+      hudPlaced.style.color = 'var(--red-accent)';
+      
+      btnImmerse.style.display = 'block';
+      btnRemove.style.display = 'none';
+      
+      playSound('remove', 1.0);
+    }
+
+    function resetCellState() {
+      cellVolume = 1.0;
+      cellState = 'normal';
+      cellDebris.length = 0;
+    }
+
+    function toggleWaterDisplay(checked) {
+      showWater = checked;
+      playSound('click', 0.95);
+    }
+
+    function setupBeakerParticles() {
+      particles.length = 0;
+      for (let i = 0; i < maxParticles; i++) {
+        // Distribute solutes based on salt concentration
+        const isWater = Math.random() > (saltPercentage / 10.0);
+        
+        // spawn particles around beaker boundaries
+        const px = Math.random() * (620 - 180) + 180;
+        const py = Math.random() * (540 - 200) + 200;
+        const speed = isWater ? 1.6 : 0.7;
+        const angle = Math.random() * Math.PI * 2;
+        
+        particles.push({
+          x: px,
+          y: py,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          radius: isWater ? 4.5 : 9.0,
+          color: isWater ? '#00b0ff' : '#ffab00',
+          isWater: isWater
+        });
+      }
+    }
+
+    /* ----------------------------------------------------
+       SIMULATION ENGINE (PHYSICS & LERP ANIMATION)
+       ---------------------------------------------------- */
+    function animate() {
+      timeTicker += 0.025;
+      
+      // Update immersion sliding animation progress
+      if (isImmersed) {
+        animationProgress = lerp(animationProgress, 1.0, 0.06);
+      } else {
+        animationProgress = lerp(animationProgress, 0.0, 0.06);
+      }
+      
+      updateOsmosisReaction();
+      updateAmbientPhysics();
+      drawSimulationCanvas();
+      updateDialsMonitor();
+      
+      requestAnimationFrame(animate);
+    }
+
+    function updateOsmosisReaction() {
+      if (!isImmersed || cellState === 'lysed') {
+        // Relax volume back to normal outside beaker
+        if (!isImmersed && cellState !== 'lysed') {
+          cellVolume = lerp(cellVolume, 1.0, 0.04);
+          if (Math.abs(cellVolume - 1.0) < 0.01) {
+            cellState = 'normal';
+          }
+        }
+        return;
+      }
+      
+      // Reaction rates depend on concentration difference
+      const gradDiff = cellSaltPercentage - saltPercentage; // positive = hypotonic beaker, negative = hypertonic
+      
+      if (Math.abs(gradDiff) < 0.15) {
+        // Isotonic balance
+        cellVolume = lerp(cellVolume, 1.0, 0.02);
+        cellState = 'normal';
+      } else if (gradDiff > 0) {
+        // Hypotonic beaker - Water flows in (cell swells)
+        const swellRate = 0.001 * (gradDiff * 2.0);
+        cellState = 'swollen';
+        
+        if (cellType === 'animal') {
+          cellVolume += swellRate;
+          if (cellVolume >= 1.45) {
+            // Animal cell burst (Lysis)
+            triggerLysisPoof();
+          }
+        } else {
+          // Plant cell swells but bounds at turgor pressure point
+          cellVolume = Math.min(1.22, cellVolume + swellRate);
+        }
+      } else {
+        // Hypertonic beaker - Water flows out (cell shrinks)
+        const shrinkRate = 0.0012 * (Math.abs(gradDiff) * 1.5);
+        cellState = 'shrunken';
+        
+        const minVol = cellType === 'animal' ? 0.62 : 0.60;
+        cellVolume = Math.max(minVol, cellVolume - shrinkRate);
+      }
+    }
+
+    function triggerLysisPoof() {
+      cellState = 'lysed';
+      playSound('lysis', 1.0);
+      
+      // Spawn wiggling fragment particles wowed at lysis center
+      const cellX = 400;
+      const cellY = 320;
+      for (let i = 0; i < 24; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * 30 + 35;
+        const vel = Math.random() * 2.5 + 1.2;
+        cellDebris.push({
+          x: cellX + Math.cos(angle) * dist,
+          y: cellY + Math.sin(angle) * dist,
+          vx: Math.cos(angle) * vel,
+          vy: Math.sin(angle) * vel,
+          radius: Math.random() * 4 + 2.5,
+          alpha: 1.0
+        });
+      }
+    }
+
+    function updateAmbientPhysics() {
+      // Beaker particles movement
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        
+        // Bounce off beaker glass bounds (Left: 180, Right: 620, Bottom: 540)
+        // Glass water level is at y = 190
+        const waterTopY = 190;
+        if (p.x < 185) { p.x = 185; p.vx = Math.abs(p.vx); }
+        if (p.x > 615) { p.x = 615; p.vx = -Math.abs(p.vx); }
+        if (p.y > 535) { p.y = 535; p.vy = -Math.abs(p.vy); }
+        if (p.y < waterTopY + p.radius) { p.y = waterTopY + p.radius; p.vy = Math.abs(p.vy); }
+        
+        // Deflect/bounce around cell center if immersed
+        if (isImmersed && cellState !== 'lysed') {
+          const cellX = 400;
+          const cellY = lerp(120, 320, animationProgress); // sliding center
+          const dist = Math.hypot(p.x - cellX, p.y - cellY);
+          
+          let boundaryR = 60 * cellVolume;
+          if (cellType === 'plant') {
+            // plant cell collision is outer rectangular wall
+            const rectL = 320, rectR = 480, rectT = cellY - 90, rectB = cellY + 90;
+            if (p.x >= rectL && p.x <= rectR && p.y >= rectT && p.y <= rectB) {
+              // bounce off plant rectangular cell wall
+              if (Math.abs(p.x - rectL) < 8) p.vx = -Math.abs(p.vx);
+              else if (Math.abs(p.x - rectR) < 8) p.vx = Math.abs(p.vx);
+              if (Math.abs(p.y - rectT) < 8) p.vy = -Math.abs(p.vy);
+              else if (Math.abs(p.y - rectB) < 8) p.vy = Math.abs(p.vy);
+            }
+          } else {
+            // animal cell circular collision
+            if (dist < boundaryR + p.radius - 5) {
+              const angle = Math.atan2(p.y - cellY, p.x - cellX);
+              p.x = cellX + Math.cos(angle) * (boundaryR + p.radius);
+              p.vx = Math.cos(angle) * Math.abs(p.vx);
+              p.vy = Math.sin(angle) * Math.abs(p.vy);
+            }
+          }
+        }
+      });
+      
+      // Update cell debris particles
+      cellDebris.forEach(d => {
+        d.x += d.vx;
+        d.y += d.vy;
+        d.vx *= 0.94; // friction
+        d.vy *= 0.94;
+        d.alpha -= 0.008; // fade out
+      });
+    }
+
+    /* ----------------------------------------------------
+       CANVAS RENDERING METHODS
+       ---------------------------------------------------- */
+    function drawSimulationCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // 1. Draw beaker water content first (under the beaker lines)
+      const bob = Math.sin(timeTicker * 2.0) * 3;
+      
+      // Fluid Gradient
+      const grad = ctx.createLinearGradient(180, 190, 180, 540);
+      grad.addColorStop(0, 'rgba(0, 229, 255, 0.16)');
+      grad.addColorStop(0.5, 'rgba(0, 176, 255, 0.08)');
+      grad.addColorStop(1, 'rgba(2, 6, 23, 0.5)');
+      
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(180, 540);
+      ctx.lineTo(180, 190 + bob);
+      ctx.quadraticCurveTo(400, 190 - bob, 620, 190 + bob);
+      ctx.lineTo(620, 540);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Top fluid surface glow line
+      ctx.save();
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.7)';
+      ctx.lineWidth = 3.5;
+      ctx.shadowColor = varHSL('--cyan-accent');
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.moveTo(180, 190 + bob);
+      ctx.quadraticCurveTo(400, 190 - bob, 620, 190 + bob);
+      ctx.stroke();
+      ctx.restore();
+      
+      // Beaker guidelines grids
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.018)';
+      ctx.lineWidth = 1;
+      for (let i = 40; i < canvas.width; i += 40) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+      }
+      
+      // Render beaker particles
+      particles.forEach(p => {
+        if (p.isWater && !showWater) return;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        if (p.isWater) {
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.save();
+          ctx.shadowColor = varHSL('--amber-accent');
+          ctx.shadowBlur = 6;
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      });
+      
+      // Draw Beaker Glass outlining
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.lineWidth = 5;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(180, 140);
+      ctx.lineTo(180, 540);
+      ctx.quadraticCurveTo(180, 550, 190, 550);
+      ctx.lineTo(610, 550);
+      ctx.quadraticCurveTo(620, 550, 620, 540);
+      ctx.lineTo(620, 140);
+      ctx.stroke();
+      
+      // Draw beaker measurement markings
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 2.5;
+      for (let y = 240; y < 540; y += 60) {
+        ctx.beginPath();
+        ctx.moveTo(180, y);
+        ctx.lineTo(205, y);
+        ctx.stroke();
+        
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.font = 'bold 9px monospace';
+        ctx.fillText(`${600 - y} ml`, 212, y + 3);
+      }
+      
+      // 2. Draw Cell Specimen
+      const cellX = 400;
+      const cellY = lerp(120, 320, animationProgress); // Lerps placement position
+      
+      if (cellState !== 'lysed') {
+        ctx.save();
+        if (cellType === 'animal') {
+          drawAnimalCell(cellX, cellY);
+        } else {
+          drawPlantCell(cellX, cellY);
+        }
+        ctx.restore();
+      } else {
+        // Draw lysed fragments wiggling and fading
+        cellDebris.forEach(d => {
+          if (d.alpha <= 0) return;
+          ctx.fillStyle = `rgba(255, 23, 68, ${d.alpha})`;
+          ctx.shadowColor = `rgba(255, 23, 68, ${d.alpha * 0.4})`;
+          ctx.shadowBlur = 4;
+          ctx.beginPath();
+          ctx.arc(d.x, d.y, d.radius, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+    }
+
+    function drawAnimalCell(x, y) {
+      const radius = 60 * cellVolume;
+      
+      // Draw shadow glow based on size/turgor
+      ctx.shadowColor = varHSL('--red-accent');
+      ctx.shadowBlur = 12 * cellVolume;
+      
+      if (cellState === 'shrunken') {
+        // Crenation - spiked border circle
+        ctx.fillStyle = '#b71c1c';
+        ctx.strokeStyle = '#ff1744';
+        ctx.lineWidth = 3.5;
+        
+        ctx.beginPath();
+        const spikes = 14;
+        const outerR = radius;
+        const innerR = radius - 12;
+        
+        for (let i = 0; i < spikes * 2; i++) {
+          const angle = (Math.PI / spikes) * i + (timeTicker * 0.2);
+          const r = i % 2 === 0 ? outerR : innerR;
+          ctx.lineTo(x + Math.cos(angle) * r, y + Math.sin(angle) * r);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        // Draw spiked inner core shadow
+        ctx.fillStyle = '#5f0909';
+        ctx.beginPath();
+        for (let i = 0; i < spikes * 2; i++) {
+          const angle = (Math.PI / spikes) * i + (timeTicker * 0.2);
+          const r = i % 2 === 0 ? outerR * 0.6 : innerR * 0.6;
+          ctx.lineTo(x + Math.cos(angle) * r, y + Math.sin(angle) * r);
+        }
+        ctx.closePath();
+        ctx.fill();
+      } else {
+        // Normal or swollen oval (Red Blood Cell)
+        const alphaVal = cellState === 'swollen' ? lerp(1.0, 0.45, (cellVolume - 1.0) / 0.5) : 1.0;
+        
+        ctx.fillStyle = `rgba(211, 47, 47, ${alphaVal})`;
+        ctx.strokeStyle = `rgba(255, 23, 68, ${alphaVal})`;
+        ctx.lineWidth = 4;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        
+        // Biconcave disk shaded center (Visible only in normal flaccid state)
+        if (cellState === 'normal') {
+          ctx.fillStyle = 'rgba(127, 0, 0, 0.8)';
+          ctx.strokeStyle = 'rgba(255, 23, 68, 0.4)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.ellipse(x, y, radius * 0.5, radius * 0.4, timeTicker * 0.15, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+      
+      // Nucleus / label inside
+      ctx.shadowBlur = 0; // reset
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.textAlign = 'center';
+      if (cellState !== 'shrunken') {
+        ctx.fillText("RBC Specimen", x, y + 4);
+      } else {
+        ctx.fillText("Crenated", x, y + 4);
+      }
+    }
+
+    function drawPlantCell(x, y) {
+      // Cell wall boundary coordinates (rigid, rectangular: 160 x 180)
+      const w = 160;
+      const h = 180;
+      const wallL = x - w / 2;
+      const wallT = y - h / 2;
+      
+      // 1. Draw rigid outer cellulose Cell Wall
+      ctx.strokeStyle = 'rgba(0, 230, 118, 0.75)';
+      ctx.lineWidth = 6;
+      ctx.fillStyle = 'rgba(2, 6, 23, 0.8)';
+      ctx.save();
+      ctx.shadowColor = varHSL('--green-accent');
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.roundRect(wallL, wallT, w, h, 8);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+      
+      // 2. Draw plasma membrane and central vacuole inside Cell Wall
+      if (cellState === 'shrunken') {
+        // Plasmolysis: membrane detaches and shrinks away from corners
+        const memW = w * cellVolume;
+        const memH = h * cellVolume;
+        const memL = x - memW / 2;
+        const memT = y - memH / 2;
+        
+        // Fully permeable cell wall space fills with beaker fluid (yellow dots)
+        ctx.fillStyle = 'rgba(255, 171, 0, 0.08)';
+        ctx.fillRect(wallL + 5, wallT + 5, w - 10, h - 10);
+        
+        // Draw detached plasma membrane wiggling inside
+        const wigOffset = Math.sin(timeTicker * 3) * 2;
+        ctx.fillStyle = '#1b5e20';
+        ctx.strokeStyle = '#00e676';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(memL + wigOffset, memT - wigOffset, memW, memH, 15);
+        ctx.fill();
+        ctx.stroke();
+        
+        // Shrivelled Vacuole
+        ctx.fillStyle = '#01579b';
+        ctx.beginPath();
+        ctx.arc(x, y + 10, 18, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Purple nucleus visible near the edge
+        ctx.fillStyle = '#ba68c8';
+        ctx.beginPath();
+        ctx.arc(x - 20, y - 20, 8, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Label
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 8.5px sans-serif';
+        ctx.fillText("Plasmolyzed", x, y - 5);
+      } else {
+        // Normal or Turgid state (membrane fully pressed to cell wall)
+        const scaleDiff = (cellVolume - 1.0) / 0.22; // turgidity ratio
+        const memW = w - 10 + (scaleDiff * 6);
+        const memH = h - 10 + (scaleDiff * 6);
+        
+        ctx.fillStyle = '#2e7d32';
+        ctx.strokeStyle = '#00e676';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.roundRect(x - memW/2, y - memH/2, memW, memH, 8);
+        ctx.fill();
+        ctx.stroke();
+        
+        // Central Vacuole (water storage) wowed as large expanding blue polygon
+        const vacW = memW * 0.72 * cellVolume;
+        const vacH = memH * 0.72 * cellVolume;
+        
+        // Brighten vacuole color in hypotonic turgid state
+        ctx.fillStyle = cellState === 'swollen' ? '#00b0ff' : '#0288d1';
+        ctx.strokeStyle = '#4fc3f7';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(x - vacW/2, y - vacH/2 + 5, vacW, vacH - 10, 12);
+        ctx.fill();
+        ctx.stroke();
+        
+        // Nucleus
+        ctx.fillStyle = '#ba68c8';
+        ctx.beginPath();
+        ctx.arc(x - memW/3, y - memH/4, 9, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 8.5px sans-serif';
+        ctx.fillText("Plant Cell", x, y - 10);
+        ctx.fillText(cellState === 'swollen' ? "Turgid (Rigid)" : "Normal Flaccid", x, y + 5);
+      }
+    }
+
+    /* ----------------------------------------------------
+       HUD DIAGNOSTICS & VELOCITY MONITOR UPDATES
+       ---------------------------------------------------- */
+    function updateDialsMonitor() {
+      // Fluid rates readout
+      let rate = 0;
+      if (isImmersed && cellState !== 'lysed') {
+        const diff = cellSaltPercentage - saltPercentage;
+        rate = Math.abs(diff) * 1.8;
+      }
+      hudRate.textContent = `${rate.toFixed(2)}x`;
+      
+      // Render Cell stats
+      const volumePercentage = Math.round(cellVolume * 100);
+      cellVolVal.textContent = `${volumePercentage}%`;
+      
+      // Update volume indicator bar width/color
+      volumeIndicatorBar.style.width = `${Math.min(100, Math.max(5, (cellVolume / 1.5) * 100))}%`;
+      if (cellState === 'shrunken') {
+        volumeIndicatorBar.style.backgroundColor = 'var(--amber-accent)';
+      } else if (cellState === 'swollen') {
+        volumeIndicatorBar.style.backgroundColor = 'var(--cyan-accent)';
+      } else {
+        volumeIndicatorBar.style.backgroundColor = 'var(--green-accent)';
+      }
+      
+      // Render Tonicity HUD arrows and badges
+      if (isImmersed && cellState !== 'lysed') {
+        const diff = cellSaltPercentage - saltPercentage;
+        
+        if (Math.abs(diff) < 0.15) {
+          // Isotonic normal flaccid
+          setCellBadge('badge-normal', 'Normal');
+          turgorVal.textContent = 'Flaccid (Balanced)';
+          
+          flowArrowSymbol.className = 'flow-arrow balanced';
+          flowArrowSymbol.innerHTML = '&harr;';
+          flowStatusText.innerHTML = 'DYNAMIC EQUILIBRIUM<br><span style="font-size: 0.68rem; color: var(--text-muted);">Equal rates of water entering and leaving</span>';
+        } else if (diff > 0) {
+          // Hypotonic beaker - water enters cell
+          setCellBadge('badge-normal', cellType === 'animal' ? 'Swelling' : 'Turgid');
+          turgorVal.textContent = cellType === 'animal' ? 'Expanding Pressure' : 'High Turgor Pressure';
+          
+          flowArrowSymbol.className = 'flow-arrow active-in';
+          flowArrowSymbol.innerHTML = '&rarr;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&larr;'; // water pulling in
+          flowStatusText.innerHTML = 'NET INWARD TRANSPORT<br><span style="font-size: 0.68rem; color: var(--cyan-accent);">Endosmosis: Water entering cell</span>';
+        } else {
+          // Hypertonic beaker - water leaves cell
+          setCellBadge('badge-shriveled', cellType === 'animal' ? 'Crenated' : 'Plasmolyzed');
+          turgorVal.textContent = cellType === 'animal' ? 'Crenated (Shriveled)' : 'Plasmolyzed (Vacuole shrunk)';
+          
+          flowArrowSymbol.className = 'flow-arrow active-out';
+          flowArrowSymbol.innerHTML = '&larr;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&rarr;'; // water squeezing out
+          flowStatusText.innerHTML = 'NET OUTWARD TRANSPORT<br><span style="font-size: 0.68rem; color: var(--amber-accent);">Exosmosis: Water leaving cell</span>';
+        }
+      } else {
+        // Lysed or not immersed
+        if (cellState === 'lysed') {
+          setCellBadge('badge-lys', 'Lysed (Burst)');
+          turgorVal.textContent = 'Lysis (Pressure Ruptured)';
+          flowStatusText.innerHTML = 'CELL BURST<br><span style="font-size: 0.68rem; color: var(--red-accent);">Membrane popped due to hypotonic swelling</span>';
+        } else {
+          setCellBadge('badge-normal', 'Normal');
+          turgorVal.textContent = 'Normal (No Beaker Reaction)';
+          flowStatusText.innerHTML = 'SPECIMEN OUTSIDE FIELD<br><span style="font-size: 0.68rem; color: var(--text-muted);">Immerse cell in beaker to start</span>';
+        }
+        flowArrowSymbol.className = 'flow-arrow';
+        flowArrowSymbol.innerHTML = '&harr;';
+      }
+    }
+
+    function setCellBadge(badgeClass, text) {
+      cellStateBadge.className = `badge-tonicity ${badgeClass}`;
+      cellStateBadge.textContent = text;
+    }
+
+    /* ----------------------------------------------------
+       HELPERS
+       ---------------------------------------------------- */
+    function lerp(start, end, amt) {
+      return (1 - amt) * start + amt * end;
+    }
+
+    function varHSL(varName) {
+      if (varName === '--amber-accent') return '#ffab00';
+      if (varName === '--cyan-accent') return '#00e5ff';
+      if (varName === '--purple-accent') return '#d500f9';
+      if (varName === '--red-accent') return '#ff1744';
+      if (varName === '--green-accent') return '#00e676';
+      return '#fff';
+    }
+
+    window.addEventListener('load', () => {
+      adjustSalt(0.1);
+      setupBeakerParticles();
+      animate();
+    });
+  </script>
+</body>
+</html>
