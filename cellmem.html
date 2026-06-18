@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cell Membrane & selective Permeability Lab | Grade 9 interactive Simulation</title>
+  
+  <!-- Google Fonts for premium UI typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #040814;
+      --bg-panel: rgba(10, 20, 42, 0.65);
+      --bg-card: rgba(16, 30, 60, 0.45);
+      --border-color: rgba(0, 229, 255, 0.2);
+      --border-glow: 0 0 15px rgba(0, 229, 255, 0.15);
+      
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      
+      --cyan-accent: #00e5ff;
+      --cyan-glow: rgba(0, 229, 255, 0.4);
+      --amber-accent: #ff9100;
+      --amber-glow: rgba(255, 145, 0, 0.4);
+      --green-accent: #00e676;
+      --green-glow: rgba(0, 230, 118, 0.4);
+      --purple-accent: #d500f9;
+      --purple-glow: rgba(213, 0, 249, 0.4);
+      
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(10, 25, 50, 0.5) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(5, 15, 35, 0.5) 0px, transparent 50%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Warning for mobile portrait users */
+    .mobile-warning {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #040814;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .mobile-warning p {
+      font-size: 1.1rem;
+      color: var(--amber-accent);
+      margin-top: 15px;
+      line-height: 1.5;
+    }
+
+    /* Header Styling */
+    header {
+      background: rgba(4, 8, 20, 0.85);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      z-index: 10;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--cyan-accent), var(--amber-accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #000;
+      font-size: 1.1rem;
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(to right, #fff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-badge {
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid var(--cyan-accent);
+      color: var(--cyan-accent);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: var(--border-glow);
+    }
+
+    /* Main Content Layout */
+    .main-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 320px 1fr 320px;
+      gap: 15px;
+      padding: 15px;
+      height: calc(100vh - 60px);
+    }
+
+    /* Panels Base (Glassmorphism) */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--cyan-accent);
+      text-transform: uppercase;
+    }
+
+    .panel-content {
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Viewport Center Panel */
+    .viewport-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #02040a;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8);
+      outline: none;
+    }
+
+    #viewportCanvas {
+      width: 100%;
+      height: 100%;
+      max-width: 800px;
+      max-height: 600px;
+      aspect-ratio: 4/3;
+      display: block;
+      background: transparent;
+      cursor: crosshair;
+    }
+
+    /* HUD Elements inside Viewport */
+    .hud-element {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: rgba(4, 10, 24, 0.75);
+      border: 1px solid rgba(0, 229, 255, 0.15);
+      padding: 6px 12px;
+      border-radius: 6px;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+    }
+
+    .hud-top-left { top: 15px; left: 15px; border-left: 3px solid var(--cyan-accent); color: #fff; font-weight: bold; }
+    .hud-top-right { top: 15px; right: 15px; text-align: right; }
+    .hud-bottom-left { bottom: 15px; left: 15px; }
+
+    /* Control Sections */
+    .control-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Slider Styling */
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .slider-header span:last-child {
+      color: var(--cyan-accent);
+      font-weight: bold;
+    }
+
+    .horizontal-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .horizontal-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--cyan-accent);
+      box-shadow: 0 0 8px var(--cyan-glow);
+      transition: transform 0.1s ease;
+    }
+
+    .horizontal-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Toggle Switches */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .switch-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: .3s;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 12px;
+      width: 12px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-muted);
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: rgba(0, 229, 255, 0.15);
+      border-color: var(--cyan-accent);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(18px);
+      background-color: var(--cyan-accent);
+      box-shadow: 0 0 8px var(--cyan-accent);
+    }
+
+    /* Spawner Buttons Grid */
+    .spawner-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-cyan { border-color: rgba(0, 229, 255, 0.2); }
+    .btn-cyan.active {
+      background: rgba(0, 229, 255, 0.1);
+      border-color: var(--cyan-accent);
+      color: var(--cyan-accent);
+      box-shadow: inset 0 0 8px rgba(0, 229, 255, 0.15), var(--border-glow);
+    }
+
+    .btn-green { border-color: rgba(0, 230, 118, 0.2); }
+    .btn-green.active {
+      background: rgba(0, 230, 118, 0.1);
+      border-color: var(--green-accent);
+      color: var(--green-accent);
+      box-shadow: inset 0 0 8px rgba(0, 230, 118, 0.15), 0 0 10px rgba(0, 230, 118, 0.15);
+    }
+
+    .btn-amber { border-color: rgba(255, 145, 0, 0.2); }
+    .btn-amber.active {
+      background: rgba(255, 145, 0, 0.1);
+      border-color: var(--amber-accent);
+      color: var(--amber-accent);
+      box-shadow: inset 0 0 8px rgba(255, 145, 0, 0.15), 0 0 10px rgba(255, 145, 0, 0.15);
+    }
+
+    .btn-action {
+      background: linear-gradient(135deg, var(--amber-accent), #e65100);
+      border: none;
+      color: #000;
+      font-weight: 800;
+      width: 100%;
+      padding: 12px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 15px rgba(255, 145, 0, 0.3);
+    }
+
+    .btn-action:hover {
+      background: linear-gradient(135deg, #ffb300, var(--amber-accent));
+      box-shadow: 0 4px 20px rgba(255, 145, 0, 0.5);
+    }
+
+    /* RIGHT PANEL: INFO & DETAILS */
+    .info-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .info-tag {
+      align-self: flex-start;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    .level-info-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .detail-text {
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    /* Membrane Legend List */
+    .membrane-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 5px;
+    }
+
+    .legend-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      text-align: left;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .legend-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .legend-btn.active {
+      background: rgba(0, 229, 255, 0.06);
+      border-color: var(--cyan-accent);
+      color: var(--cyan-accent);
+      box-shadow: var(--border-glow);
+    }
+
+    .legend-btn:after {
+      content: "→";
+      opacity: 0.3;
+      font-weight: bold;
+      transition: transform 0.2s ease;
+    }
+
+    .legend-btn:hover:after {
+      opacity: 1;
+      transform: translateX(3px);
+    }
+
+    /* Detail Drawer Card styling */
+    .organelle-drawer {
+      background: rgba(0, 229, 255, 0.03);
+      border: 1px solid rgba(0, 229, 255, 0.15);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.05);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .organelle-name {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--cyan-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .organelle-badge {
+      align-self: flex-start;
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      background: rgba(0, 229, 255, 0.1);
+      color: var(--cyan-accent);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Scrollbar customization */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      .main-container {
+        grid-template-columns: 260px 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
+        overflow-y: auto;
+      }
+      body {
+        overflow-y: auto;
+        height: auto;
+      }
+      header {
+        position: sticky;
+        top: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mobile-warning {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Warning overlay for tiny screens -->
+  <div class="mobile-warning" id="mobileWarning">
+    <div class="logo-icon">M</div>
+    <p>This biological cell membrane simulation requires a larger screen (Tablet or Desktop) for microscopic visual details and interactive lab operations.</p>
+  </div>
+
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">⚛</div>
+      <h1>CELL MEMBRANE LAB</h1>
+    </div>
+    <span class="nav-badge">Fluid Mosaic & Transport Model</span>
+  </header>
+
+  <main class="main-container">
+    
+    <!-- LEFT PANEL: SIMULATION CONTROLS -->
+    <section class="glass-panel" id="leftPanel">
+      <div class="panel-header">
+        <div class="panel-title">🎛️ CONTROLS</div>
+      </div>
+      
+      <div class="panel-content">
+        <!-- Zoom Magnification -->
+        <div class="control-section">
+          <div class="control-label">Simulation Scale</div>
+          <div style="display: flex; flex-direction: column; gap: 6px; background: var(--bg-card); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <input type="range" min="1.00" max="2.00" step="0.01" value="1.00" class="horizontal-slider" id="zoomSlider" oninput="onZoomSliderChange(this.value)" aria-label="Simulation scale slider">
+            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted); min-width: 110px;">
+              <span id="lblTick1" class="active" style="cursor:pointer;" onclick="setZoomTarget(1.0)">1. Whole Cell</span>
+              <span id="lblTick2" style="cursor:pointer;" onclick="setZoomTarget(2.0)">2. Membrane Bilayer</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="zoomNotice" style="display: block; text-align: center; font-size: 0.8rem; color: var(--amber-accent); font-style: italic; background: rgba(255, 145, 0, 0.05); padding: 8px; border-radius: 8px; border: 1px dashed rgba(255, 145, 0, 0.2); transition: all 0.3s ease;">
+          ⚠️ Zoom into Level 2 to operate the transport lab.
+        </div>
+
+        <!-- Group locked when zoomed out -->
+        <div id="transportControlsWrapper" style="display: flex; flex-direction: column; gap: 20px; transition: opacity 0.3s ease, pointer-events: 0.3s ease; opacity: 0.35; pointer-events: none;">
+          <!-- Spawners -->
+          <div class="control-section">
+            <div class="control-label">1. Spawn Molecules</div>
+            <div class="spawner-grid">
+              <button class="btn btn-cyan active" id="btnSpawnOxygen" onclick="toggleSpawn('oxygen')">Oxygen (O₂)</button>
+              <button class="btn btn-cyan active" id="btnSpawnWater" onclick="toggleSpawn('water')">Water (H₂O)</button>
+              <button class="btn btn-green active" id="btnSpawnGlucose" onclick="toggleSpawn('glucose')">Glucose</button>
+              <button class="btn btn-amber active" id="btnSpawnSodium" onclick="toggleSpawn('sodium')">Sodium (Na⁺)</button>
+            </div>
+          </div>
+
+          <!-- Channel States -->
+          <div class="control-section">
+            <div class="control-label">2. Membrane Channels</div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div class="switch-container">
+                <span class="switch-label" style="color: var(--cyan-accent);">Aquaporin (Water Channel)</span>
+                <label class="switch">
+                  <input type="checkbox" checked id="aquaporinToggle" onchange="toggleGate('aquaporin')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="switch-container">
+                <span class="switch-label" style="color: var(--amber-accent);">Sodium Ion Gate</span>
+                <label class="switch">
+                  <input type="checkbox" id="sodiumGateToggle" onchange="toggleGate('sodium')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Transport Trigger -->
+          <div class="control-section">
+            <div class="control-label">3. Active Transport Energy</div>
+            <button class="btn btn-action" onclick="injectATP()">⚡ Inject ATP Molecule</button>
+          </div>
+        </div>
+
+        <!-- Ambient Variables -->
+        <div class="control-section">
+          <div class="control-label">Simulation Environment</div>
+          
+          <!-- Temp Slider -->
+          <div class="slider-row">
+            <div class="slider-header">
+              <span>Cell Temperature:</span>
+              <span id="tempReadout">37°C</span>
+            </div>
+            <input type="range" min="0" max="60" value="37" class="horizontal-slider" id="tempSlider" oninput="updateTemperature(this.value)">
+          </div>
+
+          <!-- Synthesizer Sound Toggle -->
+          <div class="switch-container">
+            <span class="switch-label">Synthesizer Sound FX</span>
+            <label class="switch">
+              <input type="checkbox" checked id="soundToggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTER PANEL: INTERACTIVE CANVAS VIEWPORT -->
+    <section class="viewport-container" id="centerPanel" tabindex="0">
+      <canvas id="viewportCanvas" width="800" height="600"></canvas>
+      
+      <!-- HUD Overlays -->
+      <div class="hud-element hud-top-left" id="hudStatus">SELECTIVE PERMEABILITY LAB: WHOLE CELL VIEW</div>
+      <div class="hud-element hud-top-right">
+        <div>TEMPERATURE: <span id="hudTemp" style="color:var(--cyan-accent); font-weight:bold;">37°C</span></div>
+        <div style="margin-top: 4px;">ZOOM LEVEL: <span id="hudZoom" style="color:var(--amber-accent); font-weight:bold;">1.00x</span></div>
+      </div>
+      <div class="hud-element hud-bottom-left">
+        <div>[Inside Cell / Cytoplasm] Bottom Region</div>
+        <div style="margin-top: 4px;">[Outside Cell / Extracellular] Top Region</div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: COMPONENT INFO & FEATURE LEGEND -->
+    <section class="glass-panel" id="rightPanel">
+      <div class="panel-header">
+        <div class="panel-title">📖 INSPECTOR & LEGEND</div>
+      </div>
+      
+      <div class="panel-content" style="display: flex; flex-direction: column; gap: 15px;">
+        <div class="info-header">
+          <span class="info-tag" id="levelScaleBadge">Macro Scale (~10 µm)</span>
+          <h3 class="level-info-title" id="levelTitle">Whole Cell View</h3>
+          <p class="detail-text" id="levelDescription">
+            The cell is the basic structural and functional unit of life. Bounded by a selectively permeable cell membrane. Slide the zoom slider to magnify the membrane boundary and explore molecular transport.
+          </p>
+        </div>
+
+        <div id="legendWrapper" style="transition: opacity 0.3s ease, pointer-events: 0.3s ease; opacity: 0.35; pointer-events: none; display: flex; flex-direction: column; gap: 8px;">
+          <div class="control-label">Membrane Components</div>
+          <div class="membrane-legend">
+            <button class="legend-btn" id="lbl_bilayer" onclick="selectComponent('bilayer')">Lipid Bilayer</button>
+            <button class="legend-btn" id="lbl_glycoprotein" onclick="selectComponent('glycoprotein')">Glycoprotein</button>
+            <button class="legend-btn" id="lbl_cholesterol" onclick="selectComponent('cholesterol')">Cholesterol</button>
+            <button class="legend-btn" id="lbl_aquaporin" onclick="selectComponent('aquaporin')">Aquaporin</button>
+            <button class="legend-btn" id="lbl_sodiumchannel" onclick="selectComponent('sodiumchannel')">Sodium Gate</button>
+            <button class="legend-btn" id="lbl_carrierprotein" onclick="selectComponent('carrierprotein')">Glucose Carrier</button>
+            <button class="legend-btn" id="lbl_activepump" onclick="selectComponent('activepump')">Na⁺/K⁺ Pump</button>
+            <button class="legend-btn" id="lbl_peripheral" onclick="selectComponent('peripheral')">Peripheral Prot.</button>
+          </div>
+        </div>
+
+        <!-- Description Details Drawer -->
+        <div class="organelle-drawer" id="organelleDrawer" style="display: none;">
+          <h4 class="organelle-name" id="drawerOrganelleName">Component Name</h4>
+          <span class="organelle-badge" id="drawerOrganelleBadge">Grade 9 Curriculum</span>
+          <p class="detail-text" id="drawerOrganelleDesc">Details about structural composition go here.</p>
+          <button class="btn" style="padding: 6px 10px; font-size: 0.7rem; margin-top: 4px;" onclick="closeOrganelleDrawer()">Close Inspector</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* ----------------------------------------------------
+       AUDIO SYSTEM (WEB AUDIO API)
+       ---------------------------------------------------- */
+    let audioCtx = null;
+    const soundToggle = document.getElementById('soundToggle');
+
+    function playSound(type, pitchModifier = 1.0) {
+      if (!soundToggle.checked) return;
+      
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        
+        const now = audioCtx.currentTime;
+        if (type === 'click') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600 * pitchModifier, now);
+          osc.frequency.exponentialRampToValueAtTime(1000 * pitchModifier, now + 0.03);
+          gain.gain.setValueAtTime(0.005, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.03);
+        } else if (type === 'atp') {
+          // Sparkle sweep sound
+          const gain = audioCtx.createGain();
+          gain.gain.setValueAtTime(0.015, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+          gain.connect(audioCtx.destination);
+          
+          [400, 600, 900, 1300].forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq * pitchModifier, now + i * 0.05);
+            osc.connect(gain);
+            osc.start(now + i * 0.05);
+            osc.stop(now + 0.35);
+          });
+        } else if (type === 'pump') {
+          // Heavy slide/click sound
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(140 * pitchModifier, now);
+          osc.frequency.linearRampToValueAtTime(75 * pitchModifier, now + 0.22);
+          gain.gain.setValueAtTime(0.035, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.22);
+        } else if (type === 'gate') {
+          // Quick hydraulic sound
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(260 * pitchModifier, now);
+          osc.frequency.exponentialRampToValueAtTime(120 * pitchModifier, now + 0.08);
+          gain.gain.setValueAtTime(0.012, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'bounce') {
+          // Faint soft bump
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(80, now);
+          gain.gain.setValueAtTime(0.003, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.02);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.02);
+        } else if (type === 'zoom-hum') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(100 + (pitchModifier * 80), now);
+          osc.frequency.exponentialRampToValueAtTime(140 + (pitchModifier * 80), now + 0.1);
+          gain.gain.setValueAtTime(0.01, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.1);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        }
+      } catch (e) {
+        console.warn('Audio Synthesis support restricted or not allowed.', e);
+      }
+    }
+
+    /* ----------------------------------------------------
+       SCIENTIFIC METADATA
+       ---------------------------------------------------- */
+    const componentDatabase = {
+      bilayer: {
+        name: "Phospholipid Bilayer",
+        desc: "The core structure of the membrane. Hydrophilic (water-attracting) heads face outer surfaces, while hydrophobic (water-repelling) lipid tails cluster inside. This blocks polar and charged substances, protecting the cell.",
+        badge: "Lipid Matrix Boundary"
+      },
+      glycoprotein: {
+        name: "Glycoprotein & Glycolipid",
+        desc: "Carbohydrate chains anchored to surface proteins or lipids. They stick out into the extracellular fluid acting as cellular ID tags for intercellular communication and immune system recognition.",
+        badge: "Cell Identifier - Receptor"
+      },
+      cholesterol: {
+        name: "Cholesterol Molecules",
+        desc: "Steroid lipid rings nestled within the hydrophobic fatty acid tails. They regulate membrane fluid stability, preventing tails from packing too tightly in the cold or becoming too fluid in warm environments.",
+        badge: "Fluidity Stabilizer"
+      },
+      aquaporin: {
+        name: "Aquaporin Channel",
+        desc: "A selective transport protein pore that allows rapid, passive diffusion of water molecules (H₂O) down their concentration gradient, bypassing the hydrophobic fatty acid bilayer.",
+        badge: "Facilitated Diffusion: H₂O"
+      },
+      sodiumchannel: {
+        name: "Gated Sodium Channel",
+        desc: "An ion channel that controls passive sodium (Na⁺) diffusion. When open, Na⁺ flows down its electrical and chemical gradient. In this lab, you can toggle its gate open or closed.",
+        badge: "Facilitated Diffusion: Na⁺"
+      },
+      carrierprotein: {
+        name: "Glucose Carrier Protein",
+        desc: "A passive carrier protein that facilitates transport of larger glucose molecules. Binding triggers a conformation shape shift that transfers glucose across the bilayer, releasing it inside.",
+        badge: "Facilitated Carrier: Glucose"
+      },
+      activepump: {
+        name: "Na⁺/K⁺ Active Pump",
+        desc: "An active transporter that wiggles molecules against their concentration gradient. It binds three sodium ions from inside, splits ATP energy, and shifts shape to dump sodium out, maintaining homeostasis.",
+        badge: "Active Transport: ATP-Powered"
+      },
+      peripheral: {
+        name: "Peripheral Membrane Protein",
+        desc: "Proteins attached loosely to the surface of the lipid bilayer. They connect the cell membrane to the internal cytoskeleton and play key roles in cellular signaling and structural integrity.",
+        badge: "Intracellular Support"
+      }
+    };
+
+    /* ----------------------------------------------------
+       SIMULATION STATE VARIABLES & CACHED DOM ELEMENTS
+       ---------------------------------------------------- */
+    let currentZoomVal = 1.0;
+    let targetZoomVal = 1.0;
+    let isMicroView = false;
+    let timeTicker = 0;
+
+    // Environmental factors
+    let membraneTemp = 37;
+    let lipidWaveSpeed = 0.04;
+    let particleBaseSpeed = 1.0;
+
+    // Spawner button states
+    const spawnState = {
+      oxygen: true,
+      water: true,
+      glucose: true,
+      sodium: true
+    };
+
+    // Channel/Gate open states
+    const gateState = {
+      aquaporin: true,
+      sodium: false
+    };
+
+    // Active Transport state machine
+    const pumpState = {
+      conformation: 'A', // 'A' = open to inside, 'B' = open to outside
+      boundSodium: [],    // bound Na+ particle objects
+      atpAttached: null,  // bound ATP particle object
+      phosphorylationState: 'none', // 'none', 'energy-flash', 'releasing', 'resetting'
+      timer: 0
+    };
+
+    // Particle storage
+    const particles = [];
+    const maxParticlesPerType = 18;
+
+    // Mouse coordinate details
+    let mousePos = { x: 0, y: 0 };
+    let hoveredComponent = null;
+    let selectedComponent = null;
+
+    // DOM Caches
+    const canvas = document.getElementById('viewportCanvas');
+    const ctx = canvas.getContext('2d');
+    const zoomSlider = document.getElementById('zoomSlider');
+    const tempSlider = document.getElementById('tempSlider');
+    const tempReadout = document.getElementById('tempReadout');
+    const aquaporinToggle = document.getElementById('aquaporinToggle');
+    const sodiumGateToggle = document.getElementById('sodiumGateToggle');
+    const levelTitle = document.getElementById('levelTitle');
+    const levelScaleBadge = document.getElementById('levelScaleBadge');
+    const levelDescription = document.getElementById('levelDescription');
+    const organelleDrawer = document.getElementById('organelleDrawer');
+    const drawerOrganelleName = document.getElementById('drawerOrganelleName');
+    const drawerOrganelleDesc = document.getElementById('drawerOrganelleDesc');
+    const drawerOrganelleBadge = document.getElementById('drawerOrganelleBadge');
+    const zoomNotice = document.getElementById('zoomNotice');
+    const transportControlsWrapper = document.getElementById('transportControlsWrapper');
+    const legendWrapper = document.getElementById('legendWrapper');
+    const hudStatus = document.getElementById('hudStatus');
+    const lblTick1 = document.getElementById('lblTick1');
+    const lblTick2 = document.getElementById('lblTick2');
+
+    /* ----------------------------------------------------
+       INITIALIZATION & ZOOM EVENT HANDLERS
+       ---------------------------------------------------- */
+    function onZoomSliderChange(val) {
+      targetZoomVal = parseFloat(val);
+      playSound('zoom-hum', (targetZoomVal - 1.0));
+    }
+    
+    function setZoomTarget(val) {
+      targetZoomVal = val;
+      zoomSlider.value = val.toFixed(2);
+      playSound('click');
+    }
+
+    function updateUIForZoom() {
+      if (!isMicroView) {
+        // LOCK CONTROLS: LEVEL 1 (Whole Cell View)
+        lblTick1.classList.add('active');
+        lblTick2.classList.remove('active');
+        transportControlsWrapper.style.opacity = '0.35';
+        transportControlsWrapper.style.pointerEvents = 'none';
+        legendWrapper.style.opacity = '0.35';
+        legendWrapper.style.pointerEvents = 'none';
+        zoomNotice.style.display = 'block';
+        hudStatus.textContent = "SELECTIVE PERMEABILITY LAB: WHOLE CELL VIEW";
+        
+        if (!selectedComponent) {
+          levelTitle.textContent = "Whole Cell View";
+          levelScaleBadge.textContent = "Macro Scale (~10 µm)";
+          levelDescription.innerHTML = "The cell is the basic structural and functional unit of life. Bounded by a selectively permeable cell membrane. <strong>Slide the zoom slider</strong> to magnify the membrane boundary and explore molecular transport.";
+        }
+      } else {
+        // UNLOCK CONTROLS: LEVEL 2 (Membrane Bilayer View)
+        lblTick1.classList.remove('active');
+        lblTick2.classList.add('active');
+        transportControlsWrapper.style.opacity = '1.0';
+        transportControlsWrapper.style.pointerEvents = 'auto';
+        legendWrapper.style.opacity = '1.0';
+        legendWrapper.style.pointerEvents = 'auto';
+        zoomNotice.style.display = 'none';
+        hudStatus.textContent = "SELECTIVE PERMEABILITY LAB: RUNNING";
+
+        if (!selectedComponent) {
+          levelTitle.textContent = "Fluid Mosaic Model";
+          levelScaleBadge.textContent = "Molecular Scale (~8 nm)";
+          levelDescription.innerHTML = "The cell membrane is a <strong>semi-permeable lipid bilayer</strong> that regulates what enters and exits the cell, maintaining homeostasis and protecting the cell's internal environment.";
+        }
+      }
+    }
+
+    window.addEventListener('load', () => {
+      setupParticles();
+      updateTemperature(37);
+      updateUIForZoom(); // initialize UI elements on page load
+      
+      // Canvas Event listeners
+      canvas.addEventListener('mousemove', handleMouseMove);
+      canvas.addEventListener('mousedown', handleMouseDown);
+      canvas.addEventListener('mouseleave', () => {
+        if (!selectedComponent) hoveredComponent = null;
+      });
+
+      // Canvas Scroll Wheel Zoom
+      canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.05 : -0.05;
+        targetZoomVal = Math.min(2.0, Math.max(1.0, targetZoomVal + delta));
+        zoomSlider.value = targetZoomVal.toFixed(2);
+        playSound('zoom-hum', (targetZoomVal - 1.0));
+      }, { passive: false });
+
+      animate();
+    });
+
+    function dist(x1, y1, x2, y2) {
+      return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    }
+
+    function setupParticles() {
+      // Spawn initial balanced molecules
+      for (let i = 0; i < maxParticlesPerType; i++) {
+        spawnParticle('oxygen');
+        spawnParticle('water');
+        spawnParticle('glucose');
+        spawnParticle('sodium');
+      }
+    }
+
+    function spawnParticle(type, forcedY = null) {
+      let py;
+      if (forcedY !== null) {
+        py = forcedY;
+      } else {
+        // Randomly split between top (extracellular) and bottom (cytoplasm)
+        // Avoid spawning directly on membrane boundary (y: 240-360)
+        py = Math.random() > 0.5 ? Math.random() * 210 + 20 : Math.random() * 200 + 380;
+      }
+
+      let speedFactor = 1.0;
+      let radius = 5;
+      let color = '#fff';
+
+      switch(type) {
+        case 'oxygen':
+          color = '#00e5ff'; radius = 4.5; speedFactor = 1.6;
+          break;
+        case 'water':
+          color = '#29b6f6'; radius = 4.0; speedFactor = 1.3;
+          break;
+        case 'glucose':
+          color = '#66bb6a'; radius = 7.5; speedFactor = 0.8;
+          break;
+        case 'sodium':
+          color = '#ffa726'; radius = 5.0; speedFactor = 1.1;
+          break;
+        case 'atp':
+          color = '#ffeb3b'; radius = 8.0; speedFactor = 0.9;
+          break;
+      }
+
+      let angle = Math.random() * Math.PI * 2;
+      particles.push({
+        type: type,
+        x: Math.random() * (canvas.width - 40) + 20,
+        y: py,
+        vx: Math.cos(angle) * speedFactor,
+        vy: Math.sin(angle) * speedFactor,
+        radius: radius,
+        color: color,
+        isBound: false,
+        angleOffset: Math.random() * 5
+      });
+    }
+
+    /* ----------------------------------------------------
+       SIMULATION INTERACTION EVENT HANDLERS
+       ---------------------------------------------------- */
+    function toggleSpawn(type) {
+      spawnState[type] = !spawnState[type];
+      const btn = document.getElementById(`btnSpawn${type.charAt(0).toUpperCase() + type.slice(1)}`);
+      if (spawnState[type]) {
+        btn.classList.add('active');
+        // Spawn particles immediately
+        for(let i=0; i<8; i++) spawnParticle(type);
+      } else {
+        btn.classList.remove('active');
+        // Filter out existing particles of this type
+        for (let i = particles.length - 1; i >= 0; i--) {
+          if (particles[i].type === type && !particles[i].isBound) {
+            particles.splice(i, 1);
+          }
+        }
+      }
+      playSound('click');
+    }
+
+    function toggleGate(gate) {
+      gateState[gate] = !gateState[gate];
+      playSound('gate');
+    }
+
+    function injectATP() {
+      if (!isMicroView) return;
+      // Spawn an ATP particle in the cytoplasmic region (bottom y: 450)
+      spawnParticle('atp', 450);
+      playSound('atp');
+    }
+
+    function updateTemperature(val) {
+      membraneTemp = parseInt(val);
+      tempReadout.textContent = `${membraneTemp}°C`;
+      document.getElementById('hudTemp').textContent = `${membraneTemp}°C`;
+      
+      // Map temperature to speeds
+      particleBaseSpeed = 0.3 + (membraneTemp / 37.0) * 0.95;
+      lipidWaveSpeed = 0.01 + (membraneTemp / 100.0) * 0.08;
+    }
+
+    function selectComponent(id) {
+      selectedComponent = id;
+      hoveredComponent = id;
+      
+      // Update Legend selections
+      document.querySelectorAll('.legend-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`lbl_${id}`);
+      if (activeBtn) activeBtn.classList.add('active');
+      
+      // Fill details card
+      const data = componentDatabase[id];
+      if (data) {
+        drawerOrganelleName.textContent = data.name;
+        drawerOrganelleDesc.textContent = data.desc;
+        drawerOrganelleBadge.textContent = data.badge;
+        organelleDrawer.style.display = 'flex';
+      }
+      playSound('click');
+    }
+
+    function closeOrganelleDrawer() {
+      organelleDrawer.style.display = 'none';
+      selectedComponent = null;
+      hoveredComponent = null;
+      document.querySelectorAll('.legend-btn').forEach(btn => btn.classList.remove('active'));
+      playSound('click');
+    }
+
+    /* ----------------------------------------------------
+       CANVAS PHYSICS & COLLISION RESOLUTIONS
+       ---------------------------------------------------- */
+    function bounceOffMembrane(p, topMem, botMem) {
+      playSound('bounce');
+      if (p.vy > 0) {
+        p.y = topMem - p.radius;
+        p.vy *= -1;
+      } else {
+        p.y = botMem + p.radius;
+        p.vy *= -1;
+      }
+    }
+
+    function handleMouseMove(e) {
+      const rect = canvas.getBoundingClientRect();
+      mousePos = {
+        x: (e.clientX - rect.left) * (canvas.width / rect.width),
+        y: (e.clientY - rect.top) * (canvas.height / rect.height)
+      };
+
+      if (!selectedComponent) {
+        hoveredComponent = checkHoverCollisions(mousePos.x, mousePos.y);
+        // Highlight matching button in the legend list
+        document.querySelectorAll('.legend-btn').forEach(btn => btn.classList.remove('active'));
+        if (hoveredComponent) {
+          const btn = document.getElementById(`lbl_${hoveredComponent}`);
+          if (btn) btn.classList.add('active');
+        }
+      }
+    }
+
+    function handleMouseDown(e) {
+      if (!isMicroView) return; // interactive regions disabled when zoomed out
+      const rect = canvas.getBoundingClientRect();
+      const clickX = (e.clientX - rect.left) * (canvas.width / rect.width);
+      const clickY = (e.clientY - rect.top) * (canvas.height / rect.height);
+      
+      const component = checkHoverCollisions(clickX, clickY);
+      if (component) {
+        selectComponent(component);
+      }
+    }
+
+    function checkHoverCollisions(x, y) {
+      if (currentZoomVal < 1.5) return null;
+      
+      // Coordinates of transmembrane structures (y bounds: 220 to 380)
+      if (y >= 210 && y <= 390) {
+        if (x >= 135 && x <= 225) return 'aquaporin';
+        if (x >= 315 && x <= 405) return 'sodiumchannel';
+        if (x >= 445 && x <= 515) return 'carrierprotein';
+        if (x >= 535 && x <= 625) return 'activepump';
+        if (x >= 0 && x <= 800) return 'bilayer';
+      }
+
+      // Glycoprotein branches (extracellular side x: 270, y: 140 to 220)
+      if (x >= 230 && x <= 300 && y >= 110 && y <= 220) return 'glycoprotein';
+      
+      // Peripheral protein (intracellular side x: 670, y: 345 to 395)
+      if (x >= 650 && x <= 720 && y >= 340 && y <= 390) return 'peripheral';
+
+      // Cholesterols
+      if (y >= 260 && y <= 340) {
+        if (x >= 90 && x <= 125) return 'cholesterol';
+        if (x >= 240 && x <= 280) return 'cholesterol';
+        if (x >= 410 && x <= 440) return 'cholesterol';
+        if (x >= 630 && x <= 660) return 'cholesterol';
+      }
+
+      return null;
+    }
+
+    /* ----------------------------------------------------
+       CANVAS PHYSICS & RENDERING LOOP
+       ---------------------------------------------------- */
+    function animate() {
+      timeTicker += 0.025;
+      
+      // Interpolate zoom easing
+      const prevZoom = currentZoomVal;
+      currentZoomVal += (targetZoomVal - currentZoomVal) * 0.1;
+      
+      // Trigger UI updates on threshold crossing
+      const newMicroView = (currentZoomVal >= 1.5);
+      if (newMicroView !== isMicroView) {
+        isMicroView = newMicroView;
+        updateUIForZoom();
+      }
+
+      // Sync slider & HUD values
+      document.getElementById('hudZoom').textContent = `${currentZoomVal.toFixed(2)}x`;
+
+      updatePhysics();
+      drawViewport();
+
+      requestAnimationFrame(animate);
+    }
+
+    function updatePhysics() {
+      // 1. Particle dynamics
+      particles.forEach((p, idx) => {
+        if (p.isBound) return; // Locked by Active pump
+
+        let speedMult = particleBaseSpeed;
+        p.x += p.vx * speedMult;
+        p.y += p.vy * speedMult;
+
+        // Screen boundary reflections
+        if (p.x < p.radius) { p.x = p.radius; p.vx *= -1; }
+        if (p.x > canvas.width - p.radius) { p.x = canvas.width - p.radius; p.vx *= -1; }
+        if (p.y < p.radius) { p.y = p.radius; p.vy *= -1; }
+        if (p.y > canvas.height - p.radius) { p.y = canvas.height - p.radius; p.vy *= -1; }
+
+        // 2. Permeability boundary checks (Active at zoom Level 2)
+        if (currentZoomVal >= 1.5) {
+          const topMem = 260;
+          const botMem = 340;
+
+          // (A) Oxygen: passes bilayer directly
+          if (p.type === 'oxygen') {
+            // simple diffusion, no bounce
+          }
+          
+          // (B) Water: passes via open Aquaporin pore
+          else if (p.type === 'water') {
+            if (p.y + p.radius >= topMem && p.y - p.radius <= botMem) {
+              if (p.x >= 155 && p.x <= 205) {
+                if (!gateState.aquaporin) {
+                  bounceOffMembrane(p, topMem, botMem);
+                } else {
+                  p.vx = (p.vx > 0 ? 0.25 : -0.25); // guide straight
+                }
+              } else {
+                bounceOffMembrane(p, topMem, botMem);
+              }
+            }
+          }
+
+          // (C) Glucose: passes slowly via carrier channel
+          else if (p.type === 'glucose') {
+            if (p.y + p.radius >= topMem && p.y - p.radius <= botMem) {
+              if (p.x >= 450 && p.x <= 510) {
+                p.vy = p.vy > 0 ? 0.4 : -0.4;
+                p.vx = 0; // lock horizontally
+              } else {
+                bounceOffMembrane(p, topMem, botMem);
+              }
+            }
+          }
+
+          // (D) Sodium: passes if Sodium Gate is OPEN, or docks to active pump from cytoplasm
+          else if (p.type === 'sodium') {
+            if (p.y + p.radius >= topMem && p.y - p.radius <= botMem) {
+              if (p.x >= 335 && p.x <= 385) {
+                if (gateState.sodium) {
+                  p.vx = 0; // guide straight
+                } else {
+                  bounceOffMembrane(p, topMem, botMem);
+                }
+              }
+              // Active pump range: x: 550 to 610, y inside > 310
+              else if (p.x >= 550 && p.x <= 610) {
+                if (p.y > 310 && pumpState.conformation === 'A' && pumpState.boundSodium.length < 3 && pumpState.phosphorylationState === 'none') {
+                  p.isBound = true;
+                  p.x = 560 + pumpState.boundSodium.length * 16;
+                  p.y = 325;
+                  pumpState.boundSodium.push(p);
+                  playSound('bounce');
+                } else {
+                  bounceOffMembrane(p, topMem, botMem);
+                }
+              } else {
+                bounceOffMembrane(p, topMem, botMem);
+              }
+            }
+          }
+
+          // (E) ATP: docks to bottom of pump if 3 Sodium bound
+          else if (p.type === 'atp') {
+            if (p.y < botMem + p.radius) {
+              p.y = botMem + p.radius;
+              p.vy *= -1;
+            }
+            if (pumpState.boundSodium.length === 3 && pumpState.phosphorylationState === 'none' && !pumpState.atpAttached) {
+              if (dist(p.x, p.y, 580, 350) < 35) {
+                p.isBound = true;
+                p.x = 580;
+                p.y = 348;
+                pumpState.atpAttached = p;
+                pumpState.phosphorylationState = 'energy-flash';
+                pumpState.timer = 60;
+                playSound('pump');
+              }
+            }
+          }
+        }
+      });
+
+      // 3. Active Pump Conformation States
+      if (pumpState.phosphorylationState === 'energy-flash') {
+        pumpState.timer--;
+        if (pumpState.timer <= 0) {
+          if (pumpState.atpAttached) {
+            // ATP -> ADP + Pi. ADP floats away
+            const adp = pumpState.atpAttached;
+            adp.type = 'adp';
+            adp.color = '#78909c';
+            adp.isBound = false;
+            adp.vy = 1.2;
+            pumpState.atpAttached = null;
+          }
+          pumpState.phosphorylationState = 'releasing';
+          pumpState.conformation = 'B'; // Flip to outside view
+          pumpState.timer = 50;
+        }
+      } 
+      else if (pumpState.phosphorylationState === 'releasing') {
+        pumpState.timer--;
+        if (pumpState.timer <= 0) {
+          // Release sodium ions to outside
+          pumpState.boundSodium.forEach(na => {
+            na.isBound = false;
+            na.y = 250;
+            na.vy = -1.5;
+            na.vx = (Math.random() - 0.5) * 1.5;
+          });
+          pumpState.boundSodium = [];
+          
+          pumpState.phosphorylationState = 'resetting';
+          pumpState.conformation = 'A'; // return to inside conformation
+          pumpState.timer = 40;
+          playSound('gate');
+        }
+      }
+      else if (pumpState.phosphorylationState === 'resetting') {
+        pumpState.timer--;
+        if (pumpState.timer <= 0) {
+          pumpState.phosphorylationState = 'none';
+        }
+      }
+
+      // Spawn new ambient particles to maintain density if spawners active
+      ['oxygen', 'water', 'glucose', 'sodium'].forEach(type => {
+        if (spawnState[type]) {
+          let count = particles.filter(p => p.type === type).length;
+          if (count < maxParticlesPerType) {
+            spawnParticle(type);
+          }
+        }
+      });
+    }
+
+    function drawViewport() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      let baseLevel = Math.floor(currentZoomVal);
+      let fract = currentZoomVal - baseLevel;
+      
+      if (baseLevel >= 2) {
+        baseLevel = 1;
+        fract = 1.0;
+      }
+
+      // Layer 1: Whole Cell View
+      let opacity1 = 1.0 - fract;
+      let scale1 = 1.0 + fract * 5.0; // scales 1x to 6x
+      ctx.save();
+      ctx.globalAlpha = opacity1;
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(scale1, scale1);
+      let camY = 300 - (140 * fract);
+      ctx.translate(-400, -camY);
+      drawWholeCellGraphics();
+      ctx.restore();
+
+      // Layer 2: Bilayer View
+      if (fract > 0.01) {
+        let opacity2 = fract;
+        let scale2 = 0.15 + fract * 0.85; // scales 0.15x to 1x
+        ctx.save();
+        ctx.globalAlpha = opacity2;
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.scale(scale2, scale2);
+        ctx.translate(-canvas.width / 2, -canvas.height / 2);
+        drawBilayerGraphics();
+        ctx.restore();
+      }
+    }
+
+    /* ----------------------------------------------------
+       LEVEL 1: WHOLE CELL RENDERING
+       ---------------------------------------------------- */
+    function drawWholeCellGraphics() {
+      // Cytoplasm glow background
+      let bgGrad = ctx.createRadialGradient(400, 300, 50, 400, 300, 450);
+      bgGrad.addColorStop(0, '#0c132c');
+      bgGrad.addColorStop(1, '#03050b');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw extracellular grid lines
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.03)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < canvas.width; i += 40) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+      }
+      for (let j = 0; j < canvas.height; j += 40) {
+        ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke();
+      }
+
+      // Cell Membrane Boundary (circular capsule)
+      ctx.shadowColor = varColor('--cyan-accent');
+      ctx.shadowBlur = 25;
+      ctx.strokeStyle = varColor('--cyan-accent');
+      ctx.lineWidth = 6;
+      ctx.fillStyle = '#060c22';
+      ctx.beginPath();
+      ctx.arc(400, 380, 200, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.shadowBlur = 0; // reset
+
+      // Nucleus
+      ctx.fillStyle = 'rgba(213, 0, 249, 0.15)';
+      ctx.strokeStyle = varColor('--purple-accent');
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(400, 410, 70, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Nucleolus (deep nucleus)
+      ctx.fillStyle = varColor('--purple-accent');
+      ctx.beginPath();
+      ctx.arc(380, 390, 20, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Chromatin details
+      ctx.strokeStyle = 'rgba(213, 0, 249, 0.4)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(430, 440, 15, 0, Math.PI);
+      ctx.stroke();
+
+      // Mitochondria (energy sites)
+      drawMiniMitochondrion(260, 360, 0.4);
+      drawMiniMitochondrion(540, 380, -0.4);
+
+      // Golgi Stack
+      drawMiniGolgi(480, 470);
+
+      // Cytoplasmic particles (represented ambiently)
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.15)';
+      for (let i = 0; i < 20; i++) {
+        let x = 400 + Math.cos(i) * (100 + i * 4);
+        let y = 380 + Math.sin(i) * (100 + i * 4);
+        ctx.beginPath();
+        ctx.arc(x, y, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Dashed Zoom Reticle box framing the target membrane section (400, 180)
+      ctx.strokeStyle = varColor('--amber-accent');
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.strokeRect(300, 140, 200, 80);
+      ctx.setLineDash([]); // clear
+
+      // Reticle labels
+      ctx.fillStyle = varColor('--amber-accent');
+      ctx.font = `bold 8px ${varFont('--font-mono')}`;
+      ctx.fillText("ZOOM TARGET REGION", 305, 152);
+    }
+
+    function drawMiniMitochondrion(cx, cy, rotateAngle) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rotateAngle);
+      
+      // Outer shell
+      ctx.fillStyle = 'rgba(255, 145, 0, 0.1)';
+      ctx.strokeStyle = varColor('--amber-accent');
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 30, 18, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Cristae folds
+      ctx.strokeStyle = varColor('--amber-accent');
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-20, -5); ctx.lineTo(-15, 8); ctx.lineTo(-10, -8);
+      ctx.lineTo(-5, 8); ctx.lineTo(0, -8); ctx.lineTo(5, 8);
+      ctx.lineTo(10, -8); ctx.lineTo(15, 8); ctx.lineTo(20, -5);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawMiniGolgi(cx, cy) {
+      ctx.strokeStyle = 'rgba(0, 230, 118, 0.6)';
+      ctx.lineWidth = 3;
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.arc(cx, cy + i * 6, 25 - i * 3, Math.PI * 1.1, Math.PI * 1.9);
+        ctx.stroke();
+      }
+    }
+
+    /* ----------------------------------------------------
+       LEVEL 2: MEMBRANE BILAYER RENDERING
+       ---------------------------------------------------- */
+    function drawBilayerGraphics() {
+      // ECF and Cytoplasm background split
+      let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      bgGrad.addColorStop(0, '#030612'); // ECF
+      bgGrad.addColorStop(0.4, '#070b1c');
+      bgGrad.addColorStop(0.6, '#080d22'); // Cytoplasm
+      bgGrad.addColorStop(1, '#030510');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw structural elements
+      drawTransmembraneProteins();
+      drawPeripheralProteins();
+      drawPhospholipids();
+      drawCholesterols();
+      drawGlycoproteins();
+      
+      // Highlight/Hover Overlays
+      drawComponentHighlightOverlay();
+      
+      // Draw active particles
+      drawActiveParticles();
+    }
+
+    function drawPhospholipids() {
+      // Bobbing sine motion based on temperature and time ticker
+      let bob = Math.sin(timeTicker) * (1.5 + membraneTemp * 0.05);
+
+      // Define protein coordinate exclusions
+      const exclusionRanges = [
+        [130, 210], // Aquaporin
+        [320, 400], // Sodium gate
+        [440, 520], // Glucose carrier
+        [540, 620]  // Active pump
+      ];
+
+      function isExcluded(x) {
+        return exclusionRanges.some(range => x >= range[0] && x <= range[1]);
+      }
+
+      ctx.lineWidth = 1.5;
+      
+      // Draw top and bottom lipid chains across x
+      for (let x = 12; x < canvas.width; x += 18) {
+        if (isExcluded(x)) continue;
+
+        let localBob = bob + Math.sin(timeTicker * 1.2 + x * 0.05) * 1.8;
+
+        // Top Layer (Extracellular facing, heads at y = 260)
+        let topY = 260 + localBob;
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.45)'; // tails
+        ctx.beginPath();
+        // Tail 1
+        ctx.moveTo(x - 3, topY);
+        ctx.quadraticCurveTo(x - 5, topY + 20, x - 2, topY + 40);
+        // Tail 2
+        ctx.moveTo(x + 3, topY);
+        ctx.quadraticCurveTo(x + 5, topY + 20, x + 2, topY + 40);
+        ctx.stroke();
+
+        ctx.fillStyle = '#00b0ff'; // hydrophilic polar head
+        ctx.strokeStyle = varColor('--cyan-accent');
+        ctx.beginPath();
+        ctx.arc(x, topY, 7.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Bottom Layer (Intracellular facing, heads at y = 340)
+        let botY = 340 - localBob;
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.45)'; // tails
+        ctx.beginPath();
+        // Tail 1
+        ctx.moveTo(x - 3, botY);
+        ctx.quadraticCurveTo(x - 5, botY - 20, x - 2, botY - 40);
+        // Tail 2
+        ctx.moveTo(x + 3, botY);
+        ctx.quadraticCurveTo(x + 5, botY - 20, x + 2, botY - 40);
+        ctx.stroke();
+
+        ctx.fillStyle = '#0091ea'; // bottom polar head
+        ctx.strokeStyle = varColor('--cyan-accent');
+        ctx.beginPath();
+        ctx.arc(x, botY, 7.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+
+    function drawTransmembraneProteins() {
+      // 1. AQUAPORIN (Water Channel x:130 to 210, y:220 to 380)
+      ctx.fillStyle = '#01579b';
+      ctx.strokeStyle = '#29b6f6';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.roundRect(140, 220, 60, 160, 10);
+      ctx.fill();
+      ctx.stroke();
+
+      // Central water pore line
+      ctx.strokeStyle = 'rgba(41, 182, 246, 0.15)';
+      ctx.fillStyle = 'rgba(41, 182, 246, 0.05)';
+      ctx.beginPath();
+      ctx.rect(160, 220, 20, 160);
+      ctx.fill();
+      ctx.stroke();
+
+      // Label inside channel
+      ctx.fillStyle = '#90caf9';
+      ctx.font = `bold 8px ${varFont('--font-mono')}`;
+      ctx.save();
+      ctx.translate(173, 335);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText("AQUAPORIN", 0, 0);
+      ctx.restore();
+
+      // 2. SODIUM GATED CHANNEL (x:320 to 400, y:220 to 380)
+      ctx.fillStyle = '#5d4037'; // brown/gold gate
+      ctx.strokeStyle = varColor('--amber-accent');
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.roundRect(325, 220, 70, 160, 10);
+      ctx.fill();
+      ctx.stroke();
+
+      // Gate path pore
+      ctx.fillStyle = 'rgba(255, 145, 0, 0.05)';
+      ctx.strokeStyle = 'rgba(255, 145, 0, 0.15)';
+      ctx.beginPath();
+      ctx.rect(348, 225, 24, 155);
+      ctx.fill();
+      ctx.stroke();
+
+      // Gated valve lid
+      ctx.save();
+      ctx.strokeStyle = varColor('--amber-accent');
+      ctx.lineWidth = 4;
+      if (gateState.sodium) {
+        // Swing lid open (tilted)
+        ctx.translate(348, 225);
+        ctx.rotate(-Math.PI / 3);
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(26, 0); ctx.stroke();
+      } else {
+        // Locked closed lid flat across pore
+        ctx.beginPath(); ctx.moveTo(346, 224); ctx.lineTo(374, 224); ctx.stroke();
+      }
+      ctx.restore();
+
+      // Label
+      ctx.fillStyle = '#ffcc80';
+      ctx.font = `bold 8px ${varFont('--font-mono')}`;
+      ctx.save();
+      ctx.translate(362, 335);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText("SODIUM GATE", 0, 0);
+      ctx.restore();
+
+      // 3. GLUCOSE CARRIER PROTEIN (x:440 to 520, y:220 to 380)
+      ctx.fillStyle = '#1b5e20';
+      ctx.strokeStyle = varColor('--green-accent');
+      ctx.lineWidth = 3.5;
+      
+      // Hourglass carrier shape
+      ctx.beginPath();
+      ctx.moveTo(450, 220);
+      ctx.lineTo(465, 300);
+      ctx.lineTo(450, 380);
+      ctx.lineTo(510, 380);
+      ctx.lineTo(495, 300);
+      ctx.lineTo(510, 220);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Binding slot shape in center
+      ctx.fillStyle = 'rgba(0, 230, 118, 0.15)';
+      ctx.beginPath();
+      ctx.arc(480, 300, 10, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Label
+      ctx.fillStyle = '#a5d6a7';
+      ctx.font = `bold 8px ${varFont('--font-mono')}`;
+      ctx.save();
+      ctx.translate(484, 335);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText("CARRIER", 0, 0);
+      ctx.restore();
+
+      // 4. ACTIVE Na⁺/K⁺ PUMP (x:540 to 620, y:220 to 380)
+      ctx.fillStyle = '#e65100'; // deep orange/gold active pump
+      ctx.strokeStyle = varColor('--amber-accent');
+      ctx.lineWidth = 3.5;
+
+      ctx.save();
+      // Draw pump based on active conformational state
+      if (pumpState.conformation === 'A') {
+        // Conformation A: Open to Cytoplasm (inside/bottom)
+        ctx.beginPath();
+        ctx.moveTo(550, 220);
+        ctx.lineTo(610, 220);
+        ctx.lineTo(610, 280);
+        ctx.lineTo(595, 300);
+        ctx.lineTo(610, 380); // bottom left
+        ctx.lineTo(590, 380);
+        ctx.lineTo(580, 330); // inner pocket
+        ctx.lineTo(570, 380);
+        ctx.lineTo(550, 380);
+        ctx.lineTo(565, 300);
+        ctx.lineTo(550, 280);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        // Conformation B: Open to Extracellular Fluid (outside/top)
+        ctx.beginPath();
+        ctx.moveTo(550, 220);
+        ctx.lineTo(570, 220);
+        ctx.lineTo(580, 270); // inner pocket top
+        ctx.lineTo(590, 220);
+        ctx.lineTo(610, 220);
+        ctx.lineTo(595, 300);
+        ctx.lineTo(610, 380);
+        ctx.lineTo(550, 380);
+        ctx.lineTo(565, 300);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Draw Energy phosphorylation flash bubble
+      if (pumpState.phosphorylationState === 'energy-flash') {
+        ctx.shadowColor = varColor('--amber-accent');
+        ctx.shadowBlur = 35;
+        ctx.fillStyle = 'rgba(255, 235, 59, 0.4)';
+        ctx.strokeStyle = '#ffeb3b';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(580, 320, 28, 0, Math.PI*2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.shadowBlur = 0; // reset
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = `bold 9px ${varFont('--font-mono')}`;
+        ctx.fillText("PHOSPHORYLATION", 543, 205);
+      }
+
+      // Label
+      ctx.fillStyle = '#ffe0b2';
+      ctx.font = `bold 8px ${varFont('--font-mono')}`;
+      ctx.save();
+      ctx.translate(584, 335);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText("ACTIVE PUMP", -5, 0);
+      ctx.restore();
+    }
+
+    function drawPeripheralProteins() {
+      // Violet oval attached to inside edge (x:650-710, y:340-390)
+      ctx.fillStyle = '#4a148c';
+      ctx.strokeStyle = varColor('--purple-accent');
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.ellipse(680, 352, 28, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#e1bee7';
+      ctx.font = `bold 7px ${varFont('--font-mono')}`;
+      ctx.fillText("PERIPHERAL", 658, 355);
+    }
+
+    function drawCholesterols() {
+      // Draw yellow cholesterol ring sets inside the tails
+      const chosCoords = [
+        [105, 290],
+        [255, 300],
+        [422, 295],
+        [642, 305]
+      ];
+
+      ctx.fillStyle = '#fbc02d';
+      ctx.strokeStyle = '#fff59d';
+      ctx.lineWidth = 1;
+
+      chosCoords.forEach(c => {
+        let cx = c[0];
+        let cy = c[1];
+        // Draw 3 interlocking lipid rings
+        ctx.beginPath(); ctx.arc(cx, cy - 6, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx - 3, cy, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx + 3, cy + 6, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      });
+    }
+
+    function drawGlycoproteins() {
+      // Anchored chain extending extracellularly from a lipid/protein at x: 270, y: 220
+      ctx.strokeStyle = '#00e676';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(270, 255);
+      ctx.lineTo(260, 220);
+      ctx.lineTo(240, 180);
+      ctx.lineTo(255, 140);
+      ctx.stroke();
+
+      // Hexagonal carbohydrate sugar nodes
+      const hexPoints = [
+        [260, 220],
+        [240, 180],
+        [255, 140]
+      ];
+
+      ctx.fillStyle = 'rgba(0, 230, 118, 0.25)';
+      ctx.strokeStyle = varColor('--green-accent');
+      ctx.lineWidth = 1.5;
+
+      hexPoints.forEach(p => {
+        drawHexagon(p[0], p[1], 6);
+      });
+    }
+
+    function drawHexagon(x, y, size) {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        let angle = (Math.PI / 3) * i;
+        ctx.lineTo(x + Math.cos(angle) * size, y + Math.sin(angle) * size);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    function drawActiveParticles() {
+      particles.forEach(p => {
+        ctx.fillStyle = p.color;
+        
+        ctx.save();
+        if (p.type === 'oxygen') {
+          // Cyan diatomic double-sphere
+          let wobble = Math.sin(timeTicker * 8 + p.angleOffset) * 2;
+          ctx.beginPath();
+          ctx.arc(p.x - 3, p.y + wobble, p.radius, 0, Math.PI * 2);
+          ctx.arc(p.x + 3, p.y - wobble, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+        } 
+        else if (p.type === 'atp') {
+          // Glowing gold clover shape
+          ctx.shadowColor = '#fff59d';
+          ctx.shadowBlur = 10;
+          ctx.beginPath();
+          ctx.arc(p.x - 3, p.y, 4, 0, Math.PI*2);
+          ctx.arc(p.x + 3, p.y, 4, 0, Math.PI*2);
+          ctx.arc(p.x, p.y - 4, 4, 0, Math.PI*2);
+          ctx.fill();
+          ctx.shadowBlur = 0; // reset
+          
+          ctx.fillStyle = '#000';
+          ctx.font = '7px sans-serif';
+          ctx.fillText("T", p.x - 2, p.y + 2);
+        }
+        else if (p.type === 'adp') {
+          // Gray clover shape (ADP)
+          ctx.beginPath();
+          ctx.arc(p.x - 3, p.y, 4, 0, Math.PI*2);
+          ctx.arc(p.x + 3, p.y, 4, 0, Math.PI*2);
+          ctx.fill();
+          
+          ctx.fillStyle = '#000';
+          ctx.font = '7px sans-serif';
+          ctx.fillText("D", p.x - 2, p.y + 2);
+        }
+        else if (p.type === 'sodium') {
+          // Sodium ion circle with '+' sign inside
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2);
+          ctx.fill();
+          
+          ctx.fillStyle = '#000';
+          ctx.font = 'bold 8px sans-serif';
+          ctx.fillText("+", p.x - 2.5, p.y + 2.5);
+        }
+        else {
+          // Simple single spheres (water, glucose, etc.)
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      });
+    }
+
+    function drawComponentHighlightOverlay() {
+      const activeId = selectedComponent || hoveredComponent;
+      if (!activeId) return;
+
+      ctx.save();
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = varColor('--cyan-accent');
+      ctx.shadowColor = varColor('--cyan-accent');
+      ctx.shadowBlur = 15;
+      ctx.setLineDash([4, 4]);
+
+      switch(activeId) {
+        case 'bilayer':
+          ctx.strokeRect(5, 215, canvas.width - 10, 170);
+          break;
+        case 'aquaporin':
+          ctx.strokeRect(137, 215, 66, 170);
+          break;
+        case 'sodiumchannel':
+          ctx.strokeRect(322, 215, 76, 170);
+          break;
+        case 'carrierprotein':
+          ctx.strokeRect(442, 215, 76, 170);
+          break;
+        case 'activepump':
+          ctx.strokeRect(545, 215, 80, 170);
+          break;
+        case 'glycoprotein':
+          ctx.strokeRect(230, 110, 70, 148);
+          break;
+        case 'peripheral':
+          ctx.strokeRect(647, 333, 66, 38);
+          break;
+        case 'cholesterol':
+          // highlight all cholesterol groupings
+          ctx.strokeRect(100, 280, 12, 35);
+          ctx.strokeRect(250, 290, 12, 35);
+          ctx.strokeRect(417, 285, 12, 35);
+          ctx.strokeRect(637, 295, 12, 35);
+          break;
+      }
+      ctx.restore();
+    }
+
+    /* ----------------------------------------------------
+       STYLESHEET UTILITIES FOR CANVAS SYNCS
+       ---------------------------------------------------- */
+    function varColor(cssVarName) {
+      return getComputedStyle(document.documentElement).getPropertyValue(cssVarName).trim();
+    }
+    
+    function varFont(cssVarName) {
+      return getComputedStyle(document.documentElement).getPropertyValue(cssVarName).trim();
+    }
+  </script>
+</body>
+</html>
