@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fluid Mosaic Model Explorer | Grade 9 interactive Simulation</title>
+  
+  <!-- Premium UI Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-panel: rgba(13, 24, 48, 0.7);
+      --bg-card: rgba(18, 32, 64, 0.55);
+      --border-color: rgba(0, 229, 255, 0.25);
+      --border-glow: 0 0 15px rgba(0, 229, 255, 0.15);
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      
+      --cyan-accent: #00e5ff;
+      --cyan-glow: rgba(0, 229, 255, 0.45);
+      --amber-accent: #ff9100;
+      --amber-glow: rgba(255, 145, 0, 0.45);
+      --green-accent: #00e676;
+      --green-glow: rgba(0, 230, 118, 0.45);
+      --purple-accent: #e040fb;
+      --purple-glow: rgba(224, 64, 251, 0.45);
+      
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(8, 28, 58, 0.6) 0px, transparent 55%),
+        radial-gradient(at 100% 100%, rgba(4, 18, 42, 0.6) 0px, transparent 55%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Warning for mobile portrait users */
+    .mobile-warning {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #030712;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .mobile-warning p {
+      font-size: 1.15rem;
+      color: var(--amber-accent);
+      margin-top: 15px;
+      line-height: 1.5;
+    }
+
+    /* Header Styling */
+    header {
+      background: rgba(3, 7, 18, 0.9);
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
+      z-index: 10;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--cyan-accent), var(--purple-accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #000;
+      font-size: 1.15rem;
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: linear-gradient(to right, #fff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-badge {
+      background: rgba(0, 229, 255, 0.08);
+      border: 1px solid var(--cyan-accent);
+      color: var(--cyan-accent);
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: var(--border-glow);
+    }
+
+    /* Main Dashboard Layout */
+    .main-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 310px 1fr 340px;
+      gap: 15px;
+      padding: 15px;
+      height: calc(100vh - 60px);
+    }
+
+    /* Panels Base (Glassmorphism) */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--cyan-accent);
+      text-transform: uppercase;
+    }
+
+    .panel-content {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Viewport Center Panel */
+    .viewport-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #010307;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.9);
+      outline: none;
+    }
+
+    #viewportCanvas {
+      width: 100%;
+      height: 100%;
+      max-width: 800px;
+      max-height: 600px;
+      aspect-ratio: 4/3;
+      display: block;
+      background: transparent;
+    }
+
+    /* HUD overlays on canvas */
+    .hud-element {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      background: rgba(3, 8, 20, 0.85);
+      border: 1px solid rgba(0, 229, 255, 0.18);
+      padding: 6px 12px;
+      border-radius: 6px;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+    }
+
+    .hud-top-left { top: 15px; left: 15px; border-left: 3px solid var(--cyan-accent); color: #fff; font-weight: bold; }
+    .hud-top-right { top: 15px; right: 15px; text-align: right; }
+    .hud-bottom-right { bottom: 15px; right: 15px; }
+
+    /* Control Rows */
+    .control-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Custom Slider styles */
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .slider-header span:last-child {
+      color: var(--cyan-accent);
+      font-weight: bold;
+    }
+
+    .horizontal-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .horizontal-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--cyan-accent);
+      box-shadow: 0 0 8px var(--cyan-glow);
+      transition: transform 0.1s ease;
+    }
+
+    .horizontal-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Switch styling */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .switch-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: .3s;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 12px;
+      width: 12px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-muted);
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: rgba(0, 229, 255, 0.15);
+      border-color: var(--cyan-accent);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(18px);
+      background-color: var(--cyan-accent);
+      box-shadow: 0 0 8px var(--cyan-accent);
+    }
+
+    /* Interactive Legend Buttons */
+    .membrane-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .legend-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      text-align: left;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .legend-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .legend-btn.active {
+      background: rgba(0, 229, 255, 0.06);
+      border-color: var(--cyan-accent);
+      color: var(--cyan-accent);
+      box-shadow: var(--border-glow);
+    }
+
+    .legend-btn:after {
+      content: "→";
+      opacity: 0.3;
+      font-weight: bold;
+      transition: transform 0.2s ease;
+    }
+
+    .legend-btn:hover:after {
+      opacity: 1;
+      transform: translateX(3px);
+    }
+
+    /* RIGHT PANEL: INFO DRAWER */
+    .info-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .info-tag {
+      align-self: flex-start;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    .level-info-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+      border-left: 3px solid var(--cyan-accent);
+      padding-left: 8px;
+    }
+
+    .detail-text {
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    /* Detailed Molecule Popup Drawer styling */
+    .organelle-drawer {
+      background: rgba(0, 229, 255, 0.03);
+      border: 1px solid rgba(0, 229, 255, 0.15);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.05);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .organelle-name {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--cyan-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .organelle-badge {
+      align-self: flex-start;
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      background: rgba(0, 229, 255, 0.1);
+      color: var(--cyan-accent);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .diagram-container {
+      width: 100%;
+      background: rgba(2, 4, 10, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .molecule-img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+    }
+
+    .btn-close {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      align-self: flex-start;
+    }
+
+    .btn-close:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(12px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Responsive Grid spacing */
+    @media (max-width: 1024px) {
+      .main-container {
+        grid-template-columns: 260px 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
+        overflow-y: auto;
+      }
+      body {
+        overflow-y: auto;
+        height: auto;
+      }
+      header {
+        position: sticky;
+        top: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mobile-warning {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Warning overlay for tiny screens -->
+  <div class="mobile-warning" id="mobileWarning">
+    <div class="logo-icon">F</div>
+    <p>This biological Fluid Mosaic simulation requires a larger screen (Tablet or Desktop) for microscopic visual details and click controls.</p>
+  </div>
+
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">⚛</div>
+      <h1>FLUID MOSAIC MODEL</h1>
+    </div>
+    <span class="nav-badge">Grade 9 Biology Interactive Lab</span>
+  </header>
+
+  <main class="main-container">
+    
+    <!-- LEFT PANEL: CONTROLS & ENVIRONMENT -->
+    <section class="glass-panel" id="leftPanel">
+      <div class="panel-header">
+        <div class="panel-title">🎛️ SIMULATION LAB</div>
+      </div>
+      
+      <div class="panel-content">
+        <!-- Fluidity (Speed) Slider -->
+        <div class="control-section">
+          <div class="control-label">Fluid Membrane Motion</div>
+          <div class="slider-row">
+            <div class="slider-header">
+              <span>Membrane Fluidity:</span>
+              <span id="fluidityReadout">Normal (1x)</span>
+            </div>
+            <input type="range" min="0.2" max="2.5" step="0.1" value="1.0" class="horizontal-slider" id="fluiditySlider" oninput="updateFluidity(this.value)">
+          </div>
+        </div>
+
+        <!-- Mosaic Elements Toggle -->
+        <div class="control-section">
+          <div class="control-label">Mosaic Components</div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="switch-container">
+              <span class="switch-label" style="color: #00e676;">Glycoproteins (Sugar Tags)</span>
+              <label class="switch">
+                <input type="checkbox" checked id="glycoToggle" onchange="toggleComponent('glyco')">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="switch-container">
+              <span class="switch-label" style="color: #fbc02d;">Cholesterols (Stabilizers)</span>
+              <label class="switch">
+                <input type="checkbox" checked id="cholesterolToggle" onchange="toggleComponent('cholesterol')">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Synthesizer Sound Toggle -->
+        <div class="control-section">
+          <div class="control-label">Synthesizer Sound FX</div>
+          <div class="switch-container">
+            <span class="switch-label">Sound Synthesis</span>
+            <label class="switch">
+              <input type="checkbox" checked id="soundToggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Component List Legend -->
+        <div class="control-section">
+          <div class="control-label">Interactive Legend</div>
+          <div class="membrane-legend">
+            <button class="legend-btn" id="lbl_lipids" onclick="selectComponent('lipids')">Phospholipids (Bilayer)</button>
+            <button class="legend-btn" id="lbl_protein_channel" onclick="selectComponent('protein_channel')">Channel Protein (Gate)</button>
+            <button class="legend-btn" id="lbl_protein_carrier" onclick="selectComponent('protein_carrier')">Carrier Protein (Gate)</button>
+            <button class="legend-btn" id="lbl_glyco" onclick="selectComponent('glyco')">Glycoprotein (ID Tag)</button>
+            <button class="legend-btn" id="lbl_cholesterol" onclick="selectComponent('cholesterol')">Cholesterol (Helper)</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTER PANEL: INTERACTIVE VIEWPORT -->
+    <section class="viewport-container" id="centerPanel" tabindex="0">
+      <canvas id="viewportCanvas" width="800" height="600"></canvas>
+      
+      <!-- HUD Overlays -->
+      <div class="hud-element hud-top-left" id="hudStatus">FLUID MOSAIC MODEL: ACTIVE</div>
+      <div class="hud-element hud-top-right">
+        <div>MEMBRANE FLUIDITY: <span id="hudFluid" style="color:var(--cyan-accent); font-weight:bold;">1.00x</span></div>
+        <div style="margin-top: 4px;">MOSAIC COMPONENTS: <span id="hudComponents" style="color:var(--amber-accent); font-weight:bold;">5 active</span></div>
+      </div>
+      <div class="hud-element hud-bottom-right">
+        💡 Click on Lipids or Proteins to inspect structure & selective gatekeeping properties.
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: MOLECULAR STRUCTURE DETAILS -->
+    <section class="glass-panel" id="rightPanel">
+      <div class="panel-header">
+        <div class="panel-title">📖 MOLECULAR STRUCTURES</div>
+      </div>
+      
+      <div class="panel-content" style="display: flex; flex-direction: column; gap: 15px;">
+        <div class="info-header">
+          <span class="info-tag">Microscopic Scale (~8 nm)</span>
+          <h3 class="level-info-title">The Membrane Bilayer</h3>
+          <p class="detail-text">
+            According to the <strong>Fluid Mosaic Model</strong>, the cell membrane is like a fluid sea of lipid molecules where various protein molecules float like a mosaic. It is selective, acting as a gatekeeper.
+          </p>
+        </div>
+
+        <!-- Description Details Drawer -->
+        <div class="organelle-drawer" id="organelleDrawer" style="display: none;">
+          <h4 class="organelle-name" id="drawerOrganelleName">Component Name</h4>
+          <span class="organelle-badge" id="drawerOrganelleBadge">Grade 9 Biology</span>
+          <p class="detail-text" id="drawerOrganelleDesc">Click on lipids or proteins on the canvas to inspect details.</p>
+          
+          <!-- Diagram Placeholder containing local generated images -->
+          <div class="diagram-container" id="drawerDiagramContainer" style="display: none;">
+            <img src="" alt="Structure Diagram" class="molecule-img" id="drawerImage">
+          </div>
+          
+          <button class="btn-close" onclick="closeOrganelleDrawer()">Close Inspector</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* ----------------------------------------------------
+       AUDIO SYSTEM (WEB AUDIO API)
+       ---------------------------------------------------- */
+    let audioCtx = null;
+    const soundToggle = document.getElementById('soundToggle');
+
+    function playSound(type, pitch = 1.0) {
+      if (!soundToggle.checked) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        
+        const now = audioCtx.currentTime;
+        if (type === 'click') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(500 * pitch, now);
+          osc.frequency.exponentialRampToValueAtTime(900 * pitch, now + 0.04);
+          gain.gain.setValueAtTime(0.006, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.04);
+        } else if (type === 'hover') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(700 * pitch, now);
+          gain.gain.setValueAtTime(0.002, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.015);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.015);
+        }
+      } catch (e) {
+        console.warn('Audio Synthesis restricted.', e);
+      }
+    }
+
+    /* ----------------------------------------------------
+       SCIENTIFIC METADATA & DATASET
+       ---------------------------------------------------- */
+    const componentDatabase = {
+      lipids: {
+        name: "Phospholipid Molecule",
+        desc: "A phospholipid molecule has a circular head made of phosphates that is hydrophilic ('water-loving' and attracted to water), and two fatty acid tails that are hydrophobic ('non-water loving' or water-fearing, repelled by water). In water, they spontaneously arrange into a double layer (bilayer) keeping the tails protected inside and heads facing outward.",
+        badge: "Bilayer backbone - Polar Lipids",
+        imgUrl: "./phospholipid_structure.png"
+      },
+      protein_channel: {
+        name: "Channel Protein (Selective Gate)",
+        desc: "Transmembrane channel proteins act as selective gatekeepers. They create a hydrophilic pore straight through the membrane, allowing smaller, specific polar molecules like water (H₂O) or charged ions (Na⁺) to pass freely through, while blocking larger molecules. It functions like an open gate for specific passengers.",
+        badge: "selective Gatekeeper - Pore Channel",
+        imgUrl: "./gated_protein_structure.png"
+      },
+      protein_carrier: {
+        name: "Carrier Protein (Selective Gate)",
+        desc: "Carrier proteins act as selective gatekeepers by binding to specific molecules (like glucose). When the target molecule enters the binding slot, the protein changes its shape to carry the passenger across the lipid bilayer and release it on the other side. It works like a revolving door, regulating what goes in or out.",
+        badge: "selective Gatekeeper - Conformational Carrier",
+        imgUrl: "./gated_protein_structure.png"
+      },
+      glyco: {
+        name: "Glycoprotein (Cell ID Tag)",
+        desc: "Glycoproteins are proteins with branched carbohydrate chains sticking out into the extracellular space. They act like molecular name tags or antennae, allowing the cell to communicate with other cells and enabling the immune system to recognize the cell as a friendly, self-organism instead of an invader.",
+        badge: "Cell Identifier - Antenna Tag",
+        imgUrl: "" // uses CSS fallback diagram
+      },
+      cholesterol: {
+        name: "Cholesterol (Fluidity Helper)",
+        desc: "Cholesterols are small lipid rings scattered between the hydrophobic tails of the phospholipids. They regulate membrane stability: when it is hot, they prevent the membrane from melting or becoming too leaky; when it is cold, they keep the membrane flexible and fluid, preventing it from freezing.",
+        badge: "Fluidity Stabilizer",
+        imgUrl: "" // uses CSS fallback diagram
+      }
+    };
+
+    /* ----------------------------------------------------
+       STATE VARIABLES & DOM ELEMENT CACHES
+       ---------------------------------------------------- */
+    let fluiditySpeed = 1.0;
+    let timeTicker = 0;
+    let selectedComponent = null;
+    let hoveredComponent = null;
+    let mousePos = { x: 0, y: 0 };
+
+    // Toggles
+    const showState = {
+      glyco: true,
+      cholesterol: true
+    };
+
+    // Ambient particles list
+    const particles = [];
+    const maxParticles = 30;
+
+    // DOM Caches
+    const canvas = document.getElementById('viewportCanvas');
+    const ctx = canvas.getContext('2d');
+    const fluiditySlider = document.getElementById('fluiditySlider');
+    const fluidityReadout = document.getElementById('fluidityReadout');
+    const glycoToggle = document.getElementById('glycoToggle');
+    const cholesterolToggle = document.getElementById('cholesterolToggle');
+    const levelTitle = document.getElementById('levelTitle');
+    const levelDescription = document.getElementById('levelDescription');
+    const organelleDrawer = document.getElementById('organelleDrawer');
+    const drawerOrganelleName = document.getElementById('drawerOrganelleName');
+    const drawerOrganelleDesc = document.getElementById('drawerOrganelleDesc');
+    const drawerOrganelleBadge = document.getElementById('drawerOrganelleBadge');
+    const drawerDiagramContainer = document.getElementById('drawerDiagramContainer');
+    const drawerImage = document.getElementById('drawerImage');
+    const hudFluid = document.getElementById('hudFluid');
+    const hudComponents = document.getElementById('hudComponents');
+
+    /* ----------------------------------------------------
+       INITIALIZATION & INTERACTION HANDLERS
+       ---------------------------------------------------- */
+    function updateFluidity(val) {
+      fluiditySpeed = parseFloat(val);
+      fluidityReadout.textContent = `${fluiditySpeed === 1.0 ? 'Normal' : fluiditySpeed < 1.0 ? 'Slow' : 'Fast'} (${fluiditySpeed.toFixed(1)}x)`;
+      hudFluid.textContent = `${fluiditySpeed.toFixed(2)}x`;
+    }
+
+    function toggleComponent(comp) {
+      showState[comp] = !showState[comp];
+      
+      let count = 3; // Lipids, Channel, Carrier always active
+      if (showState.glyco) count++;
+      if (showState.cholesterol) count++;
+      hudComponents.textContent = `${count} active`;
+    }
+
+    function selectComponent(id) {
+      selectedComponent = id;
+      hoveredComponent = id;
+      
+      // Update interactive legend lists
+      document.querySelectorAll('.legend-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`lbl_${id}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      // Fill and reveal inspector details drawer
+      const data = componentDatabase[id];
+      if (data) {
+        drawerOrganelleName.textContent = data.name;
+        drawerOrganelleDesc.textContent = data.desc;
+        drawerOrganelleBadge.textContent = data.badge;
+        
+        if (data.imgUrl) {
+          drawerImage.src = data.imgUrl;
+          drawerDiagramContainer.style.display = 'flex';
+        } else {
+          drawerDiagramContainer.style.display = 'none';
+        }
+        organelleDrawer.style.display = 'flex';
+      }
+      playSound('click');
+    }
+
+    function closeOrganelleDrawer() {
+      organelleDrawer.style.display = 'none';
+      selectedComponent = null;
+      hoveredComponent = null;
+      document.querySelectorAll('.legend-btn').forEach(btn => btn.classList.remove('active'));
+      playSound('click');
+    }
+
+    window.addEventListener('load', () => {
+      // Spawn some water and solute particles
+      setupParticles();
+      
+      // Event listeners
+      canvas.addEventListener('mousemove', handleMouseMove);
+      canvas.addEventListener('mousedown', handleMouseDown);
+      canvas.addEventListener('mouseleave', () => {
+        if (!selectedComponent) hoveredComponent = null;
+      });
+
+      animate();
+    });
+
+    function setupParticles() {
+      for (let i = 0; i < maxParticles; i++) {
+        // distribute between intracellular and extracellular
+        let py = Math.random() > 0.5 ? Math.random() * 200 + 30 : Math.random() * 200 + 370;
+        let isWater = Math.random() > 0.35;
+        
+        particles.push({
+          x: Math.random() * (canvas.width - 20) + 10,
+          y: py,
+          vx: (Math.random() - 0.5) * 1.4,
+          vy: (Math.random() - 0.5) * 1.4,
+          radius: isWater ? 4.5 : 7.0, // Smaller blue water, larger green glucose
+          color: isWater ? '#29b6f6' : '#66bb6a',
+          isWater: isWater
+        });
+      }
+    }
+
+    function handleMouseMove(e) {
+      const rect = canvas.getBoundingClientRect();
+      mousePos = {
+        x: (e.clientX - rect.left) * (canvas.width / rect.width),
+        y: (e.clientY - rect.top) * (canvas.height / rect.height)
+      };
+
+      if (!selectedComponent) {
+        let detected = checkCollisions(mousePos.x, mousePos.y);
+        if (detected !== hoveredComponent) {
+          hoveredComponent = detected;
+          if (hoveredComponent) playSound('hover', 1.3);
+          
+          document.querySelectorAll('.legend-btn').forEach(btn => btn.classList.remove('active'));
+          if (hoveredComponent) {
+            const btn = document.getElementById(`lbl_${hoveredComponent}`);
+            if (btn) btn.classList.add('active');
+          }
+        }
+      }
+    }
+
+    function handleMouseDown(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = (e.clientX - rect.left) * (canvas.width / rect.width);
+      const clickY = (e.clientY - rect.top) * (canvas.height / rect.height);
+      
+      let detected = checkCollisions(clickX, clickY);
+      if (detected) {
+        selectComponent(detected);
+      }
+    }
+
+    function checkCollisions(x, y) {
+      // Check collision coordinates inside bilayer y range (210 to 390)
+      if (y >= 210 && y <= 390) {
+        if (x >= 140 && x <= 220) return 'protein_channel';
+        if (x >= 470 && x <= 550) return 'protein_carrier';
+        
+        // check lipids
+        if (x >= 0 && x <= 800) return 'lipids';
+      }
+
+      // Glycoprotein branching at x: 270, y: 110 to 220
+      if (showState.glyco && x >= 230 && x <= 300 && y >= 110 && y <= 220) return 'glyco';
+
+      // Cholesterols nestled inside lipids
+      if (showState.cholesterol && y >= 270 && y <= 330) {
+        if (x >= 90 && x <= 125) return 'cholesterol';
+        if (x >= 405 && x <= 435) return 'cholesterol';
+        if (x >= 635 && x <= 665) return 'cholesterol';
+      }
+
+      return null;
+    }
+
+    /* ----------------------------------------------------
+       PHYSICS & CANVAS RENDERING
+       ---------------------------------------------------- */
+    function animate() {
+      timeTicker += 0.025 * fluiditySpeed;
+
+      updatePhysics();
+      drawViewport();
+
+      requestAnimationFrame(animate);
+    }
+
+    function updatePhysics() {
+      // 1. Ambient particles physics
+      particles.forEach(p => {
+        p.x += p.vx * fluiditySpeed;
+        p.y += p.vy * fluiditySpeed;
+
+        // Screen boundary reflections
+        if (p.x < p.radius) { p.x = p.radius; p.vx *= -1; }
+        if (p.x > canvas.width - p.radius) { p.x = canvas.width - p.radius; p.vx *= -1; }
+        if (p.y < p.radius) { p.y = p.radius; p.vy *= -1; }
+        if (p.y > canvas.height - p.radius) { p.y = canvas.height - p.radius; p.vy *= -1; }
+
+        // Membrane boundary collisions (Top y: 260, Bottom y: 340)
+        const topMem = 260;
+        const botMem = 340;
+
+        if (p.y + p.radius >= topMem && p.y - p.radius <= botMem) {
+          // (A) Water channel passes small water particles
+          if (p.isWater && p.x >= 155 && p.x <= 205) {
+            p.vx = (p.vx > 0 ? 0.35 : -0.35); // straight passage
+          }
+          // (B) Carrier channel slow passage representing revolving carrier
+          else if (!p.isWater && p.x >= 485 && p.x <= 535) {
+            p.vy = (p.vy > 0 ? 0.45 : -0.45);
+            p.vx = 0; // locks horizontally
+          }
+          // (C) Otherwise bounce off hydrophobic lipid tails
+          else {
+            if (p.vy > 0) {
+              p.y = topMem - p.radius;
+              p.vy *= -1;
+            } else {
+              p.y = botMem + p.radius;
+              p.vy *= -1;
+            }
+          }
+        }
+      });
+    }
+
+    function drawViewport() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Gradient background (extracellular fluid top, cytoplasm bottom)
+      let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      bgGrad.addColorStop(0, '#030715'); // ECF
+      bgGrad.addColorStop(0.42, '#070c22');
+      bgGrad.addColorStop(0.58, '#080d25'); // Cytoplasm
+      bgGrad.addColorStop(1, '#02050f');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Ambient grids
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.02)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < canvas.width; i += 40) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+      }
+
+      // Draw structures
+      drawTransmembraneProteins();
+      drawPhospholipids();
+      drawCholesterols();
+      drawGlycoproteinBranch();
+      
+      // Draw highlight reticle overlays
+      drawSelectionOverlay();
+
+      // Draw moving molecules
+      drawMolecules();
+    }
+
+    function drawPhospholipids() {
+      // Bobbing sine wave
+      let bob = Math.sin(timeTicker) * 3;
+
+      // Exclude ranges where channel and carrier proteins are drawn
+      const exclusionRanges = [
+        [135, 215], // Channel
+        [465, 545]  // Carrier
+      ];
+
+      function isExcluded(x) {
+        return exclusionRanges.some(r => x >= r[0] && x <= r[1]);
+      }
+
+      ctx.lineWidth = 1.8;
+      
+      // Draw top and bottom lipid layers
+      for (let x = 12; x < canvas.width; x += 18) {
+        if (isExcluded(x)) continue;
+
+        let localBob = bob + Math.sin(timeTicker * 1.5 + x * 0.05) * 1.5;
+
+        // Top Polar Heads (y = 260 facing water)
+        let topY = 260 + localBob;
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.45)'; // tails
+        ctx.beginPath();
+        ctx.moveTo(x - 3, topY); ctx.quadraticCurveTo(x - 5, topY + 20, x - 2, topY + 40); // tail 1
+        ctx.moveTo(x + 3, topY); ctx.quadraticCurveTo(x + 5, topY + 20, x + 2, topY + 40); // tail 2
+        ctx.stroke();
+
+        ctx.fillStyle = '#00b0ff'; // cyan hydrophilic head
+        ctx.strokeStyle = '#00e5ff';
+        ctx.beginPath(); ctx.arc(x, topY, 7.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+        // Bottom Polar Heads (y = 340 facing cytoplasm)
+        let botY = 340 - localBob;
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.45)'; // tails
+        ctx.beginPath();
+        ctx.moveTo(x - 3, botY); ctx.quadraticCurveTo(x - 5, botY - 20, x - 2, botY - 40);
+        ctx.moveTo(x + 3, botY); ctx.quadraticCurveTo(x + 5, botY - 20, x + 2, botY - 40);
+        ctx.stroke();
+
+        ctx.fillStyle = '#0091ea'; // dark blue hydrophilic head
+        ctx.strokeStyle = '#00e5ff';
+        ctx.beginPath(); ctx.arc(x, botY, 7.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+    }
+
+    function drawTransmembraneProteins() {
+      // 1. SELECTIVE CHANNEL PROTEIN (x: 140 to 220, y: 220 to 380)
+      ctx.fillStyle = '#01579b';
+      ctx.strokeStyle = '#29b6f6';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.roundRect(145, 220, 60, 160, 12);
+      ctx.fill();
+      ctx.stroke();
+
+      // Open hydrophilic inner pore
+      ctx.fillStyle = 'rgba(41, 182, 246, 0.08)';
+      ctx.strokeStyle = 'rgba(41, 182, 246, 0.2)';
+      ctx.beginPath();
+      ctx.rect(165, 220, 20, 160);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#90caf9';
+      ctx.font = 'bold 8.5px sans-serif';
+      ctx.save();
+      ctx.translate(178, 335);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText("CHANNEL PROTEIN", 0, 0);
+      ctx.restore();
+
+      // 2. SELECTIVE CARRIER PROTEIN (x: 470 to 550, y: 220 to 380)
+      ctx.fillStyle = '#1b5e20';
+      ctx.strokeStyle = '#00e676';
+      ctx.lineWidth = 3.5;
+
+      // Hourglass carrier shape (closed at one end, open to the other)
+      ctx.beginPath();
+      ctx.moveTo(475, 220);
+      ctx.lineTo(495, 300);
+      ctx.lineTo(475, 380);
+      ctx.lineTo(545, 380);
+      ctx.lineTo(525, 300);
+      ctx.lineTo(545, 220);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // central glucose docking slot
+      ctx.fillStyle = 'rgba(0, 230, 118, 0.15)';
+      ctx.beginPath();
+      ctx.arc(510, 300, 11, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#a5d6a7';
+      ctx.font = 'bold 8.5px sans-serif';
+      ctx.save();
+      ctx.translate(514, 330);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText("CARRIER PROTEIN", 0, 0);
+      ctx.restore();
+    }
+
+    function drawCholesterols() {
+      if (!showState.cholesterol) return;
+
+      const chosCoords = [
+        [105, 290],
+        [422, 295],
+        [642, 305]
+      ];
+
+      ctx.fillStyle = '#fbc02d';
+      ctx.strokeStyle = '#fff59d';
+      ctx.lineWidth = 1;
+
+      chosCoords.forEach(c => {
+        let cx = c[0];
+        let cy = c[1];
+        // 3 interlocking ring blocks
+        ctx.beginPath(); ctx.arc(cx, cy - 6, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx - 3, cy, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx + 3, cy + 6, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      });
+    }
+
+    function drawGlycoproteinBranch() {
+      if (!showState.glyco) return;
+
+      // Anchored chain extending extracellularly from a lipid/protein at x: 270, y: 220
+      ctx.strokeStyle = '#00e676';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(270, 255);
+      ctx.lineTo(260, 220);
+      ctx.lineTo(240, 180);
+      ctx.lineTo(255, 140);
+      ctx.stroke();
+
+      // Hexagonal carbohydrate sugar nodes
+      const hexPoints = [
+        [260, 220],
+        [240, 180],
+        [255, 140]
+      ];
+
+      ctx.fillStyle = 'rgba(0, 230, 118, 0.25)';
+      ctx.strokeStyle = '#00e676';
+      ctx.lineWidth = 1.5;
+
+      hexPoints.forEach(p => {
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          let angle = (Math.PI / 3) * i;
+          ctx.lineTo(p[0] + Math.cos(angle) * 5.5, p[1] + Math.sin(angle) * 5.5);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      });
+    }
+
+    function drawMolecules() {
+      particles.forEach(p => {
+        ctx.fillStyle = p.color;
+        
+        ctx.beginPath();
+        if (p.isWater) {
+          ctx.shadowColor = '#29b6f6';
+          ctx.shadowBlur = 4;
+        } else {
+          ctx.shadowColor = '#00e676';
+          ctx.shadowBlur = 6;
+        }
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0; // reset
+      });
+    }
+
+    function drawSelectionOverlay() {
+      const activeId = selectedComponent || hoveredComponent;
+      if (!activeId) return;
+
+      ctx.save();
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#00e5ff';
+      ctx.shadowColor = '#00e5ff';
+      ctx.shadowBlur = 12;
+      ctx.setLineDash([5, 5]);
+
+      switch(activeId) {
+        case 'lipids':
+          ctx.strokeRect(5, 215, canvas.width - 10, 170);
+          break;
+        case 'protein_channel':
+          ctx.strokeRect(140, 215, 70, 170);
+          break;
+        case 'protein_carrier':
+          ctx.strokeRect(468, 215, 84, 170);
+          break;
+        case 'glyco':
+          ctx.strokeRect(228, 110, 72, 148);
+          break;
+        case 'cholesterol':
+          ctx.strokeRect(96, 280, 16, 35);
+          ctx.strokeRect(400, 285, 16, 35);
+          ctx.strokeRect(630, 295, 16, 35);
+          break;
+      }
+      ctx.restore();
+    }
+  </script>
+</body>
+</html>
