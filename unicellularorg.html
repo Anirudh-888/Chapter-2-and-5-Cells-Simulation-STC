@@ -1,0 +1,2256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unicellular Organism Zoom Explorer | Grade 9 Biology Interactive Simulation</title>
+  <meta name="description" content="An interactive, scientifically accurate simulation showing that unicellular organisms are made of a single cell. Zoom from a smartphone surface down to a bacterial heap, a single bacterium, and its prokaryotic structures.">
+  
+  <!-- Google Fonts for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ----------------------------------------------------
+       DESIGN SYSTEM & VARIABLES
+       ---------------------------------------------------- */
+    :root {
+      --bg-dark: #05070f;
+      --bg-panel: rgba(11, 17, 34, 0.75);
+      --bg-card: rgba(23, 33, 56, 0.45);
+      --border-color: rgba(255, 255, 255, 0.08);
+      
+      /* Theme accents */
+      --cyan-accent: #00e5ff;
+      --cyan-glow: rgba(0, 229, 255, 0.4);
+      --cyan-bg: rgba(0, 229, 255, 0.05);
+      
+      --lime-accent: #d4ff00;
+      --lime-glow: rgba(212, 255, 0, 0.4);
+      --lime-bg: rgba(212, 255, 0, 0.05);
+
+      --active-accent: var(--cyan-accent);
+      --active-glow: var(--cyan-glow);
+      --active-bg: var(--cyan-bg);
+      
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-highlight: #ffffff;
+      
+      --font-outfit: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 229, 255, 0.03) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(212, 255, 0, 0.03) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, #0d1222 0%, #05070f 100%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      font-family: var(--font-outfit);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ----------------------------------------------------
+       LAYOUT STRUCTURE
+       ---------------------------------------------------- */
+    header {
+      height: 70px;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(5, 7, 15, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      z-index: 10;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--cyan-accent), var(--lime-accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #000;
+      font-size: 1.1rem;
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-tag {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 12px;
+      color: var(--text-muted);
+    }
+
+    .main-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 320px 1fr 380px;
+      gap: 20px;
+      padding: 20px;
+      height: calc(100vh - 70px);
+      position: relative;
+    }
+
+    /* ----------------------------------------------------
+       PANELS & GLASSMORPHISM
+       ---------------------------------------------------- */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .glass-panel.active {
+      border-color: rgba(0, 229, 255, 0.15);
+      box-shadow: 0 8px 32px 0 rgba(0, 229, 255, 0.04);
+    }
+
+    .panel-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-content {
+      padding: 20px;
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Custom Scrollbar */
+    .panel-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    .panel-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .panel-content::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+    .panel-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* ----------------------------------------------------
+       LEFT PANEL: CONTROLS & SCALE LEGEND
+       ---------------------------------------------------- */
+    .slider-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .slider-container {
+      position: relative;
+      height: 240px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      width: 100%;
+      padding: 10px 0;
+    }
+
+    .vertical-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 8px;
+      height: 220px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      outline: none;
+      writing-mode: bt-lr;
+      -webkit-appearance: slider-vertical;
+      cursor: pointer;
+    }
+
+    .vertical-slider::-webkit-slider-runnable-track {
+      width: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+    }
+
+    .vertical-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--active-accent);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--active-glow);
+      transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
+      margin-left: -7px;
+    }
+
+    .vertical-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .slider-ticks {
+      display: flex;
+      flex-direction: column-reverse;
+      justify-content: space-between;
+      height: 220px;
+      flex: 1;
+    }
+
+    .tick-item {
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .tick-item::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .tick-item.active {
+      color: var(--active-accent);
+      font-weight: 700;
+      transform: translateX(4px);
+    }
+
+    .tick-item.active::before {
+      background: var(--active-accent);
+      box-shadow: 0 0 6px var(--active-accent);
+    }
+
+    /* Auto Zoom Controls */
+    .button-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      font-family: var(--font-outfit);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+    }
+
+    .btn.active {
+      background: var(--active-bg);
+      border-color: var(--active-accent);
+      color: var(--active-accent);
+      box-shadow: 0 0 12px var(--active-glow);
+    }
+
+    /* Settings & Legend section */
+    .legend-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .legend-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .legend-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      padding-bottom: 6px;
+    }
+    .legend-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .legend-val {
+      font-family: var(--font-mono);
+      color: var(--text-highlight);
+    }
+
+    /* Toggle Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.08);
+      transition: .3s;
+      border-radius: 22px;
+      border: 1px solid var(--border-color);
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-muted);
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: var(--active-bg);
+      border-color: var(--active-accent);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(18px);
+      background-color: var(--active-accent);
+      box-shadow: 0 0 5px var(--active-accent);
+    }
+
+    /* ----------------------------------------------------
+       CENTER PANEL: VIEWPORT CANVAS
+       ---------------------------------------------------- */
+    .viewport-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      outline: none;
+    }
+
+    .viewport-canvas-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border-color);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #020308;
+      cursor: crosshair;
+    }
+
+    /* HUD overlay elements */
+    .hud-element {
+      position: absolute;
+      background: rgba(6, 10, 22, 0.8);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(8px);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      pointer-events: none;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hud-top-right {
+      top: 15px;
+      right: 15px;
+      border-color: var(--active-accent);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.1);
+      font-weight: 700;
+      color: var(--active-accent);
+    }
+
+    .hud-bottom-left {
+      bottom: 15px;
+      left: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      min-width: 140px;
+    }
+
+    .scale-bar-line {
+      height: 4px;
+      background: var(--text-main);
+      width: 100px;
+      position: relative;
+      margin-top: 4px;
+      border-left: 2px solid var(--text-main);
+      border-right: 2px solid var(--text-main);
+      transition: width 0.3s ease;
+    }
+
+    .hud-bottom-right {
+      bottom: 15px;
+      right: 15px;
+      color: var(--text-muted);
+      max-width: 250px;
+      text-align: right;
+    }
+
+    .scanning-laser {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--active-accent), transparent);
+      box-shadow: 0 0 10px var(--active-accent);
+      opacity: 0.25;
+      pointer-events: none;
+      animation: scan 5s linear infinite;
+    }
+
+    @keyframes scan {
+      0% { top: 0%; }
+      50% { top: 100%; }
+      100% { top: 0%; }
+    }
+
+    /* ----------------------------------------------------
+       RIGHT PANEL: DETAILS & INSPECTOR
+       ---------------------------------------------------- */
+    .detail-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .level-info-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .info-scale-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--active-accent);
+      background: var(--active-bg);
+      border: 1px solid rgba(0, 229, 255, 0.15);
+      padding: 2px 8px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+
+    .detail-text {
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    .detail-text strong {
+      color: var(--text-highlight);
+    }
+
+    /* Structures Inspector Grid */
+    .structures-inspector {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .inspector-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 5px;
+    }
+
+    .organelle-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px;
+      font-family: var(--font-outfit);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .organelle-btn::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .organelle-btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .organelle-btn.active {
+      color: var(--active-accent);
+      border-color: var(--active-accent);
+      background: var(--active-bg);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.05);
+    }
+
+    .organelle-btn.active::before {
+      background: var(--active-accent);
+      box-shadow: 0 0 6px var(--active-accent);
+    }
+
+    .inspector-placeholder {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    /* Hotspot Highlight / Details Drawer */
+    .organelle-drawer {
+      border: 1px solid rgba(0, 229, 255, 0.15);
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(10, 15, 30, 0.9), rgba(20, 30, 50, 0.7));
+      padding: 18px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.08);
+      animation: slideIn 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(15px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .organelle-drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .organelle-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .organelle-name::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--active-accent);
+      box-shadow: 0 0 6px var(--active-accent);
+    }
+
+    .close-drawer {
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      transition: color 0.2s;
+    }
+
+    .close-drawer:hover {
+      color: #fff;
+    }
+
+    .organelle-function-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--active-accent);
+      margin-bottom: 2px;
+    }
+
+    .organelle-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      background: rgba(0, 229, 255, 0.05);
+      border: 1px solid rgba(0, 229, 255, 0.15);
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 4px;
+      color: var(--cyan-accent);
+    }
+
+    /* ----------------------------------------------------
+       RESPONSIVE & ALERTS
+       ---------------------------------------------------- */
+    .mobile-warning {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg-dark);
+      z-index: 9999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      text-align: center;
+      gap: 20px;
+    }
+
+    .mobile-warning h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    @media (max-width: 1024px) {
+      .main-container {
+        grid-template-columns: 280px 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
+        overflow-y: auto;
+      }
+      body {
+        overflow-y: auto;
+        height: auto;
+      }
+      header {
+        position: sticky;
+        top: 0;
+      }
+      .vertical-slider {
+        height: 180px;
+      }
+      .slider-ticks {
+        height: 180px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mobile-warning {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-warning" id="mobileWarning">
+    <div class="logo-icon">🔬</div>
+    <h2>Screen Size Too Small</h2>
+    <p>This biological unicellular zoom simulation requires a larger screen (Tablet or Desktop) for microscopic visual fidelity and interactive hotspot controls.</p>
+  </div>
+
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">U</div>
+      <div>
+        <h1 id="mainTitle">UNICELLULAR LIFE EXPLORER</h1>
+        <div style="font-size: 0.65rem; color: var(--text-muted); font-family: var(--font-mono);">GRADE 9 BIOLOGY INTERACTIVE SIMULATION</div>
+      </div>
+    </div>
+    <div class="header-tag">PROKARYOTIC CELL ZOOM</div>
+  </header>
+
+  <main class="main-container">
+    
+    <!-- LEFT PANEL: CONTROLS & SCALE LEGEND -->
+    <section class="glass-panel active" id="leftPanel">
+      <div class="panel-header">
+        <div class="panel-title">🎛️ CONTROLS</div>
+      </div>
+      
+      <div class="panel-content">
+        <!-- Zoom Slider -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Zoom Magnification</div>
+          <div class="slider-section">
+            <div class="slider-container">
+              <input type="range" min="1.0" max="4.0" step="0.01" value="1.0" class="vertical-slider" id="zoomSlider" aria-label="Microscope zoom level selector">
+              <div class="slider-ticks" id="sliderTicks">
+                <div class="tick-item active" data-val="1">1. Smartphone</div>
+                <div class="tick-item" data-val="2">2. Colony Heap</div>
+                <div class="tick-item" data-val="3">3. Single Cell</div>
+                <div class="tick-item" data-val="4">4. Cell Structures</div>
+              </div>
+            </div>
+            
+            <!-- Play/Pause Controls -->
+            <div class="button-group">
+              <button class="btn" id="btnAutoTour" onclick="toggleAutoTour()">▶ Auto Tour</button>
+              <button class="btn" id="btnStopTour" onclick="stopAutoTour()" disabled>⏹ Stop</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scale Legend -->
+        <div class="legend-section">
+          <div class="legend-title">Scale Indicators</div>
+          <div class="legend-row">
+            <span>Smartphone:</span>
+            <span class="legend-val">~50 mm</span>
+          </div>
+          <div class="legend-row">
+            <span>Colony Heap:</span>
+            <span class="legend-val">~100 µm</span>
+          </div>
+          <div class="legend-row">
+            <span>Single Cell:</span>
+            <span class="legend-val">~2 µm</span>
+          </div>
+          <div class="legend-row">
+            <span>Cell Organelles:</span>
+            <span class="legend-val">~200 nm</span>
+          </div>
+        </div>
+
+        <!-- Synthesizer Audio -->
+        <div class="legend-section">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Synthesizer Sound</span>
+            <label class="switch">
+              <input type="checkbox" checked id="soundToggle" aria-label="Toggle synthesizer sound effects">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTER PANEL: INTERACTIVE CANVAS VIEWPORT -->
+    <section class="viewport-container" id="centerPanel" tabindex="0">
+      <div class="viewport-canvas-wrapper">
+        <canvas id="viewportCanvas" width="800" height="600"></canvas>
+        <div class="scanning-laser"></div>
+        
+        <!-- HUD Indicators -->
+        <div class="hud-element hud-top-right" id="hudMagnification">MAGNIFICATION: 1x</div>
+        
+        <div class="hud-element hud-bottom-left">
+          <span style="font-weight: 700;" id="hudScaleText">Scale: 5 cm</span>
+          <div class="scale-bar-line" id="hudScaleBar"></div>
+        </div>
+
+        <div class="hud-element hud-bottom-right" id="hudInteractionHint">
+          Drag the slider or scroll to zoom in.
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: DETAILED METADATA & CELL STRUCTURES -->
+    <section class="glass-panel active" id="rightPanel">
+      <div class="panel-header">
+        <div class="panel-title">🔬 BIOLOGICAL INFO</div>
+      </div>
+
+      <div class="panel-content">
+        <!-- EXPLORE INFORMATION -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <div class="detail-card">
+            <span class="info-scale-tag" id="levelScaleBadge">Naked Eye (~5 cm)</span>
+            <h3 class="level-info-title" id="levelTitle">Bacteria on a Smartphone</h3>
+            <p class="detail-text" id="levelDescription">
+              Smartphone screens harbor millions of invisible bacteria smudged on the surface. Zoom in to explore how a heap of bacteria resolves into individual single-cell organisms.
+            </p>
+          </div>
+
+          <!-- Cell Structures Inspector -->
+          <div class="structures-inspector" id="structuresInspector">
+            <div class="legend-title">Select Structure to Highlight</div>
+            <div id="inspectorContent" class="inspector-placeholder">
+              Zoom into Level 4 to explore the cell structures.
+            </div>
+            <div class="inspector-grid" id="inspectorGrid" style="display: none;">
+              <!-- Dynamic buttons for organelles in level 4 -->
+              <button class="organelle-btn" id="btn_capsule" onclick="selectStructure('capsule')">Capsule</button>
+              <button class="organelle-btn" id="btn_cell_wall" onclick="selectStructure('cell_wall')">Cell Wall</button>
+              <button class="organelle-btn" id="btn_cell_membrane" onclick="selectStructure('cell_membrane')">Membrane</button>
+              <button class="organelle-btn" id="btn_nucleoid" onclick="selectStructure('nucleoid')">Nucleoid</button>
+              <button class="organelle-btn" id="btn_plasmids" onclick="selectStructure('plasmids')">Plasmids</button>
+              <button class="organelle-btn" id="btn_ribosomes" onclick="selectStructure('ribosomes')">Ribosomes</button>
+              <button class="organelle-btn" id="btn_flagella" onclick="selectStructure('flagella')">Flagella</button>
+              <button class="organelle-btn" id="btn_pili" onclick="selectStructure('pili')">Pili</button>
+            </div>
+          </div>
+
+          <!-- Dynamic Organelle Inspector Drawer -->
+          <div class="organelle-drawer" id="organelleDrawer">
+            <div class="organelle-drawer-header">
+              <h4 class="organelle-name" id="drawerOrganelleName">Organelle</h4>
+              <button class="close-drawer" onclick="closeOrganelleDrawer()" aria-label="Close details drawer">×</button>
+            </div>
+            <div>
+              <div class="organelle-function-title">FUNCTION & STRUCTURE:</div>
+              <p class="detail-text" id="drawerOrganelleDesc">Details about the organelle structure go here.</p>
+              <span class="organelle-badge" id="drawerOrganelleBadge">Grade 9 Curriculum Focus</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ----------------------------------------------------
+       SIMULATION JAVASCRIPT LOGIC
+       ---------------------------------------------------- -->
+  <script>
+    /* ----------------------------------------------------
+       AUDIO SYSTEM (WEB AUDIO API SYNTHESIZER)
+       ---------------------------------------------------- */
+    let audioCtx = null;
+    const soundToggle = document.getElementById('soundToggle');
+
+    function playSound(type, pitchModifier = 1.0) {
+      if (!soundToggle.checked) return;
+      
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        // Resume if suspended (browser security policies)
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        
+        const now = audioCtx.currentTime;
+        
+        if (type === 'hover') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(800 * pitchModifier, now);
+          osc.frequency.exponentialRampToValueAtTime(1100 * pitchModifier, now + 0.04);
+          gain.gain.setValueAtTime(0.004, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.04);
+        } else if (type === 'select') {
+          const osc1 = audioCtx.createOscillator();
+          const osc2 = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          
+          osc1.type = 'triangle';
+          osc1.frequency.setValueAtTime(440 * pitchModifier, now);
+          osc1.frequency.setValueAtTime(660 * pitchModifier, now + 0.06);
+          
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(880 * pitchModifier, now);
+          
+          gain.gain.setValueAtTime(0.02, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+          
+          osc1.connect(gain);
+          osc2.connect(gain);
+          gain.connect(audioCtx.destination);
+          
+          osc1.start(now);
+          osc1.stop(now + 0.15);
+          osc2.start(now);
+          osc2.stop(now + 0.15);
+        } else if (type === 'zoom-hum') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(80 + (pitchModifier * 80), now);
+          osc.frequency.exponentialRampToValueAtTime(150 + (pitchModifier * 80), now + 0.12);
+          gain.gain.setValueAtTime(0.012, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        } else if (type === 'tour-tick') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1200, now);
+          gain.gain.setValueAtTime(0.008, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.02);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.02);
+        }
+      } catch (e) {
+        console.warn('Web Audio Synth initialization deferred until user interaction.', e);
+      }
+    }
+
+    /* ----------------------------------------------------
+       DATASET DEFINITIONS
+       ---------------------------------------------------- */
+    const levelDescriptions = {
+      1: {
+        title: "Smartphone Screen",
+        badge: "Naked Eye View (1x)",
+        scale: "Scale: 5 cm",
+        barWidth: 100,
+        microscope: "MACRO VIEW (1x)",
+        desc: "Every day, our fingers touch clean-looking smartphone screens. In reality, they harbor millions of invisible bacteria. A tiny oily smudge on a glass surface contains massive colonies of <strong>unicellular organisms</strong>."
+      },
+      2: {
+        title: "The Bacterial Colony (Heap)",
+        badge: "Low Power Microscope (100x)",
+        scale: "Scale: 100 µm",
+        barWidth: 80,
+        microscope: "COLONY VIEW (100x)",
+        desc: "Magnified 100x. The oily smudge resolves into a massive heap of thousands of independent rod-shaped bacteria (bacilli) clumped together. Each bacillus is an <strong>independent, single-cell organism</strong>. There is no multicellular structure; they simply exist side-by-side."
+      },
+      3: {
+        title: "A Single Bacterium",
+        badge: "High Power Microscope (10,000x)",
+        scale: "Scale: 2 µm",
+        barWidth: 100,
+        microscope: "CELLULAR VIEW (10,000x)",
+        desc: "Magnified 10,000x. Focus is locked onto a single, isolated bacterium. This single cell is a fully self-sufficient living unit—it carries out eating, metabolism, reproduction, and locomotion on its own, proving that a single cell constitutes a complete organism."
+      },
+      4: {
+        title: "Prokaryotic Cell Structures",
+        badge: "Electron Microscope (100,000x)",
+        scale: "Scale: 200 nm",
+        barWidth: 90,
+        microscope: "INTERNAL VIEW (100,000x)",
+        desc: "Magnified 100,000x. A cutaway view reveals the inside of this single-cell factory. Bacteria are <strong>prokaryotic cells</strong>. They do not have a nucleus or membrane-bound organelles (like mitochondria or chloroplasts). All life processes occur within this single, complex compartment."
+      }
+    };
+
+    const structureDatabase = {
+      nucleoid: {
+        name: "Nucleoid (Genomic DNA)",
+        desc: "A concentrated, tangled region containing the bacterium's genetic material (DNA). Unlike eukaryotic cells (plants/animals), it is NOT enclosed by a nuclear membrane. It floats freely in the cytoplasm and controls all cellular functions.",
+        badge: "No Nuclear Envelope - DNA"
+      },
+      plasmids: {
+        name: "Plasmids (Accessory DNA)",
+        desc: "Small, circular, double-stranded DNA molecules separate from the main nucleoid DNA. They replicate independently and often carry accessory genes that give the bacterium advantages, such as antibiotic resistance.",
+        badge: "Circular Ring DNA - Accessory Genes"
+      },
+      ribosomes: {
+        name: "Ribosomes (70S)",
+        desc: "Tiny macromolecular structures composed of RNA and proteins. They read genetic codes and build proteins (protein synthesis). Bacterial ribosomes are 70S in size, which is smaller than the 80S ribosomes in eukaryotic cells.",
+        badge: "Protein synthesis - 70S Size"
+      },
+      capsule: {
+        name: "Capsule / Slime Layer",
+        desc: "The outermost gelatinous envelope. It protects the cell from being engulfed by host immune cells (phagocytosis), prevents drying out (desiccation), and helps the bacterium stick to surfaces.",
+        badge: "Gel Outer Layer - Protective Shield"
+      },
+      cell_wall: {
+        name: "Cell Wall (Peptidoglycan)",
+        desc: "A rigid, structural envelope situated outside the cell membrane. Made of peptidoglycan, it provides mechanical strength, maintains cell shape, and prevents the cell from bursting due to osmotic pressure.",
+        badge: "Peptidoglycan Matrix - Structural Boundary"
+      },
+      cell_membrane: {
+        name: "Plasma Membrane",
+        desc: "A thin, selectively permeable phospholipid bilayer inside the cell wall. It acts as a barrier, regulating what enters and exits the cell (nutrients, water, waste) and contains energy-generating enzymes.",
+        badge: "Selective Barrier - Lipid Bilayer"
+      },
+      flagella: {
+        name: "Flagella (Rotary Propeller)",
+        desc: "Long, whip-like appendages extending from the membrane. They spin like propeller shafts driven by a tiny rotary protein motor in the membrane, allowing the bacterium to swim towards nutrients.",
+        badge: "Locomotion - Rotary Motor"
+      },
+      pili: {
+        name: "Pili & Fimbriae",
+        desc: "Hair-like protein projections on the surface. Fimbriae help the bacterium attach to surfaces. Special sex pili are used in conjugation to share plasmid DNA with neighboring bacteria.",
+        badge: "Attachment & Gene Sharing"
+      }
+    };
+
+    /* ----------------------------------------------------
+       GLOBAL STATE
+       ---------------------------------------------------- */
+    let currentZoomVal = 1.0;
+    let targetZoomVal = 1.0;
+    let autoTourActive = false;
+    let tourStep = 1;
+    let tourTimer = 0;
+    let tourPaused = false;
+    
+    // Interactive selections
+    let hoveredStructure = null;
+    let selectedStructure = null;
+    let mousePos = { x: 0, y: 0 };
+    
+    // Animation ticker
+    let timeTicker = 0;
+
+    // Pre-calculated coordinates for the colony (Level 2)
+    const colonyBacteria = [];
+    const numColonyBacteria = 90;
+
+    // Elements cache
+    const canvas = document.getElementById('viewportCanvas');
+    const ctx = canvas.getContext('2d');
+    const zoomSlider = document.getElementById('zoomSlider');
+    const hudMagnification = document.getElementById('hudMagnification');
+    const hudScaleText = document.getElementById('hudScaleText');
+    const hudScaleBar = document.getElementById('hudScaleBar');
+    const hudInteractionHint = document.getElementById('hudInteractionHint');
+    
+    const levelTitle = document.getElementById('levelTitle');
+    const levelScaleBadge = document.getElementById('levelScaleBadge');
+    const levelDescription = document.getElementById('levelDescription');
+    const organelleDrawer = document.getElementById('organelleDrawer');
+    const drawerOrganelleName = document.getElementById('drawerOrganelleName');
+    const drawerOrganelleDesc = document.getElementById('drawerOrganelleDesc');
+    const drawerOrganelleBadge = document.getElementById('drawerOrganelleBadge');
+
+    const inspectorContent = document.getElementById('inspectorContent');
+    const inspectorGrid = document.getElementById('inspectorGrid');
+    
+    const leftPanel = document.getElementById('leftPanel');
+    const rightPanel = document.getElementById('rightPanel');
+
+    /* ----------------------------------------------------
+       INITIALIZATION
+       ---------------------------------------------------- */
+    window.addEventListener('load', () => {
+      setupColonyData();
+      setupEventListeners();
+      resizeCanvas();
+      updateSidebarText();
+      animate();
+    });
+
+    function resizeCanvas() {
+      // Internal rendering grid is fixed to 800x600 for coordinate consistency
+      canvas.width = 800;
+      canvas.height = 600;
+    }
+
+    function setupColonyData() {
+      // Pre-calculate positions for Level 2 bacterium colony
+      // Focus bacterium is generated at index 0 at the exact center (400, 300)
+      colonyBacteria.push({
+        x: 400,
+        y: 300,
+        length: 40,
+        radius: 9,
+        angle: 0.15, // matches single cell level slant
+        color: 'hsl(170, 95%, 45%)',
+        isTarget: true
+      });
+
+      // Scatter the rest randomly, densest at the center
+      for (let i = 1; i < numColonyBacteria; i++) {
+        let angle = Math.random() * Math.PI * 2;
+        // Distribute distance using square root to get clustering around center
+        let dist = Math.pow(Math.random(), 1.5) * 260;
+        let bx = 400 + Math.cos(angle) * dist;
+        let by = 300 + Math.sin(angle) * dist;
+        
+        // Avoid placing too close to target cell directly in center
+        if (Math.abs(bx - 400) < 20 && Math.abs(by - 300) < 20) {
+          bx += 35 * (Math.random() > 0.5 ? 1 : -1);
+          by += 35 * (Math.random() > 0.5 ? 1 : -1);
+        }
+
+        colonyBacteria.push({
+          x: bx,
+          y: by,
+          length: 25 + Math.random() * 20,
+          radius: 6 + Math.random() * 4,
+          angle: Math.random() * Math.PI * 2,
+          color: `hsl(${145 + Math.random() * 40}, ${75 + Math.random() * 20}%, ${35 + Math.random() * 15}%)`,
+          isTarget: false
+        });
+      }
+    }
+
+    function setupEventListeners() {
+      // Slider Input
+      zoomSlider.addEventListener('input', (e) => {
+        targetZoomVal = parseFloat(e.target.value);
+        if (autoTourActive) stopAutoTour();
+        playSound('zoom-hum', (targetZoomVal - 1) / 3.0);
+      });
+
+      // Canvas Interaction
+      canvas.addEventListener('mousemove', handleMouseMove);
+      canvas.addEventListener('mousedown', handleMouseDown);
+      canvas.addEventListener('mouseleave', () => {
+        if (!selectedStructure) hoveredStructure = null;
+      });
+
+      // Scroll Wheel Zoom
+      canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.12 : -0.12;
+        targetZoomVal = Math.min(4.0, Math.max(1.0, targetZoomVal + delta));
+        zoomSlider.value = targetZoomVal.toFixed(2);
+        if (autoTourActive) stopAutoTour();
+        playSound('zoom-hum', (targetZoomVal - 1) / 3.0);
+      }, { passive: false });
+
+      window.addEventListener('resize', resizeCanvas);
+    }
+
+    /* ----------------------------------------------------
+       CONTROLS & AUTO TOUR LOGIC
+       ---------------------------------------------------- */
+    function toggleAutoTour() {
+      playSound('select');
+      autoTourActive = true;
+      tourPaused = false;
+      tourStep = Math.max(1, Math.floor(currentZoomVal));
+      if (tourStep >= 4) tourStep = 1;
+      
+      document.getElementById('btnAutoTour').classList.add('active');
+      document.getElementById('btnStopTour').disabled = false;
+      document.getElementById('btnAutoTour').textContent = "⏸ Playing Tour";
+      
+      runTourLogic();
+    }
+
+    function stopAutoTour() {
+      if (!autoTourActive) return;
+      autoTourActive = false;
+      tourPaused = false;
+      
+      document.getElementById('btnAutoTour').classList.remove('active');
+      document.getElementById('btnStopTour').disabled = true;
+      document.getElementById('btnAutoTour').textContent = "▶ Auto Tour";
+      playSound('select');
+    }
+
+    function runTourLogic() {
+      if (!autoTourActive) return;
+      targetZoomVal = tourStep;
+      zoomSlider.value = tourStep.toFixed(2);
+    }
+
+    // Connect slider ticks clicking
+    document.querySelectorAll('#sliderTicks .tick-item').forEach((tick) => {
+      tick.addEventListener('click', () => {
+        const val = parseInt(tick.getAttribute('data-val'));
+        targetZoomVal = val;
+        zoomSlider.value = val;
+        if (autoTourActive) stopAutoTour();
+        playSound('select');
+      });
+    });
+
+    /* ----------------------------------------------------
+       COLLISION & INSPECTOR UTILITIES
+       ---------------------------------------------------- */
+    function getCanvasCoordinates(e) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: (e.clientX - rect.left) * (canvas.width / rect.width),
+        y: (e.clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    function getLocalCoordinates(x, y) {
+      // Transform coordinate system centered on bacterium (400, 300) and rotated 0.15 rad
+      const dx = x - 400;
+      const dy = y - 300;
+      const angle = 0.15;
+      return {
+        lx: dx * Math.cos(-angle) - dy * Math.sin(-angle),
+        ly: dx * Math.sin(-angle) + dy * Math.cos(-angle)
+      };
+    }
+
+    function checkOrganelleCollision(mx, my) {
+      // Hover collisions are active in zoom levels 3.5 to 4.0
+      if (currentZoomVal < 3.4) return null;
+      
+      const { lx, ly } = getLocalCoordinates(mx, my);
+      const distToCenter = Math.sqrt(lx * lx + ly * ly);
+
+      // 1. Plasmids (3 small ring DNA circles)
+      if (dist(lx, ly, -150, -80) < 32) return 'plasmids';
+      if (dist(lx, ly, 180, 100) < 32) return 'plasmids';
+      if (dist(lx, ly, -120, 90) < 32) return 'plasmids';
+
+      // 2. Nucleoid DNA (central tangled skeleton around (0,0))
+      if (distToCenter < 115) {
+        // Exclude other structures nested in center
+        if (dist(lx, ly, -120, 90) > 32) return 'nucleoid';
+      }
+
+      // 3. Ribosomes (designated clusters)
+      if (dist(lx, ly, 140, -80) < 40) return 'ribosomes';
+      if (dist(lx, ly, 20, 110) < 40) return 'ribosomes';
+      if (dist(lx, ly, -230, -50) < 35) return 'ribosomes';
+
+      // 4. Flagella (Attachment on the left side)
+      if (dist(lx, ly, -320, 0) < 55) return 'flagella';
+      
+      // 5. Outer layer boundaries (checking rounded rectangular rings)
+      // Cell wall boundary coordinates in local space
+      const capsuleW = 340, capsuleH = 210;
+      const wallW = 326, wallH = 196;
+      const membraneW = 316, membraneH = 186;
+
+      const alx = Math.abs(lx);
+      const aly = Math.abs(ly);
+
+      if (alx < 360 && aly < 230) {
+        if (alx >= wallW || aly >= wallH) {
+          // Inside capsule ring
+          if (alx < 350 && aly < 220) return 'capsule';
+        } else if (alx >= membraneW || aly >= membraneH) {
+          // Inside cell wall ring
+          return 'cell_wall';
+        } else if (alx >= 306 || aly >= 176) {
+          // Inside plasma membrane ring
+          return 'cell_membrane';
+        }
+      }
+
+      // 6. Pili fimbriae (whiskers projecting outward)
+      // Check if mouse is just outside capsule boundary (up to 35px)
+      if (alx >= 340 && alx <= 385 && aly >= 0 && aly <= 250) return 'pili';
+      if (aly >= 210 && aly <= 250 && alx >= 0 && alx <= 385) return 'pili';
+
+      return null;
+    }
+
+    function dist(x1, y1, x2, y2) {
+      return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    }
+
+    function handleMouseMove(e) {
+      const pos = getCanvasCoordinates(e);
+      mousePos = pos;
+      
+      if (currentZoomVal >= 3.4) {
+        const detected = checkOrganelleCollision(pos.x, pos.y);
+        if (detected !== hoveredStructure) {
+          hoveredStructure = detected;
+          if (hoveredStructure) {
+            playSound('hover');
+            highlightInspectorButton(hoveredStructure);
+          } else if (!selectedStructure) {
+            clearInspectorHighlights();
+          }
+        }
+      } else {
+        hoveredStructure = null;
+      }
+    }
+
+    function handleMouseDown(e) {
+      const pos = getCanvasCoordinates(e);
+      if (currentZoomVal >= 3.4) {
+        const clicked = checkOrganelleCollision(pos.x, pos.y);
+        if (clicked) {
+          selectStructure(clicked);
+        } else {
+          closeOrganelleDrawer();
+        }
+      }
+    }
+
+    function selectStructure(id) {
+      selectedStructure = id;
+      hoveredStructure = id;
+      
+      // Highlight in the inspector list
+      highlightInspectorButton(id);
+      
+      // Update details drawer
+      const db = structureDatabase[id];
+      if (db) {
+        drawerOrganelleName.textContent = db.name;
+        drawerOrganelleDesc.innerHTML = db.desc;
+        drawerOrganelleBadge.textContent = db.badge;
+        organelleDrawer.style.display = 'flex';
+      }
+      playSound('select');
+    }
+
+    function closeOrganelleDrawer() {
+      organelleDrawer.style.display = 'none';
+      selectedStructure = null;
+      hoveredStructure = null;
+      clearInspectorHighlights();
+      playSound('select', 0.8);
+    }
+
+    function highlightInspectorButton(id) {
+      clearInspectorHighlights();
+      const btn = document.getElementById(`btn_${id}`);
+      if (btn) btn.classList.add('active');
+    }
+
+    function clearInspectorHighlights() {
+      document.querySelectorAll('.organelle-btn').forEach(btn => btn.classList.remove('active'));
+    }
+
+    /* ----------------------------------------------------
+       SIDEBAR & UI TEXT CODES
+       ---------------------------------------------------- */
+    function updateSidebarText() {
+      const idx = Math.min(4, Math.max(1, Math.floor(currentZoomVal)));
+      const data = levelDescriptions[idx];
+
+      levelTitle.textContent = data.title;
+      levelScaleBadge.textContent = data.badge;
+      levelDescription.innerHTML = data.desc;
+      
+      // Update HUD elements
+      hudMagnification.textContent = `MAGNIFICATION: ${levelDescriptions[idx].microscope.split(' (')[1].replace(')', '')}`;
+      hudScaleText.textContent = data.scale;
+      hudScaleBar.style.width = `${data.barWidth}px`;
+
+      // Update Ticks highlights
+      const ticks = document.querySelectorAll('#sliderTicks .tick-item');
+      ticks.forEach((tick, i) => {
+        if (i === idx - 1) {
+          tick.classList.add('active');
+        } else {
+          tick.classList.remove('active');
+        }
+      });
+
+      // Update structures inspector section based on level
+      if (idx === 4) {
+        inspectorContent.style.display = 'none';
+        inspectorGrid.style.display = 'grid';
+        hudInteractionHint.textContent = "Inspect cell organelles. Click structures on the canvas or use the right menu.";
+      } else {
+        inspectorContent.style.display = 'block';
+        inspectorGrid.style.display = 'none';
+        clearInspectorHighlights();
+        
+        if (idx === 1) {
+          inspectorContent.textContent = "Zoom in to explore the bacterial colony on the smartphone glass.";
+          hudInteractionHint.textContent = "Drag the slider or use scroll wheel to zoom in.";
+        } else if (idx === 2) {
+          inspectorContent.textContent = "Zoom further to target the central isolated bacterium.";
+          hudInteractionHint.textContent = "Zoom in closer to see the single isolated bacterium.";
+        } else if (idx === 3) {
+          inspectorContent.textContent = "Observe the outer structures. Zoom deeper to inspect the interior organelles.";
+          hudInteractionHint.textContent = "Double-click or zoom to see internal prokaryotic organelles.";
+        }
+      }
+    }
+
+    /* ----------------------------------------------------
+       CANVAS GRAPHICS RENDER ENGINE
+       ---------------------------------------------------- */
+    function animate() {
+      timeTicker += 0.02;
+      
+      // 1. Easing Zoom values
+      if (autoTourActive) {
+        if (tourPaused) {
+          tourTimer--;
+          if (tourTimer <= 0) {
+            tourPaused = false;
+            tourStep++;
+            if (tourStep > 4) {
+              stopAutoTour();
+            } else {
+              playSound('tour-tick');
+              runTourLogic();
+            }
+          }
+        } else {
+          // Zoom towards next step
+          let stepDelta = tourStep - currentZoomVal;
+          if (Math.abs(stepDelta) < 0.03) {
+            currentZoomVal = tourStep;
+            // Reached target step! Trigger pause to read
+            tourPaused = true;
+            tourTimer = tourStep === 4 ? 300 : 200; // Pause longer on Level 4
+            
+            // Auto-select structure in level 4 for tutorial effect
+            if (tourStep === 4) {
+              selectStructure('nucleoid');
+            }
+          } else {
+            // Speed up or slow down appropriately
+            targetZoomVal = tourStep;
+          }
+        }
+      }
+
+      const prevZoom = currentZoomVal;
+      // Smooth interpolation easing
+      currentZoomVal += (targetZoomVal - currentZoomVal) * 0.08;
+      
+      if (Math.abs(currentZoomVal - prevZoom) > 0.001) {
+        updateSidebarText();
+      } else {
+        currentZoomVal = targetZoomVal;
+      }
+
+      // 2. Render viewport frame
+      drawViewport();
+
+      requestAnimationFrame(animate);
+    }
+
+    function drawViewport() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Calculate active level indices and crossfade fractions
+      let baseLevel = Math.floor(currentZoomVal);
+      let fract = currentZoomVal - baseLevel;
+      
+      if (baseLevel >= 4) {
+        baseLevel = 3;
+        fract = 1.0;
+      }
+
+      // Layer 1: Base Level (Fade out, Scale up)
+      let opacity1 = 1.0 - fract;
+      let scale1 = 1.0 + fract * 4.0; // scale grows 1x to 5x
+
+      ctx.save();
+      ctx.globalAlpha = opacity1;
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(scale1, scale1);
+      ctx.translate(-canvas.width / 2, -canvas.height / 2);
+      drawLevelGraphics(baseLevel);
+      ctx.restore();
+
+      // Layer 2: Next Level (Fade in, Scale up)
+      if (fract > 0.01) {
+        let opacity2 = fract;
+        let scale2 = 0.2 + fract * 0.8; // scale grows 0.2x to 1x
+
+        ctx.save();
+        ctx.globalAlpha = opacity2;
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.scale(scale2, scale2);
+        ctx.translate(-canvas.width / 2, -canvas.height / 2);
+        drawLevelGraphics(baseLevel + 1);
+        ctx.restore();
+      }
+
+      // 3. Render Microscope Overlay Grid
+      drawMicroscopeOverlay();
+      
+      // 4. Render active highlights
+      drawInteractivityOverlay();
+    }
+
+    function drawLevelGraphics(level) {
+      switch(level) {
+        case 1: drawLevel1(); break; // Smartphone Surface
+        case 2: drawLevel2(); break; // Bacterial Colony Heap
+        case 3: drawLevel3(); break; // Single Bacterium
+        case 4: drawLevel4(); break; // Cell Structures Cutaway
+      }
+    }
+
+    /* ----------------------------------------------------
+       INDIVIDUAL LEVEL DRAWING FUNCTIONS
+       ---------------------------------------------------- */
+
+    // LEVEL 1: Smartphone Surface
+    function drawLevel1() {
+      // 1. Dark workbench surface gradient
+      ctx.fillStyle = '#080a14';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Subtle metallic shadow
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+      ctx.shadowBlur = 40;
+
+      // 2. Smartphone Body Bezel
+      const phoneW = 250;
+      const phoneH = 490;
+      const phoneX = 400 - phoneW / 2;
+      const phoneY = 300 - phoneH / 2;
+      const r = 26;
+
+      ctx.fillStyle = '#1e2436';
+      ctx.strokeStyle = '#374151';
+      ctx.lineWidth = 4;
+      
+      ctx.beginPath();
+      ctx.roundRect(phoneX, phoneY, phoneW, phoneH, r);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.shadowBlur = 0; // reset shadow
+
+      // Metallic screen border accent
+      ctx.strokeStyle = '#4b5563';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(phoneX + 4, phoneY + 4, phoneW - 8, phoneH - 8, r - 3);
+      ctx.stroke();
+
+      // 3. LCD Screen glass
+      const screenX = phoneX + 8;
+      const screenY = phoneY + 8;
+      const screenW = phoneW - 16;
+      const screenH = phoneH - 16;
+      const screenR = r - 6;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(screenX, screenY, screenW, screenH, screenR);
+      ctx.clip(); // clip to screen boundaries
+
+      // Wallpaper gradient background
+      let screenGrad = ctx.createRadialGradient(400, 300, 50, 400, 300, 300);
+      screenGrad.addColorStop(0, '#1a103c');
+      screenGrad.addColorStop(1, '#080c18');
+      ctx.fillStyle = screenGrad;
+      ctx.fillRect(screenX, screenY, screenW, screenH);
+
+      // Floating particles on lockscreen wallpaper
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.08)';
+      for(let i=0; i<8; i++) {
+        let px = screenX + 30 + ((i * 45 + timeTicker * 10) % (screenW - 50));
+        let py = screenY + 40 + ((i * 70 - timeTicker * 15 + screenH) % (screenH - 80));
+        ctx.beginPath();
+        ctx.arc(px, py, 4 + (i%3)*3, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      // 4. Phone UI Text Elements
+      // Time Clock
+      ctx.font = '800 2.2rem ' + varOutfit();
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.fillText("08:36", 400, phoneY + 95);
+
+      // Date
+      ctx.font = '600 0.78rem ' + varOutfit();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.fillText("THURSDAY, JUNE 18", 400, phoneY + 120);
+
+      // Status Bar icons (Top)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.font = '0.65rem ' + varMono();
+      ctx.fillText("5G  [|||] 84%", 400, phoneY + 28);
+
+      ctx.restore();
+
+      // Camera lens bezel at phone top
+      ctx.fillStyle = '#080a14';
+      ctx.beginPath();
+      ctx.arc(400, phoneY + 45, 6, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.arc(400, phoneY + 45, 2.5, 0, Math.PI*2);
+      ctx.fill();
+
+      // 5. The Bacterial Heap Smudge (Center of screen)
+      ctx.save();
+      // Oily fingerprint swirl lines (representing colony at macroscopic scale)
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.16)';
+      ctx.lineWidth = 1.5;
+      
+      const smudgeX = 400, smudgeY = 300;
+      for (let r = 8; r < 40; r += 5) {
+        ctx.beginPath();
+        ctx.arc(smudgeX + 2, smudgeY - 5, r, 0.2, Math.PI * 1.7);
+        ctx.stroke();
+      }
+
+      // Translucent slime glow layers
+      let smudgeGrad = ctx.createRadialGradient(smudgeX, smudgeY, 2, smudgeX, smudgeY, 35);
+      smudgeGrad.addColorStop(0, 'rgba(0, 229, 255, 0.25)');
+      smudgeGrad.addColorStop(0.5, 'rgba(212, 255, 0, 0.15)');
+      smudgeGrad.addColorStop(1, 'rgba(0, 229, 255, 0)');
+      
+      ctx.fillStyle = smudgeGrad;
+      ctx.beginPath();
+      ctx.arc(smudgeX, smudgeY, 35, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.restore();
+
+      // Focus reticle marking the smudge zoom target
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath();
+      ctx.arc(400, 300, 48, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // LEVEL 2: The Bacterial Colony/Heap
+    function drawLevel2() {
+      // 1. Dark subpixel pixelated screen glass background
+      ctx.fillStyle = '#020306';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw red/green/blue subpixel grid matrix layout
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.012)';
+      ctx.lineWidth = 0.5;
+      const subpixelStep = 10;
+      for (let x = 0; x < canvas.width; x += subpixelStep) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += subpixelStep) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // Glass surface micro scratches
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+      ctx.lineWidth = 0.8;
+      
+      // Scratch 1
+      ctx.beginPath();
+      ctx.arc(150, 200, 350, Math.PI, Math.PI * 1.15);
+      ctx.stroke();
+      
+      // Scratch 2
+      ctx.beginPath();
+      ctx.arc(650, 480, 250, 0.2, 0.5);
+      ctx.stroke();
+
+      // 2. Draw the pile of colony bacteria
+      // Sort so target cell in center is drawn on top
+      colonyBacteria.forEach(b => {
+        if (!b.isTarget) {
+          // Draw standard capsule
+          drawCapsule(b.x, b.y, b.length, b.radius, b.angle, b.color, 'rgba(255,255,255,0.08)', 1);
+        }
+      });
+
+      // Draw the central focus target cell with glowing highlight outline
+      const targetB = colonyBacteria[0];
+      
+      // Focus Reticle around target
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.8)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.arc(400, 300, 32 + Math.sin(timeTicker * 4) * 3, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      
+      // Target capsule
+      drawCapsule(
+        targetB.x, targetB.y, targetB.length, targetB.radius, targetB.angle,
+        targetB.color, 'rgba(0, 229, 255, 0.8)', 1.5
+      );
+    }
+
+    // LEVEL 3: A Single Cell
+    function drawLevel3() {
+      // 1. Microscopic liquid medium fluid background
+      let fluidGrad = ctx.createRadialGradient(400, 300, 20, 400, 300, 450);
+      fluidGrad.addColorStop(0, '#040d1a');
+      fluidGrad.addColorStop(1, '#02040a');
+      ctx.fillStyle = fluidGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw blurred out-of-focus background cells drifting away
+      ctx.save();
+      ctx.globalAlpha = 0.08;
+      drawCapsule(180, 140, 150, 40, -0.6, 'hsl(160, 80%, 40%)');
+      drawCapsule(620, 160, 160, 45, 0.8, 'hsl(145, 75%, 35%)');
+      drawCapsule(220, 480, 140, 38, 0.3, 'hsl(175, 80%, 40%)');
+      drawCapsule(630, 450, 150, 42, -0.4, 'hsl(150, 75%, 35%)');
+      ctx.restore();
+
+      // Floating tiny organic water particles (Brownian motion)
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.1)';
+      for (let i = 0; i < 15; i++) {
+        let px = (i * 73 + timeTicker * 12) % canvas.width;
+        let py = (i * 91 - timeTicker * 8 + canvas.height) % canvas.height;
+        ctx.beginPath();
+        ctx.arc(px, py, 2 + (i%4)*1.5, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      // 2. Draw the single focus bacterium
+      const bx = 400, by = 300;
+      const length = 260, radius = 70, angle = 0.15;
+
+      ctx.save();
+      ctx.translate(bx, by);
+      ctx.rotate(angle);
+
+      // (A) Capsule: Outermost layer (thick cyan translucent boundary)
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.08)';
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)';
+      ctx.lineWidth = 12;
+      ctx.beginPath();
+      ctx.arc(length / 2, 0, radius, -Math.PI / 2, Math.PI / 2);
+      ctx.arc(-length / 2, 0, radius, Math.PI / 2, -Math.PI / 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Capsule neon inner trace
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.9)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // (B) Cell Wall: Outer rigid boundary (lime green)
+      ctx.fillStyle = 'rgba(212, 255, 0, 0.05)';
+      ctx.strokeStyle = 'rgba(212, 255, 0, 0.8)';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc((length - 16) / 2, 0, radius - 8, -Math.PI / 2, Math.PI / 2);
+      ctx.arc(-(length - 16) / 2, 0, radius - 8, Math.PI / 2, -Math.PI / 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // (C) Cell Membrane: Inner thin boundary (bright green)
+      ctx.strokeStyle = '#00e676';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc((length - 30) / 2, 0, radius - 15, -Math.PI / 2, Math.PI / 2);
+      ctx.arc(-(length - 30) / 2, 0, radius - 15, Math.PI / 2, -Math.PI / 2);
+      ctx.closePath();
+      ctx.stroke();
+
+      // (D) Cytoplasm (Internal space granular look)
+      ctx.fillStyle = 'rgba(11, 28, 48, 0.6)';
+      ctx.beginPath();
+      ctx.arc((length - 32) / 2, 0, radius - 16, -Math.PI / 2, Math.PI / 2);
+      ctx.arc(-(length - 32) / 2, 0, radius - 16, Math.PI / 2, -Math.PI / 2);
+      ctx.closePath();
+      ctx.fill();
+
+      // Faint nucleoid glow coming from inside
+      let nuclGrad = ctx.createRadialGradient(0, 0, 5, 0, 0, radius - 20);
+      nuclGrad.addColorStop(0, 'rgba(0, 229, 255, 0.15)');
+      nuclGrad.addColorStop(0.6, 'rgba(212, 255, 0, 0.05)');
+      nuclGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = nuclGrad;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, length/2 - 20, radius - 20, 0, 0, Math.PI*2);
+      ctx.fill();
+
+      // (E) Pili (Fimbriae hair structures protruding radially)
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.6)';
+      ctx.lineWidth = 1.2;
+      const numPili = 44;
+      for (let i = 0; i < numPili; i++) {
+        let a = (i * Math.PI * 2) / numPili;
+        // Avoid flagella region on the left end (around angle Math.PI)
+        if (a > Math.PI - 0.5 && a < Math.PI + 0.5) continue;
+        
+        let cx = Math.cos(a);
+        let cy = Math.sin(a);
+        
+        // Approximate capsule points
+        let px = cx * (length / 2);
+        let py = cy * radius;
+        if (cx > 0) px = (length/2) + cx * radius;
+        if (cx < 0) px = -(length/2) + cx * radius;
+        
+        // Animated wiggle
+        let pilLength = 12 + Math.sin(timeTicker * 15 + i) * 2.5;
+        
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(px + cx * pilLength, py + cy * pilLength);
+        ctx.stroke();
+      }
+
+      // (F) Flagella (Rotary propulsion tails at the left end)
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.75)';
+      ctx.lineWidth = 2.2;
+      const numFlagella = 3;
+      const flagBaseX = -length/2 - radius + 2;
+
+      for (let i = 0; i < numFlagella; i++) {
+        let flagBaseY = -15 + i * 15;
+        let waveOffset = timeTicker * 8 + i * 1.5;
+        
+        ctx.beginPath();
+        ctx.moveTo(flagBaseX, flagBaseY);
+        
+        // Draw wavy flagellum tail line extending leftwards
+        for (let j = 0; j < 100; j++) {
+          let tx = flagBaseX - j * 2.5;
+          let ty = flagBaseY + Math.sin(j * 0.16 - waveOffset) * 14 * (1.0 - j * 0.005);
+          ctx.lineTo(tx, ty);
+        }
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    // LEVEL 4: Prokaryotic Cell Structures (Zoomed cross-section)
+    function drawLevel4() {
+      // 1. Dark workspace cell cytoplasm grid
+      let cellGrad = ctx.createRadialGradient(400, 300, 100, 400, 300, 500);
+      cellGrad.addColorStop(0, '#040b15');
+      cellGrad.addColorStop(1, '#010308');
+      ctx.fillStyle = cellGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Cytoplasm granular look (faint grid of tiny cyan dots)
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.015)';
+      for(let x = 0; x < canvas.width; x += 25) {
+        for(let y = 0; y < canvas.height; y += 25) {
+          ctx.beginPath();
+          ctx.arc(x, y, 1, 0, Math.PI*2);
+          ctx.fill();
+        }
+      }
+
+      // 2. Cell Outer Envelope borders (rotated 0.15 rad to match Level 3 slant)
+      ctx.save();
+      ctx.translate(400, 300);
+      ctx.rotate(0.15);
+
+      // (A) Capsule Cross-Section Layer (Outermost, Cyan)
+      ctx.strokeStyle = '#006064';
+      ctx.lineWidth = 14;
+      ctx.lineJoin = 'round';
+      ctx.strokeRect(-340, -210, 680, 420);
+      
+      ctx.strokeStyle = '#00e5ff';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(-340, -210, 680, 420);
+
+      // (B) Cell Wall Cross-Section Layer (Middle, Lime)
+      ctx.strokeStyle = '#558b2f';
+      ctx.lineWidth = 8;
+      ctx.strokeRect(-326, -196, 652, 392);
+
+      ctx.strokeStyle = '#d4ff00';
+      ctx.lineWidth = 2.2;
+      ctx.strokeRect(-326, -196, 652, 392);
+
+      // (C) Plasma Membrane Layer (Innermost, Green)
+      ctx.strokeStyle = '#2e7d32';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(-316, -186, 632, 372);
+      
+      ctx.strokeStyle = '#00e676';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(-316, -186, 632, 372);
+
+      // (D) Pili attachment nodes extending outwards
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.5)';
+      ctx.lineWidth = 1.5;
+      for (let x = -310; x <= 310; x += 40) {
+        // Top fimbriae
+        ctx.beginPath(); ctx.moveTo(x, -210); ctx.lineTo(x, -235); ctx.stroke();
+        // Bottom fimbriae
+        ctx.beginPath(); ctx.moveTo(x, 210); ctx.lineTo(x, 235); ctx.stroke();
+      }
+
+      // (E) Flagella Motor Bases (Left Edge boundary)
+      ctx.fillStyle = '#00b8d4';
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1;
+      
+      // Three motors embedded in membrane
+      const basesY = [-50, 0, 50];
+      basesY.forEach(by => {
+        ctx.save();
+        ctx.translate(-316, by);
+        
+        // Basal body cylinders
+        ctx.fillRect(-12, -8, 12, 16);
+        ctx.strokeRect(-12, -8, 12, 16);
+        
+        // Rotary bearing ring
+        ctx.fillStyle = '#d4ff00';
+        ctx.beginPath();
+        ctx.arc(0, 0, 5, 0, Math.PI*2);
+        ctx.fill();
+        
+        // Flagella tail wiggling extending outwards
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.8)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-12, 0);
+        let waveOffset = timeTicker * 8 + by * 0.1;
+        for (let j = 0; j < 80; j++) {
+          let tx = -12 - j * 3;
+          let ty = Math.sin(j * 0.15 - waveOffset) * 12 * (1.0 - j * 0.006);
+          ctx.lineTo(tx, ty);
+        }
+        ctx.stroke();
+        
+        ctx.restore();
+      });
+
+      // (F) Plasmids (Three glowing circular double helix rings)
+      // Plasmid 1 (Left Upper)
+      drawPlasmidRing(-150, -80, timeTicker * 0.5);
+      // Plasmid 2 (Right Lower)
+      drawPlasmidRing(180, 100, -timeTicker * 0.4);
+      // Plasmid 3 (Left Lower)
+      drawPlasmidRing(-120, 90, timeTicker * 0.3);
+
+      // (G) Ribosomes (Tiny 70S dots scattered in groups)
+      drawRibosomeCluster(140, -80, 28);
+      drawRibosomeCluster(20, 110, 25);
+      drawRibosomeCluster(-230, -50, 20);
+      
+      // Also scatter some loose single ribosomes
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = '#00e5ff';
+      ctx.shadowBlur = 4;
+      const looseRibosomes = [
+        {x: -60, y: -100}, {x: 60, y: -70}, {x: 230, y: -90},
+        {x: 250, y: -20}, {x: 120, y: 15}, {x: -240, y: 80},
+        {x: -40, y: 50}, {x: -200, y: -120}, {x: 200, y: 50}
+      ];
+      looseRibosomes.forEach(r => {
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, 2, 0, Math.PI*2);
+        ctx.fill();
+      });
+      ctx.shadowBlur = 0; // reset
+
+      // (H) Nucleoid DNA (Freely floating glowing skein in the center)
+      ctx.save();
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.85)';
+      ctx.lineWidth = 3.5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.shadowColor = '#00e5ff';
+      ctx.shadowBlur = 12;
+      
+      ctx.beginPath();
+      // Generate a complex, breathing tangled loop of DNA
+      for(let a=0; a<Math.PI*6; a+=0.06) {
+        // Combination of sine components gives organic complexity
+        let r = 75 + Math.sin(a * 4.2) * 28 + Math.cos(a * 7.5) * 14 + Math.sin(timeTicker * 2.5 + a) * 4.5;
+        // Stretch along x-axis slightly
+        let dx = Math.cos(a) * r * 1.45;
+        let dy = Math.sin(a) * r;
+        
+        if (a === 0) ctx.moveTo(dx, dy);
+        else ctx.lineTo(dx, dy);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.restore();
+    }
+
+    // Helper: Draws Plasmid DNA circle with tick-marks
+    function drawPlasmidRing(x, y, rotation) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rotation);
+      
+      ctx.strokeStyle = '#d4ff00';
+      ctx.lineWidth = 3.5;
+      ctx.shadowColor = '#d4ff00';
+      ctx.shadowBlur = 8;
+      
+      ctx.beginPath();
+      ctx.arc(0, 0, 20, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.shadowBlur = 0; // reset
+
+      // Double helix base pair ladder bars
+      ctx.strokeStyle = 'rgba(212, 255, 0, 0.5)';
+      ctx.lineWidth = 1.5;
+      for (let a = 0; a < Math.PI * 2; a += 0.4) {
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * 17, Math.sin(a) * 17);
+        ctx.lineTo(Math.cos(a) * 23, Math.sin(a) * 23);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // Helper: Draws a group of ribosomes
+    function drawRibosomeCluster(cx, cy, count) {
+      ctx.save();
+      ctx.fillStyle = '#e0f7fa';
+      ctx.shadowColor = '#00e5ff';
+      ctx.shadowBlur = 5;
+      
+      for(let i=0; i<count; i++) {
+        // Distribute within a circle radius
+        let a = i * 2.3 + Math.sin(i);
+        let d = (i / count) * 28;
+        let rx = cx + Math.cos(a) * d;
+        let ry = cy + Math.sin(a) * d;
+        
+        ctx.beginPath();
+        ctx.arc(rx, ry, 2.2, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    /* ----------------------------------------------------
+       UI GRID OVERLAY & INTERACTIVE VIEWS
+       ---------------------------------------------------- */
+    function drawMicroscopeOverlay() {
+      // Draw grid only for microscopic levels (Level 2 to 4)
+      if (currentZoomVal < 1.3) return;
+
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.04)';
+      ctx.lineWidth = 1;
+      
+      // Center circle reticle
+      ctx.beginPath();
+      ctx.arc(canvas.width/2, canvas.height/2, 260, 0, Math.PI*2);
+      ctx.arc(canvas.width/2, canvas.height/2, 160, 0, Math.PI*2);
+      ctx.stroke();
+
+      // Crosshair lines
+      ctx.beginPath();
+      ctx.moveTo(canvas.width/2 - 300, canvas.height/2);
+      ctx.lineTo(canvas.width/2 - 260, canvas.height/2);
+      
+      ctx.moveTo(canvas.width/2 + 260, canvas.height/2);
+      ctx.lineTo(canvas.width/2 + 300, canvas.height/2);
+      
+      ctx.moveTo(canvas.width/2, canvas.height/2 - 200);
+      ctx.lineTo(canvas.width/2, canvas.height/2 - 160);
+      
+      ctx.moveTo(canvas.width/2, canvas.height/2 + 160);
+      ctx.lineTo(canvas.width/2, canvas.height/2 + 200);
+      ctx.stroke();
+
+      // Corner focus bounds
+      const pad = 20;
+      ctx.strokeStyle = varAccent();
+      ctx.lineWidth = 2;
+      
+      // Top Left
+      ctx.beginPath();
+      ctx.moveTo(pad, pad + 20); ctx.lineTo(pad, pad); ctx.lineTo(pad + 20, pad);
+      // Top Right
+      ctx.moveTo(canvas.width - pad, pad + 20); ctx.lineTo(canvas.width - pad, pad); ctx.lineTo(canvas.width - pad - 20, pad);
+      // Bottom Left
+      ctx.moveTo(pad, canvas.height - pad - 20); ctx.lineTo(pad, canvas.height - pad); ctx.lineTo(pad + 20, canvas.height - pad);
+      // Bottom Right
+      ctx.moveTo(canvas.width - pad, canvas.height - pad - 20); ctx.lineTo(canvas.width - pad, canvas.height - pad); ctx.lineTo(canvas.width - pad - 20, canvas.height - pad);
+      ctx.stroke();
+    }
+
+    function drawInteractivityOverlay() {
+      if (currentZoomVal < 3.4 || !hoveredStructure) return;
+
+      ctx.save();
+      ctx.translate(400, 300);
+      ctx.rotate(0.15); // align with Level 4 cell rotation
+
+      ctx.strokeStyle = varAccent();
+      ctx.lineWidth = 3;
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = varAccent();
+
+      const id = hoveredStructure;
+
+      if (id === 'nucleoid') {
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 155, 105, 0, 0, Math.PI*2);
+        ctx.stroke();
+      } else if (id === 'plasmids') {
+        // Highlight all three plasmids
+        ctx.beginPath(); ctx.arc(-150, -80, 26, 0, Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(180, 100, 26, 0, Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(-120, 90, 26, 0, Math.PI*2); ctx.stroke();
+      } else if (id === 'ribosomes') {
+        // Highlight the three ribosome clusters
+        ctx.beginPath(); ctx.arc(140, -80, 32, 0, Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(20, 110, 29, 0, Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(-230, -50, 24, 0, Math.PI*2); ctx.stroke();
+      } else if (id === 'flagella') {
+        // Highlight basal body motor region
+        ctx.beginPath();
+        ctx.arc(-320, 0, 52, 0, Math.PI*2);
+        ctx.stroke();
+      } else if (id === 'capsule') {
+        ctx.strokeRect(-343, -213, 686, 426);
+      } else if (id === 'cell_wall') {
+        ctx.strokeRect(-329, -199, 658, 398);
+      } else if (id === 'cell_membrane') {
+        ctx.strokeRect(-319, -189, 638, 378);
+      } else if (id === 'pili') {
+        // Highlight outer boundary indicating pili hair layer
+        ctx.lineWidth = 4;
+        ctx.strokeRect(-365, -235, 730, 470);
+      }
+
+      ctx.restore();
+    }
+
+    // Helper: capsule shapes drawer utility
+    function drawCapsule(x, y, length, radius, angle, fillColor, strokeColor, strokeWidth) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      
+      ctx.beginPath();
+      ctx.arc(length / 2, 0, radius, -Math.PI / 2, Math.PI / 2);
+      ctx.arc(-length / 2, 0, radius, Math.PI / 2, -Math.PI / 2);
+      ctx.closePath();
+      
+      if (fillColor) {
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+      }
+      if (strokeColor) {
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = strokeWidth;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    /* ----------------------------------------------------
+       THEMING ACCESSORS
+       ---------------------------------------------------- */
+    function varAccent() {
+      // Dynamic shift between levels
+      return currentZoomVal < 2.5 ? '#00e5ff' : '#d4ff00';
+    }
+
+    function varOutfit() {
+      return "'Outfit', sans-serif";
+    }
+
+    function varMono() {
+      return "'JetBrains Mono', monospace";
+    }
+  </script>
+</body>
+</html>
