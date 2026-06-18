@@ -468,8 +468,9 @@
       background: rgba(2, 4, 10, 0.6);
       border: 1px solid var(--border-color);
       border-radius: 8px;
-      padding: 5px;
+      padding: 8px;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
@@ -480,6 +481,11 @@
       height: auto;
       border-radius: 4px;
       box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+      transition: transform 0.2s ease;
+    }
+
+    .molecule-img:hover {
+      transform: scale(1.02);
     }
 
     .btn-close {
@@ -500,9 +506,240 @@
       border-color: rgba(255, 255, 255, 0.2);
     }
 
+    /* Enlarge Presentation Modal (75% screen popout) */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      outline: none;
+    }
+
+    .modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-container {
+      width: 78vw;
+      height: 75vh;
+      max-width: 1200px;
+      max-height: 800px;
+      background: rgba(8, 17, 36, 0.98);
+      border: 1px solid var(--cyan-accent);
+      box-shadow: 0 20px 50px rgba(0, 229, 255, 0.25), inset 0 0 30px rgba(0, 229, 255, 0.05);
+      border-radius: 20px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: scale(0.9) translateY(20px);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-backdrop.active .modal-container {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      font-size: 1.8rem;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      z-index: 1010;
+    }
+
+    .modal-close-btn:hover {
+      background: rgba(255, 0, 90, 0.15);
+      border-color: #ff1744;
+      color: #ff1744;
+      transform: rotate(90deg);
+      box-shadow: 0 0 10px rgba(255, 23, 68, 0.3);
+    }
+
+    .modal-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .modal-left {
+      background: #020612;
+      border-right: 1px solid rgba(0, 229, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 25px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .modal-left img {
+      max-width: 95%;
+      max-height: 95%;
+      object-fit: contain;
+      border-radius: 10px;
+      filter: drop-shadow(0 0 20px rgba(0, 229, 255, 0.2));
+      transition: transform 0.3s ease;
+    }
+    
+    .modal-left img:hover {
+      transform: scale(1.03);
+    }
+
+    .modal-right {
+      padding: 35px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+      background: linear-gradient(135deg, rgba(8, 17, 36, 0.95), rgba(15, 32, 67, 0.95));
+    }
+
+    .modal-header-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 15px;
+    }
+
+    .modal-badge {
+      align-self: flex-start;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--cyan-accent);
+      background: rgba(0, 229, 255, 0.15);
+      border: 1px solid rgba(0, 229, 255, 0.25);
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    #modalTitle {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(to right, #ffffff, var(--cyan-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .modal-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-main);
+    }
+
+    .modal-parts-section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .modal-parts-section h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--amber-accent);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .modal-parts-list {
+      list-style-type: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .modal-parts-list li {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+      position: relative;
+      padding-left: 18px;
+    }
+
+    .modal-parts-list li::before {
+      content: "▪";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--cyan-accent);
+      font-size: 1.1rem;
+    }
+
+    .modal-parts-list li strong {
+      color: #fff;
+    }
+
+    .modal-footer-info {
+      margin-top: auto;
+      background: rgba(0, 229, 255, 0.05);
+      border-left: 4px solid var(--cyan-accent);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .modal-footer-info p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
     @keyframes slideIn {
       from { transform: translateY(12px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Responsive adjustments for modal */
+    @media (max-width: 1024px) {
+      .modal-container {
+        width: 90vw;
+        height: 85vh;
+      }
+      .modal-body {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1.1fr 1fr;
+        overflow-y: auto;
+      }
+      .modal-left {
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 229, 255, 0.15);
+        padding: 15px;
+        min-height: 250px;
+      }
+      .modal-right {
+        padding: 20px;
+        overflow-y: visible;
+      }
     }
 
     /* Responsive Grid spacing */
@@ -651,8 +888,9 @@
           <p class="detail-text" id="drawerOrganelleDesc">Click on lipids or proteins on the canvas to inspect details.</p>
           
           <!-- Diagram Placeholder containing local generated images -->
-          <div class="diagram-container" id="drawerDiagramContainer" style="display: none;">
+          <div class="diagram-container" id="drawerDiagramContainer" style="display: none; cursor: pointer;" onclick="openPresentationModal(selectedComponent)" title="Click to enlarge image to 75% of screen">
             <img src="" alt="Structure Diagram" class="molecule-img" id="drawerImage">
+            <span style="font-size: 0.68rem; color: var(--cyan-accent); font-family: var(--font-mono); display: block; text-align: center; margin-top: 6px; width: 100%;">🔍 Click image to enlarge (75% screen)</span>
           </div>
           
           <button class="btn-close" onclick="closeOrganelleDrawer()">Close Inspector</button>
@@ -661,6 +899,36 @@
     </section>
 
   </main>
+
+  <!-- Enlarge Image Presentation Modal -->
+  <div id="presentationModal" class="modal-backdrop" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-container">
+      <button class="modal-close-btn" onclick="closePresentationModal()" aria-label="Close modal">&times;</button>
+      <div class="modal-body">
+        <div class="modal-left">
+          <img id="modalImage" src="" alt="Structure Diagram">
+        </div>
+        <div class="modal-right">
+          <div class="modal-header-info">
+            <span id="modalBadge" class="modal-badge">Grade 9 Biology</span>
+            <h2 id="modalTitle">Component Name</h2>
+          </div>
+          <p id="modalDesc" class="modal-desc">Detailed scientific description here.</p>
+          
+          <div class="modal-parts-section">
+            <h3>Key Parts to Explain:</h3>
+            <ul id="modalPartsList" class="modal-parts-list">
+              <!-- Dynamically populated key points for student explanation -->
+            </ul>
+          </div>
+          
+          <div class="modal-footer-info">
+            <p>💡 Tip: Use this high-resolution diagram to explain how molecular structure governs selective permeability and gatekeeping in the fluid mosaic membrane.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
     /* ----------------------------------------------------
@@ -717,31 +985,48 @@
         name: "Phospholipid Molecule",
         desc: "A phospholipid molecule has a circular head made of phosphates that is hydrophilic ('water-loving' and attracted to water), and two fatty acid tails that are hydrophobic ('non-water loving' or water-fearing, repelled by water). In water, they spontaneously arrange into a double layer (bilayer) keeping the tails protected inside and heads facing outward.",
         badge: "Bilayer backbone - Polar Lipids",
-        imgUrl: "./phospholipid_structure.png"
+        imgUrl: "./phospholipid_structure.png",
+        parts: [
+          "<strong>Hydrophilic Phosphate Head</strong>: The water-loving circular head that sits on the outer surfaces of the bilayer, interacting with surrounding water.",
+          "<strong>Hydrophobic Fatty Acid Tails</strong>: The water-fearing fatty acid chains that point inward, creating a secure protective core.",
+          "<strong>Phospholipid Bilayer</strong>: Two opposing layers of phospholipids that form the structural matrix of the cell membrane."
+        ]
       },
       protein_channel: {
         name: "Channel Protein (Selective Gate)",
         desc: "Transmembrane channel proteins act as selective gatekeepers. They create a hydrophilic pore straight through the membrane, allowing smaller, specific polar molecules like water (H₂O) or charged ions (Na⁺) to pass freely through, while blocking larger molecules. It functions like an open gate for specific passengers.",
         badge: "selective Gatekeeper - Pore Channel",
-        imgUrl: "./gated_protein_structure.png"
+        imgUrl: "./gated_protein_structure.png",
+        parts: [
+          "<strong>Hydrophilic Inner Pore</strong>: A water-lined channel that spans the membrane, permitting passage of polar molecules.",
+          "<strong>Gate Gating Control</strong>: Restricts flow based on particle size and electrical charge, blocking unauthorized materials.",
+          "<strong>Passive Diffusion</strong>: Allows ions to flow naturally from high to low concentration without utilizing energy."
+        ]
       },
       protein_carrier: {
         name: "Carrier Protein (Selective Gate)",
         desc: "Carrier proteins act as selective gatekeepers by binding to specific molecules (like glucose). When the target molecule enters the binding slot, the protein changes its shape to carry the passenger across the lipid bilayer and release it on the other side. It works like a revolving door, regulating what goes in or out.",
         badge: "selective Gatekeeper - Conformational Carrier",
-        imgUrl: "./gated_protein_structure.png"
+        imgUrl: "./gated_protein_structure.png",
+        parts: [
+          "<strong>Target Binding Site</strong>: A custom-shaped receptor cavity that only binds specific substances like glucose or amino acids.",
+          "<strong>Conformational Change</strong>: The protein changes shape when bound to its cargo, shielding it as it passes through the lipid tails.",
+          "<strong>Facilitated Passage</strong>: Safely ferries larger or highly polar molecules across the membrane barrier."
+        ]
       },
       glyco: {
         name: "Glycoprotein (Cell ID Tag)",
         desc: "Glycoproteins are proteins with branched carbohydrate chains sticking out into the extracellular space. They act like molecular name tags or antennae, allowing the cell to communicate with other cells and enabling the immune system to recognize the cell as a friendly, self-organism instead of an invader.",
         badge: "Cell Identifier - Antenna Tag",
-        imgUrl: "" // uses CSS fallback diagram
+        imgUrl: "", // uses CSS fallback diagram
+        parts: []
       },
       cholesterol: {
         name: "Cholesterol (Fluidity Helper)",
         desc: "Cholesterols are small lipid rings scattered between the hydrophobic tails of the phospholipids. They regulate membrane stability: when it is hot, they prevent the membrane from melting or becoming too leaky; when it is cold, they keep the membrane flexible and fluid, preventing it from freezing.",
         badge: "Fluidity Stabilizer",
-        imgUrl: "" // uses CSS fallback diagram
+        imgUrl: "", // uses CSS fallback diagram
+        parts: []
       }
     };
 
@@ -819,6 +1104,8 @@
         if (data.imgUrl) {
           drawerImage.src = data.imgUrl;
           drawerDiagramContainer.style.display = 'flex';
+          // Immediately pop out big presentation modal for lipids and proteins
+          openPresentationModal(id);
         } else {
           drawerDiagramContainer.style.display = 'none';
         }
@@ -835,6 +1122,45 @@
       playSound('click');
     }
 
+    function openPresentationModal(id) {
+      const data = componentDatabase[id];
+      if (!data || !data.imgUrl) return;
+
+      const modalBackdrop = document.getElementById('presentationModal');
+      const modalImage = document.getElementById('modalImage');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalDesc = document.getElementById('modalDesc');
+      const modalBadge = document.getElementById('modalBadge');
+      const modalPartsList = document.getElementById('modalPartsList');
+
+      modalImage.src = data.imgUrl;
+      modalTitle.textContent = data.name;
+      modalDesc.textContent = data.desc;
+      modalBadge.textContent = data.badge;
+
+      // Populate parts list
+      modalPartsList.innerHTML = '';
+      if (data.parts && data.parts.length > 0) {
+        data.parts.forEach(part => {
+          const li = document.createElement('li');
+          li.innerHTML = part;
+          modalPartsList.appendChild(li);
+        });
+      }
+
+      modalBackdrop.classList.add('active');
+      modalBackdrop.focus();
+      playSound('click', 1.25);
+    }
+
+    function closePresentationModal() {
+      const modalBackdrop = document.getElementById('presentationModal');
+      if (modalBackdrop.classList.contains('active')) {
+        modalBackdrop.classList.remove('active');
+        playSound('click', 0.85);
+      }
+    }
+
     window.addEventListener('load', () => {
       // Spawn some water and solute particles
       setupParticles();
@@ -844,6 +1170,22 @@
       canvas.addEventListener('mousedown', handleMouseDown);
       canvas.addEventListener('mouseleave', () => {
         if (!selectedComponent) hoveredComponent = null;
+      });
+
+      // Presentation Modal event listeners
+      const modalBackdrop = document.getElementById('presentationModal');
+      if (modalBackdrop) {
+        modalBackdrop.addEventListener('click', (e) => {
+          if (e.target === modalBackdrop) {
+            closePresentationModal();
+          }
+        });
+      }
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closePresentationModal();
+        }
       });
 
       animate();
