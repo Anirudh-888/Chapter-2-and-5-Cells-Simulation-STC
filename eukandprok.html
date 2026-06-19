@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prokaryotic vs Eukaryotic Cells | Comparative Interactive Lab</title>
+  <meta name="description" content="Compare the structures, size scales, DNA organization, and organelle presence in prokaryotic and eukaryotic cells. Interactive grade 9 biology simulation.">
+  
+  <!-- Google Fonts for premium UI typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #05060b;
+      --bg-panel: rgba(10, 11, 22, 0.75);
+      --bg-card: rgba(18, 20, 38, 0.5);
+      --border-color: rgba(156, 39, 176, 0.18);
+      --border-glow: 0 0 15px rgba(156, 39, 176, 0.15);
+      
+      --text-main: #eef0f6;
+      --text-muted: #9b9fb0;
+      
+      --cyan-accent: #00e5ff;
+      --cyan-glow: rgba(0, 229, 255, 0.4);
+      --purple-accent: #e040fb;
+      --purple-glow: rgba(224, 64, 251, 0.4);
+      --green-accent: #00e676;
+      --green-glow: rgba(0, 230, 118, 0.4);
+      --amber-accent: #ffb300;
+      
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(224, 64, 251, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(10, 20, 45, 0.6) 0px, transparent 50%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Warning for mobile portrait users */
+    .mobile-warning {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #05060b;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .mobile-warning p {
+      font-size: 1.1rem;
+      color: var(--purple-accent);
+      margin-top: 15px;
+      line-height: 1.5;
+    }
+
+    /* Header Styling */
+    header {
+      background: rgba(5, 6, 11, 0.9);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      z-index: 10;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--purple-accent), var(--cyan-accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #000;
+      font-size: 1.1rem;
+      box-shadow: 0 0 15px var(--purple-glow);
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(to right, #ffffff, #9b9fb0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-badge {
+      background: rgba(156, 39, 176, 0.1);
+      border: 1px solid var(--purple-accent);
+      color: var(--purple-accent);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: var(--border-glow);
+    }
+
+    /* Main Content Layout */
+    .main-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 320px 1fr 340px;
+      gap: 15px;
+      padding: 15px;
+      height: calc(100vh - 60px);
+    }
+
+    /* Panels Base (Glassmorphism) */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--purple-accent);
+      text-transform: uppercase;
+    }
+
+    .panel-content {
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Viewport Center Panel */
+    .viewport-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #020306;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9);
+      outline: none;
+    }
+
+    #viewportCanvas {
+      width: 100%;
+      height: 100%;
+      max-width: 800px;
+      max-height: 600px;
+      aspect-ratio: 4/3;
+      display: block;
+      background: transparent;
+      cursor: crosshair;
+    }
+
+    /* HUD Elements inside Viewport */
+    .hud-element {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: rgba(5, 6, 12, 0.8);
+      border: 1px solid rgba(156, 39, 176, 0.15);
+      padding: 6px 12px;
+      border-radius: 6px;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+      z-index: 5;
+    }
+
+    .hud-top-left { top: 15px; left: 15px; border-left: 3px solid var(--purple-accent); color: #fff; font-weight: bold; }
+    .hud-top-right { top: 15px; right: 15px; text-align: right; }
+    .hud-bottom-left { bottom: 15px; left: 15px; display: flex; flex-direction: column; gap: 4px; }
+    .hud-bottom-right { bottom: 15px; right: 15px; text-align: right; }
+
+    /* HUD Scale Bar indicator */
+    .scale-bar-line {
+      height: 4px;
+      background: var(--text-main);
+      width: 100px;
+      position: relative;
+      margin-top: 4px;
+      border-left: 2px solid var(--text-main);
+      border-right: 2px solid var(--text-main);
+    }
+
+    /* Control Sections */
+    .control-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Highlight Navigation Options */
+    .highlight-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .hl-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hl-btn:hover {
+      background: rgba(156, 39, 176, 0.08);
+      color: #fff;
+    }
+
+    .hl-btn.active {
+      color: #fff;
+      box-shadow: var(--border-glow);
+    }
+
+    .hl-btn.active.dna { border-color: var(--purple-accent); background: rgba(224, 64, 251, 0.12); }
+    .hl-btn.active.organelles { border-color: var(--green-accent); background: rgba(0, 230, 118, 0.1); }
+    .hl-btn.active.ribosomes { border-color: var(--cyan-accent); background: rgba(0, 229, 255, 0.1); }
+    .hl-btn.active.envelope { border-color: var(--amber-accent); background: rgba(255, 179, 0, 0.1); }
+
+    .hl-badge {
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    .hl-btn.dna .hl-badge { background: rgba(224, 64, 251, 0.15); color: var(--purple-accent); }
+    .hl-btn.organelles .hl-badge { background: rgba(0, 230, 118, 0.15); color: var(--green-accent); }
+    .hl-btn.ribosomes .hl-badge { background: rgba(0, 229, 255, 0.15); color: var(--cyan-accent); }
+    .hl-btn.envelope .hl-badge { background: rgba(255, 179, 0, 0.15); color: var(--amber-accent); }
+
+    /* Toggle Switches */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      padding: 10.5px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .switch-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: .3s;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 12px;
+      width: 12px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-muted);
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: rgba(224, 64, 251, 0.15);
+      border-color: var(--purple-accent);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(18px);
+      background-color: var(--purple-accent);
+      box-shadow: 0 0 8px var(--purple-glow);
+    }
+
+    /* Buttons */
+    .btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* RIGHT PANEL: DETAILS & QUIZ TABS */
+    .tab-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 12px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      color: var(--purple-accent);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 15%;
+      width: 70%;
+      height: 2px;
+      background: var(--purple-accent);
+      box-shadow: 0 0 8px var(--purple-glow);
+    }
+
+    .tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .tab-pane.active {
+      display: flex;
+    }
+
+    .info-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .info-tag {
+      align-self: flex-start;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    .level-info-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .detail-text {
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    /* Hotspots/Legend list */
+    .legend-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .legend-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      text-align: left;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .legend-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .legend-btn.active {
+      background: rgba(156, 39, 176, 0.06);
+      border-color: var(--purple-accent);
+      color: #fff;
+      box-shadow: var(--border-glow);
+    }
+
+    .legend-btn.active.dna { border-color: var(--purple-accent); color: var(--purple-accent); }
+    .legend-btn.active.organelles { border-color: var(--green-accent); color: var(--green-accent); }
+    .legend-btn.active.ribosomes { border-color: var(--cyan-accent); color: var(--cyan-accent); }
+    .legend-btn.active.envelope { border-color: var(--amber-accent); color: var(--amber-accent); }
+
+    .legend-btn:after {
+      content: "→";
+      opacity: 0.3;
+      font-weight: bold;
+      transition: transform 0.2s ease;
+    }
+
+    .legend-btn:hover:after {
+      opacity: 1;
+      transform: translateX(3px);
+    }
+
+    /* Inspector Drawer */
+    .organelle-drawer {
+      background: rgba(156, 39, 176, 0.03);
+      border: 1px solid rgba(156, 39, 176, 0.15);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: inset 0 0 15px rgba(156, 39, 176, 0.05);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .organelle-drawer.dna { border-color: rgba(224, 64, 251, 0.3); background: rgba(224, 64, 251, 0.02); }
+    .organelle-drawer.organelles { border-color: rgba(0, 230, 118, 0.3); background: rgba(0, 230, 118, 0.02); }
+    .organelle-drawer.ribosomes { border-color: rgba(0, 229, 255, 0.3); background: rgba(0, 229, 255, 0.02); }
+    .organelle-drawer.envelope { border-color: rgba(255, 179, 0, 0.3); background: rgba(255, 179, 0, 0.02); }
+
+    .organelle-name {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--purple-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .organelle-drawer.dna .organelle-name { color: var(--purple-accent); }
+    .organelle-drawer.organelles .organelle-name { color: var(--green-accent); }
+    .organelle-drawer.ribosomes .organelle-name { color: var(--cyan-accent); }
+    .organelle-drawer.envelope .organelle-name { color: var(--amber-accent); }
+
+    .organelle-badge {
+      align-self: flex-start;
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .organelle-drawer.dna .organelle-badge { background: rgba(224, 64, 251, 0.1); color: var(--purple-accent); border-color: rgba(224, 64, 251, 0.2); }
+    .organelle-drawer.organelles .organelle-badge { background: rgba(0, 230, 118, 0.1); color: var(--green-accent); border-color: rgba(0, 230, 118, 0.2); }
+    .organelle-drawer.ribosomes .organelle-badge { background: rgba(0, 229, 255, 0.1); color: var(--cyan-accent); border-color: rgba(0, 229, 255, 0.2); }
+    .organelle-drawer.envelope .organelle-badge { background: rgba(255, 179, 0, 0.1); color: var(--amber-accent); border-color: rgba(255, 179, 0, 0.2); }
+
+    @keyframes slideIn {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* QUIZ SYSTEM */
+    .quiz-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-progress {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .quiz-progress-bar {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .quiz-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--purple-accent);
+      transition: width 0.3s ease;
+    }
+
+    .quiz-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-question {
+      font-size: 0.85rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: #fff;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quiz-opt-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 10px;
+      color: var(--text-main);
+      text-align: left;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .quiz-opt-btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-opt-btn.correct {
+      background: rgba(0, 230, 118, 0.15);
+      border-color: var(--green-accent);
+      color: var(--green-accent);
+      font-weight: bold;
+    }
+
+    .quiz-opt-btn.wrong {
+      background: rgba(255, 82, 82, 0.15);
+      border-color: #ff5252;
+      color: #ff5252;
+    }
+
+    .quiz-feedback {
+      font-size: 0.75rem;
+      line-height: 1.4;
+      color: var(--text-muted);
+      min-height: 34px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 10px;
+    }
+
+    .quiz-results-card {
+      text-align: center;
+      padding: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .quiz-score-circle {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(156, 39, 176, 0.1);
+      border: 3px solid var(--purple-accent);
+      box-shadow: var(--border-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--purple-accent);
+    }
+
+    /* Scrollbar customization */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .main-container {
+        grid-template-columns: 260px 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
+        overflow-y: auto;
+      }
+      body {
+        overflow-y: auto;
+        height: auto;
+      }
+      header {
+        position: sticky;
+        top: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mobile-warning {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Warning overlay for mobile screens -->
+  <div class="mobile-warning" id="mobileWarning">
+    <div class="logo-icon">🧬</div>
+    <p>This comparison simulation requires a tablet or desktop browser screen for high-fidelity cell diagrams.</p>
+  </div>
+
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">🧬</div>
+      <h1>PROKARYOTE VS EUKARYOTE</h1>
+    </div>
+    <span class="nav-badge">Class 9 Biology Lab</span>
+  </header>
+
+  <main class="main-container">
+    
+    <!-- LEFT PANEL: CONTROLS & COMPARISONS -->
+    <section class="glass-panel" id="leftPanel">
+      <div class="panel-header">
+        <div class="panel-title">🎛️ Contrast Filters</div>
+      </div>
+      
+      <div class="panel-content">
+        <!-- Highlight category selection -->
+        <div class="control-section">
+          <div class="control-label">1. Select Highlight Feature</div>
+          <div class="highlight-list">
+            <button class="hl-btn active dna" id="btn_dna" onclick="setHighlight('dna')">
+              <span>Genetic Material</span>
+              <span class="hl-badge">Nucleoid vs Nucleus</span>
+            </button>
+            <button class="hl-btn organelles" id="btn_organelles" onclick="setHighlight('organelles')">
+              <span>Cell Organelles</span>
+              <span class="hl-badge">Absent vs Present</span>
+            </button>
+            <button class="hl-btn ribosomes" id="btn_ribosomes" onclick="setHighlight('ribosomes')">
+              <span>Ribosomes</span>
+              <span class="hl-badge">70S (Small) vs 80S</span>
+            </button>
+            <button class="hl-btn envelope" id="btn_envelope" onclick="setHighlight('envelope')">
+              <span>Outer Envelope</span>
+              <span class="hl-badge">Cell Wall & Capsule</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Scale Toggle -->
+        <div class="control-section">
+          <div class="control-label">2. Relative Scale Comparison</div>
+          <div class="switch-container">
+            <span class="switch-label" style="color:var(--amber-accent);">True Relative Scale (1/10 size)</span>
+            <label class="switch">
+              <input type="checkbox" id="scaleToggle" onchange="toggleRelativeScale(this.checked)">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <div class="control-label">Simulation Variables</div>
+          
+          <!-- Animation Sound FX Toggle -->
+          <div class="switch-container">
+            <span class="switch-label">Synthesizer Sound FX</span>
+            <label class="switch">
+              <input type="checkbox" checked id="soundToggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTER PANEL: DUAL CELL VIEWPORT -->
+    <section class="viewport-container" id="centerPanel" tabindex="0">
+      <canvas id="viewportCanvas" width="800" height="600"></canvas>
+      
+      <!-- HUD Overlays -->
+      <div class="hud-element hud-top-left" id="hudStatus">CELL COMPARISON: DNA LAYOUT</div>
+      <div class="hud-element hud-top-right">
+        <div>HIGHLIGHT MODE: <span id="hudHighlight" style="color:var(--purple-accent); font-weight:bold; text-transform: uppercase;">GENETIC MATERIAL</span></div>
+        <div style="margin-top: 4px;">SCALE RATIO: <span id="hudRatio" style="color:var(--amber-accent); font-weight:bold;">1:1 (DIAGRAM)</span></div>
+      </div>
+      <div class="hud-element hud-bottom-left">
+        <div id="hudCellLabel">Left: Prokaryote (Bacterium) | Right: Eukaryote (Animal Cell)</div>
+        <div class="scale-bar-line" id="hudScaleBar"></div>
+      </div>
+      <div class="hud-element hud-bottom-right">
+        <div>PROKARYOTE SIZE: <span id="hudProSize">~2 µm</span></div>
+        <div style="margin-top: 4px;" id="hudEukSize">EUKARYOTE SIZE: ~20 µm</div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: COMPONENT INFO & COMPARATIVE Legend / QUIZ -->
+    <section class="glass-panel" id="rightPanel">
+      <div class="tab-header">
+        <button class="tab-btn active" id="btnTabLegend" onclick="switchTab('legend')">📖 Inspector</button>
+        <button class="tab-btn" id="btnTabQuiz" onclick="switchTab('quiz')">✍️ Knowledge Quiz</button>
+      </div>
+      
+      <div class="panel-content">
+        <!-- TAB 1: INSPECTOR & LEGEND -->
+        <div class="tab-pane active" id="paneLegend">
+          <div class="info-header">
+            <span class="info-tag" id="levelScaleBadge">Feature Contrast</span>
+            <h3 class="level-info-title" id="levelTitle">Genetic Material</h3>
+            <div class="detail-text" id="levelDescription">
+              DNA structure and storage is a key difference. In prokaryotes, DNA is a naked circular strand free-floating in the <strong>Nucleoid</strong> region. Eukaryotes pack DNA into linear chromosomes bound inside a double-membrane **Nucleus**.
+            </div>
+          </div>
+
+          <div id="legendWrapper" style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="control-label">Structure Comparisons (Inspect)</div>
+            <div class="legend-list">
+              <button class="legend-btn" id="lbl_dna" onclick="selectComponent('dna')">Genetic DNA Storage</button>
+              <button class="legend-btn" id="lbl_organelles" onclick="selectComponent('organelles')">Membrane Organelles</button>
+              <button class="legend-btn" id="lbl_ribosomes" onclick="selectComponent('ribosomes')">Cellular Ribosomes</button>
+              <button class="legend-btn" id="lbl_envelope" onclick="selectComponent('envelope')">Cell Wall & Envelopes</button>
+            </div>
+          </div>
+
+          <!-- Description Details Drawer -->
+          <div class="organelle-drawer" id="organelleDrawer" style="display: none;">
+            <h4 class="organelle-name" id="drawerOrganelleName">Component Name</h4>
+            <span class="organelle-badge" id="drawerOrganelleBadge">Grade 9 STC Syllabus</span>
+            <p class="detail-text" id="drawerOrganelleDesc">Details about structural composition go here.</p>
+            <button class="btn" style="padding: 6px 10px; font-size: 0.7rem; margin-top: 4px;" onclick="closeOrganelleDrawer()">Close Inspector</button>
+          </div>
+        </div>
+
+        <!-- TAB 2: KNOWLEDGE QUIZ -->
+        <div class="tab-pane" id="paneQuiz">
+          <div class="quiz-container" id="quizActiveContainer">
+            <div class="quiz-progress">
+              <span>Question <span id="quizCurrentNum">1</span> of 5</span>
+              <span>Score: <span id="quizScore">0</span></span>
+            </div>
+            <div class="quiz-progress-bar">
+              <div class="quiz-progress-fill" id="quizProgressFill"></div>
+            </div>
+            
+            <div class="quiz-card">
+              <div class="quiz-question" id="quizQuestionText">Question text goes here.</div>
+              <div class="quiz-options" id="quizOptionsContainer">
+                <!-- Buttons dynamically loaded -->
+              </div>
+            </div>
+            <div class="quiz-feedback" id="quizFeedbackText">Select an answer above to see explanation.</div>
+            <button class="btn btn-purple" style="display:none;" id="btnNextQuiz" onclick="nextQuestion()">Next Question</button>
+          </div>
+
+          <!-- Quiz Completion Card -->
+          <div class="quiz-results-card" id="quizResultsContainer" style="display: none;">
+            <h4>Lab Challenge Complete!</h4>
+            <div class="quiz-score-circle" id="quizFinalScore">4/5</div>
+            <p class="detail-text" id="quizResultsEval">Excellent job! You successfully understand the structural contrasts between prokaryotes and eukaryotes.</p>
+            <button class="btn btn-purple" style="width: 100%; margin-top: 10px;" onclick="resetQuiz()">Try Quiz Again</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* ----------------------------------------------------
+       AUDIO SYSTEM (WEB AUDIO API SYNTHESIZER)
+       ---------------------------------------------------- */
+    let audioCtx = null;
+    const soundToggle = document.getElementById('soundToggle');
+
+    function playSound(type, pitchModifier = 1.0) {
+      if (!soundToggle.checked) return;
+      
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        
+        const now = audioCtx.currentTime;
+        
+        if (type === 'click') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(400 * pitchModifier, now);
+          osc.frequency.exponentialRampToValueAtTime(700 * pitchModifier, now + 0.04);
+          gain.gain.setValueAtTime(0.005, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.04);
+        } else if (type === 'scale') {
+          // Ascending or descending synth slide
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(150 * pitchModifier, now);
+          osc.frequency.linearRampToValueAtTime(250 * pitchModifier, now + 0.2);
+          gain.gain.setValueAtTime(0.015, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        } else if (type === 'correct') {
+          const gain = audioCtx.createGain();
+          gain.gain.setValueAtTime(0.01, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+          gain.connect(audioCtx.destination);
+          
+          [523, 659, 784].forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+            osc.connect(gain);
+            osc.start(now + idx * 0.06);
+            osc.stop(now + 0.35);
+          });
+        } else if (type === 'wrong') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.linearRampToValueAtTime(95, now + 0.22);
+          gain.gain.setValueAtTime(0.012, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.22);
+        }
+      } catch (e) {
+        console.warn('Audio Synthesis restrictions active.', e);
+      }
+    }
+
+    /* ----------------------------------------------------
+       SCIENTIFIC METADATA FOR COMPARISON INSPECTOR
+       ---------------------------------------------------- */
+    const componentDatabase = {
+      dna: {
+        name: "Genetic DNA Storage",
+        desc: "<strong>Prokaryotes (Nucleoid)</strong>: Free-floating, single circular loop of double-stranded DNA not enclosed by any membrane. Additional small circular DNA loops called <strong>plasmids</strong> are also present.<br><br><strong>Eukaryotes (Nucleus)</strong>: DNA is linear, wrapped around histone proteins to form chromatin, and locked securely inside a double-membrane **Nucleus** envelope.",
+        badge: "Nucleoid vs Nucleus"
+      },
+      organelles: {
+        name: "Membrane-bound Organelles",
+        desc: "<strong>Prokaryotes</strong>: Completely lack membrane-bound compartments (no mitochondria, chloroplasts, endoplasmic reticulum, or Golgi apparatus). Metabolic processes occur directly in the cytoplasm or along foldings of the cell membrane.<br><br><strong>Eukaryotes</strong>: Feature specialized membrane compartments like **Mitochondria** (aerobic respiration), **Endoplasmic Reticulum** (lipid/protein transport), and **Golgi Complex** (sorting).",
+        badge: "Absent vs Present"
+      },
+      ribosomes: {
+        name: "Ribosomes",
+        desc: "<strong>Prokaryotes (70S Ribosomes)</strong>: Scattered freely in cytoplasm. They are smaller and less complex, yet perform the exact same core function of protein synthesis.<br><br><strong>Eukaryotes (80S Ribosomes)</strong>: Larger, heavier, and more complex. They are found scattered freely in the cytoplasm and also docked on the membranes of the **Rough Endoplasmic Reticulum**.",
+        badge: "70S vs 80S Scale"
+      },
+      envelope: {
+        name: "Cell Envelope Layers",
+        desc: "<strong>Prokaryotes</strong>: Possess a complex envelope containing a **peptidoglycan cell wall** (rigid layer) and often an outermost sticky **Capsule** that protects against drying and host immune systems.<br><br><strong>Eukaryotes</strong>: Animal cells have only a **Plasma Membrane** (no cell wall). Plant/Fungal cells do have a cell wall, but it is composed of **cellulose** or chitin, never peptidoglycan.",
+        badge: "Peptidoglycan Wall vs Membrane"
+      }
+    };
+
+    /* ----------------------------------------------------
+       SIMULATION STATE & VARIABLES
+       ---------------------------------------------------- */
+    let activeHighlight = 'dna'; // 'dna', 'organelles', 'ribosomes', 'envelope'
+    let isTrueScale = false;
+    let timeTicker = 0;
+    
+    // Scale animation variables
+    let proScale = 1.0;
+    let proScaleTarget = 1.0;
+    
+    let selectedComponentId = null;
+
+    // Canvas DOM elements
+    const canvas = document.getElementById('viewportCanvas');
+    const ctx = canvas.getContext('2d');
+    const scaleToggle = document.getElementById('scaleToggle');
+    const hudHighlight = document.getElementById('hudHighlight');
+    const hudRatio = document.getElementById('hudRatio');
+    const hudStatus = document.getElementById('hudStatus');
+
+    const levelTitle = document.getElementById('levelTitle');
+    const levelScaleBadge = document.getElementById('levelScaleBadge');
+    const levelDescription = document.getElementById('levelDescription');
+    const organelleDrawer = document.getElementById('organelleDrawer');
+    const drawerOrganelleName = document.getElementById('drawerOrganelleName');
+    const drawerOrganelleDesc = document.getElementById('drawerOrganelleDesc');
+    const drawerOrganelleBadge = document.getElementById('drawerOrganelleBadge');
+
+    /* ----------------------------------------------------
+       CONTROLLER EVENT FUNCTIONS
+       ---------------------------------------------------- */
+    function setHighlight(mode) {
+      activeHighlight = mode;
+      
+      // Update sidebar buttons
+      document.querySelectorAll('.hl-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`btn_${mode}`).classList.add('active');
+
+      playSound('click', mode === 'dna' ? 1.0 : mode === 'organelles' ? 1.15 : mode === 'ribosomes' ? 1.3 : 0.85);
+      
+      // Sync HUD and Inspector
+      hudHighlight.textContent = mode.replace('_', ' ');
+      
+      if (mode === 'dna') {
+        hudStatus.textContent = "CELL COMPARISON: DNA LAYOUT";
+      } else if (mode === 'organelles') {
+        hudStatus.textContent = "CELL COMPARISON: ORGANELLES";
+      } else if (mode === 'ribosomes') {
+        hudStatus.textContent = "CELL COMPARISON: RIBOSOME STRUCTURES";
+      } else {
+        hudStatus.textContent = "CELL COMPARISON: OUTSIDE ENVELOPES";
+      }
+
+      if (!selectedComponentId) {
+        const data = componentDatabase[mode];
+        levelTitle.textContent = data.name;
+        levelScaleBadge.textContent = data.badge;
+        levelDescription.innerHTML = data.desc;
+      }
+    }
+
+    function toggleRelativeScale(checked) {
+      isTrueScale = checked;
+      
+      if (isTrueScale) {
+        proScaleTarget = 0.18; // Shrink prokaryote
+        hudRatio.textContent = "1:10 (TRUE SCALE)";
+        playSound('scale', 0.8);
+      } else {
+        proScaleTarget = 1.0;  // Reset diagram scale
+        hudRatio.textContent = "1:1 (DIAGRAM)";
+        playSound('scale', 1.25);
+      }
+    }
+
+    /* ----------------------------------------------------
+       INSPECTOR & LEGEND
+       ---------------------------------------------------- */
+    function selectComponent(id) {
+      document.querySelectorAll('.legend-btn').forEach(btn => btn.classList.remove('active'));
+      selectedComponentId = id;
+      
+      if (id) {
+        document.getElementById(`lbl_${id}`).classList.add(`active`);
+        
+        // Match drawer styles
+        organelleDrawer.className = "organelle-drawer " + id;
+        
+        const data = componentDatabase[id];
+        drawerOrganelleName.textContent = data.name;
+        drawerOrganelleBadge.textContent = data.badge;
+        drawerOrganelleDesc.innerHTML = data.desc;
+        
+        organelleDrawer.style.display = 'flex';
+        setHighlight(id); // auto-highlight the comparative feature on the cells!
+      } else {
+        organelleDrawer.style.display = 'none';
+      }
+    }
+
+    function closeOrganelleDrawer() {
+      selectComponent(null);
+      playSound('click', 0.95);
+    }
+
+    /* ----------------------------------------------------
+       QUIZ SYSTEM LOGIC
+       ---------------------------------------------------- */
+    const quizQuestions = [
+      {
+        question: "Which of the following describes the DNA of a prokaryotic cell?",
+        options: [
+          "Linear chromosomes housed inside a nucleus membrane",
+          "A single, circular DNA loop free-floating in the nucleoid region",
+          "There is no DNA or genetic material present in prokaryotes",
+          "DNA locked inside mitochondria membranes"
+        ],
+        correct: 1,
+        explanation: "Prokaryotes lack a true nucleus. Their circular DNA loop floats freely in the cytoplasm in a region called the nucleoid."
+      },
+      {
+        question: "Which organelle would you expect to find inside an animal cell but NOT inside a bacterial cell?",
+        options: [
+          "Plasma membrane",
+          "Ribosomes",
+          "Mitochondria",
+          "Cytoplasm"
+        ],
+        correct: 2,
+        explanation: "Correct! Mitochondria are membrane-bound organelles. Prokaryotes lack all membrane-bound compartments, whereas eukaryotes contain them."
+      },
+      {
+        question: "Which ribosome type is found in eukaryotic cells vs prokaryotic cells?",
+        options: [
+          "Eukaryotes have smaller 70S ribosomes; prokaryotes have larger 80S ribosomes.",
+          "Both cell types possess identical 80S ribosome structures.",
+          "Eukaryotes possess 80S ribosomes; prokaryotes possess smaller 70S ribosomes.",
+          "Prokaryotic ribosomes are bound to rough ER membranes."
+        ],
+        correct: 2,
+        explanation: "Eukaryotes have larger 80S ribosomes (free & ER-docked). Prokaryotes have smaller 70S ribosomes scattered in cytosol."
+      },
+      {
+        question: "What biochemical compound forms the cell wall of bacterial cells (prokaryotes)?",
+        options: [
+          "Cellulose",
+          "Peptidoglycan",
+          "Phospholipids",
+          "Starch polymer"
+        ],
+        correct: 1,
+        explanation: "Bacterial cell walls are made of peptidoglycan. In contrast, plant cell walls are made of cellulose, and animal cells have no cell wall."
+      },
+      {
+        question: "Roughly how much smaller is a prokaryotic cell compared to a typical eukaryotic cell?",
+        options: [
+          "They are exactly the same average size.",
+          "Prokaryotes are about 10 times smaller (2 µm vs 20 µm).",
+          "Prokaryotes are 1000 times larger.",
+          "Eukaryotes are only smaller under hypotonic conditions."
+        ],
+        correct: 1,
+        explanation: "Prokaryotes are small (1-10 µm) and typically fit at about 1/10th the diameter scale of eukaryotic cells (10-100 µm)."
+      }
+    ];
+
+    let currentQuestionIdx = 0;
+    let quizScoreVal = 0;
+    let answered = false;
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      
+      if (tab === 'legend') {
+        document.getElementById('btnTabLegend').classList.add('active');
+        document.getElementById('paneLegend').classList.add('active');
+      } else {
+        document.getElementById('btnTabQuiz').classList.add('active');
+        document.getElementById('paneQuiz').classList.add('active');
+        loadQuizQuestion();
+      }
+      playSound('click');
+    }
+
+    function loadQuizQuestion() {
+      answered = false;
+      document.getElementById('btnNextQuiz').style.display = 'none';
+      document.getElementById('quizFeedbackText').textContent = "Select an answer above to see explanation.";
+      document.getElementById('quizFeedbackText').style.color = 'var(--text-muted)';
+      
+      const q = quizQuestions[currentQuestionIdx];
+      document.getElementById('quizQuestionText').textContent = q.question;
+      document.getElementById('quizCurrentNum').textContent = (currentQuestionIdx + 1);
+      document.getElementById('quizScore').textContent = quizScoreVal;
+      
+      const progressPct = (currentQuestionIdx / quizQuestions.length) * 100;
+      document.getElementById('quizProgressFill').style.width = `${progressPct}%`;
+
+      const optionsBox = document.getElementById('quizOptionsContainer');
+      optionsBox.innerHTML = '';
+      
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-opt-btn';
+        btn.innerHTML = opt;
+        btn.onclick = () => selectOption(idx, btn);
+        optionsBox.appendChild(btn);
+      });
+    }
+
+    function selectOption(selectedIdx, btnElement) {
+      if (answered) return;
+      answered = true;
+      
+      const q = quizQuestions[currentQuestionIdx];
+      const optionButtons = document.querySelectorAll('.quiz-opt-btn');
+      
+      if (selectedIdx === q.correct) {
+        btnElement.classList.add('correct');
+        document.getElementById('quizFeedbackText').innerHTML = `<strong>Correct!</strong> ` + q.explanation;
+        document.getElementById('quizFeedbackText').style.color = 'var(--green-accent)';
+        quizScoreVal++;
+        document.getElementById('quizScore').textContent = quizScoreVal;
+        playSound('correct');
+      } else {
+        btnElement.classList.add('wrong');
+        optionButtons[q.correct].classList.add('correct');
+        document.getElementById('quizFeedbackText').innerHTML = `<strong>Incorrect.</strong> ` + q.explanation;
+        document.getElementById('quizFeedbackText').style.color = '#ff5252';
+        playSound('wrong');
+      }
+
+      document.getElementById('btnNextQuiz').style.display = 'block';
+      if (currentQuestionIdx === quizQuestions.length - 1) {
+        document.getElementById('btnNextQuiz').textContent = "Finish Quiz";
+      } else {
+        document.getElementById('btnNextQuiz').textContent = "Next Question";
+      }
+    }
+
+    function nextQuestion() {
+      playSound('click');
+      if (currentQuestionIdx < quizQuestions.length - 1) {
+        currentQuestionIdx++;
+        loadQuizQuestion();
+      } else {
+        document.getElementById('quizActiveContainer').style.display = 'none';
+        document.getElementById('quizResultsContainer').style.display = 'flex';
+        
+        document.getElementById('quizFinalScore').textContent = `${quizScoreVal}/${quizQuestions.length}`;
+        const pct = (quizScoreVal / quizQuestions.length) * 100;
+        
+        let evalText = "Review the inspector comparison details and try again!";
+        if (pct >= 80) {
+          evalText = "Outstanding! You fully grasp Eukaryotic vs Prokaryotic scale, DNA, and organelles differences.";
+        } else if (pct >= 60) {
+          evalText = "Good job! Read the comparison inspector tags to reinforce specific knowledge details.";
+        }
+        document.getElementById('quizResultsEval').textContent = evalText;
+      }
+    }
+
+    function resetQuiz() {
+      playSound('click');
+      currentQuestionIdx = 0;
+      quizScoreVal = 0;
+      document.getElementById('quizActiveContainer').style.display = 'flex';
+      document.getElementById('quizResultsContainer').style.display = 'none';
+      loadQuizQuestion();
+    }
+
+    /* ----------------------------------------------------
+       CANVAS DRAWING METHODS (PROKARYOTE VS EUKARYOTE)
+       ---------------------------------------------------- */
+    function drawProkaryote(x, y, scale) {
+      // Draw rod-shaped bacterium (bacillus)
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(scale, scale);
+
+      const length = 120;
+      const width = 60;
+
+      // 1. CAPSULE - Outermost layer (Sticky coat, yellow/brown)
+      ctx.strokeStyle = activeHighlight === 'envelope' ? 'var(--amber-accent)' : 'rgba(255, 171, 64, 0.4)';
+      ctx.fillStyle = 'rgba(255, 171, 64, 0.08)';
+      ctx.lineWidth = activeHighlight === 'envelope' ? 6 : 2;
+      drawCapsuleShape(length + 8, width + 8);
+      ctx.fill();
+      ctx.stroke();
+
+      // Draw Pili/Fimbriae (tiny external hairs)
+      ctx.strokeStyle = 'rgba(255, 171, 64, 0.35)';
+      ctx.lineWidth = 1.5;
+      for (let angle = 0; angle < Math.PI * 2; angle += 0.25) {
+        const hlen = Math.sin(angle * 10 + timeTicker * 0.1) * 3 + 10;
+        const hx1 = (length/2) * Math.cos(angle);
+        const hy1 = (width/2) * Math.sin(angle);
+        const hx2 = ((length/2) + hlen) * Math.cos(angle);
+        const hy2 = ((width/2) + hlen) * Math.sin(angle);
+        ctx.beginPath();
+        ctx.moveTo(hx1, hy1);
+        ctx.lineTo(hx2, hy2);
+        ctx.stroke();
+      }
+
+      // Draw flagellum (wavy tail at back)
+      ctx.strokeStyle = 'rgba(255, 171, 64, 0.65)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-length/2 - 4, 0);
+      for (let fx = 0; fx < 80; fx += 5) {
+        const fy = Math.sin(fx * 0.08 - timeTicker * 0.15) * 12;
+        ctx.lineTo(-length/2 - 4 - fx, fy);
+      }
+      ctx.stroke();
+
+      // 2. CELL WALL - Peptidoglycan (rigid layer, green)
+      ctx.strokeStyle = activeHighlight === 'envelope' ? 'var(--amber-accent)' : 'rgba(0, 230, 118, 0.5)';
+      ctx.lineWidth = activeHighlight === 'envelope' ? 5 : 2;
+      drawCapsuleShape(length, width);
+      ctx.stroke();
+
+      // 3. PLASMA MEMBRANE - Inner boundary (cyan)
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.6)';
+      ctx.lineWidth = 2;
+      drawCapsuleShape(length - 6, width - 6);
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.03)';
+      ctx.fill();
+      ctx.stroke();
+
+      // 4. CYTOPLASM & RIBOSOMES (70S - tiny dots)
+      // Ribosomes (tiny yellow dots)
+      ctx.fillStyle = activeHighlight === 'ribosomes' ? 'var(--cyan-accent)' : 'rgba(255, 255, 255, 0.5)';
+      const dotRad = activeHighlight === 'ribosomes' ? 2.5 : 1.5;
+      for (let rx = -length/2 + 15; rx < length/2 - 15; rx += 18) {
+        const ry = (Math.sin(rx) * width * 0.3) + (Math.cos(rx*2)*3);
+        ctx.beginPath();
+        ctx.arc(rx, ry, dotRad, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(rx + 5, ry + 6, dotRad, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      // 5. NUCLEOID - Naked circular DNA (coiled purple string in center)
+      ctx.strokeStyle = activeHighlight === 'dna' ? 'var(--purple-accent)' : 'rgba(224, 64, 251, 0.55)';
+      ctx.lineWidth = activeHighlight === 'dna' ? 4 : 2;
+      ctx.beginPath();
+      // Coiled center loop
+      ctx.moveTo(-30, -5);
+      ctx.bezierCurveTo(-10, -25, 20, 25, 30, -10);
+      ctx.bezierCurveTo(45, -15, 10, -5, 5, 15);
+      ctx.bezierCurveTo(-15, 25, -25, -15, -30, -5);
+      ctx.stroke();
+
+      // Plasmids (small DNA rings)
+      ctx.strokeStyle = activeHighlight === 'dna' ? 'var(--purple-accent)' : 'rgba(224, 64, 251, 0.4)';
+      ctx.lineWidth = activeHighlight === 'dna' ? 3 : 1.5;
+      ctx.beginPath();
+      ctx.arc(35, 15, 8, 0, 2 * Math.PI);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(-35, 12, 6, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      // Feature Labeling Highlights
+      if (activeHighlight === 'dna') {
+        drawGlowCircle(0, 0, 48, 'rgba(224, 64, 251, 0.15)');
+        ctx.font = '10px JetBrains Mono';
+        ctx.fillStyle = 'var(--purple-accent)';
+        ctx.fillText("NUCLEOID (DNA)", -42, -35);
+        ctx.fillText("(No Nuclear Membrane)", -60, 44);
+      } else if (activeHighlight === 'organelles') {
+        // Pointing to empty cytoplasm
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillStyle = '#ff5252';
+        ctx.fillText("NO MEMBRANE-BOUND ORGANELLES", -70, -35);
+      } else if (activeHighlight === 'ribosomes') {
+        ctx.font = '10px JetBrains Mono';
+        ctx.fillStyle = 'var(--cyan-accent)';
+        ctx.fillText("70S RIBOSOMES (SMALL)", -58, -35);
+      } else if (activeHighlight === 'envelope') {
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillStyle = 'var(--amber-accent)';
+        ctx.fillText("Capsule (outer)", -60, -42);
+        ctx.fillText("Cell Wall (middle)", -60, 45);
+        ctx.fillText("Plasma Membrane (inner)", -68, 56);
+      }
+
+      ctx.restore();
+    }
+
+    function drawCapsuleShape(l, w) {
+      // Helper to draw capsule (stadium) shape centered
+      ctx.beginPath();
+      ctx.arc(l/2 - w/2, 0, w/2, -Math.PI/2, Math.PI/2);
+      ctx.lineTo(-l/2 + w/2, w/2);
+      ctx.arc(-l/2 + w/2, 0, w/2, Math.PI/2, -Math.PI/2);
+      ctx.closePath();
+    }
+
+    function drawEukaryote(x, y, scale) {
+      // Draw Eukaryote animal cell
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(scale, scale);
+
+      const radius = 115;
+
+      // 1. PLASMA MEMBRANE (outer boundary, cyan)
+      ctx.beginPath();
+      // Wave outline
+      for (let i = 0; i < 90; i++) {
+        const a = (i * Math.PI * 2) / 90;
+        const w = Math.sin(timeTicker * 0.03 + a * 5) * 1.5;
+        const px = (radius + w) * Math.cos(a);
+        const py = (radius + w) * Math.sin(a);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      
+      ctx.strokeStyle = activeHighlight === 'envelope' ? 'var(--amber-accent)' : 'rgba(0, 229, 255, 0.65)';
+      ctx.lineWidth = activeHighlight === 'envelope' ? 5 : 2.5;
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.02)';
+      ctx.fill();
+      ctx.stroke();
+
+      // 2. CYTOPLASM & ORGANELLES (Mitochondria, ER, Golgi)
+      // Endoplasmic Reticulum (purple folded channels wrapping nucleus)
+      ctx.strokeStyle = activeHighlight === 'organelles' ? 'var(--green-accent)' : 'rgba(213, 0, 249, 0.2)';
+      ctx.lineWidth = activeHighlight === 'organelles' ? 4 : 2;
+      ctx.beginPath();
+      ctx.arc(0, 0, 48, Math.PI * 0.6, Math.PI * 1.4);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(0, 0, 56, Math.PI * 0.65, Math.PI * 1.35);
+      ctx.stroke();
+
+      // Mitochondria (orange double ovals)
+      ctx.fillStyle = activeHighlight === 'organelles' ? 'var(--green-accent)' : 'rgba(255, 171, 64, 0.7)';
+      ctx.beginPath();
+      ctx.ellipse(-50, 45, 14, 6, 0.8, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(45, -55, 14, 6, -0.6, 0, 2 * Math.PI);
+      ctx.fill();
+
+      // Golgi Stack (greenish plates)
+      ctx.strokeStyle = activeHighlight === 'organelles' ? 'var(--green-accent)' : 'rgba(0, 230, 118, 0.35)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(55, 45, 20, Math.PI * 0.8, Math.PI * 1.4);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(62, 43, 20, Math.PI * 0.85, Math.PI * 1.35);
+      ctx.stroke();
+
+      // 3. RIBOSOMES (80S - larger dots free and ER bound)
+      ctx.fillStyle = activeHighlight === 'ribosomes' ? 'var(--cyan-accent)' : 'rgba(255, 255, 255, 0.5)';
+      const dotRad = activeHighlight === 'ribosomes' ? 3.0 : 2.0;
+      
+      // Free ribosomes
+      const ribosomeSpots = [
+        {x:-60, y:-30}, {x:-75, y:-10}, {x:20, y:65}, {x:-20, y:-70}
+      ];
+      ribosomeSpots.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, dotRad, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+
+      // ER bound ribosomes
+      if (activeHighlight === 'ribosomes') {
+        const erSpots = [
+          {x:-38, y:-24}, {x:-46, y:-10}, {x:-38, y:24}, {x:-48, y:12}
+        ];
+        erSpots.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, dotRad, 0, 2 * Math.PI);
+          ctx.fill();
+        });
+      }
+
+      // 4. TRUE NUCLEUS (with envelope boundary, nucleolus, linear DNA)
+      ctx.save();
+      ctx.strokeStyle = activeHighlight === 'dna' ? 'var(--purple-accent)' : 'rgba(213, 0, 249, 0.7)';
+      ctx.lineWidth = activeHighlight === 'dna' ? 4 : 2;
+      ctx.fillStyle = 'rgba(213, 0, 249, 0.08)';
+      
+      // Nuclear envelope (double membrane circle centered)
+      ctx.beginPath();
+      ctx.arc(0, 0, 36, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.stroke();
+
+      // Nucleolus inside nucleus
+      ctx.beginPath();
+      ctx.arc(-8, -6, 9, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(213, 0, 249, 0.4)';
+      ctx.fill();
+
+      // Linear DNA chromatin strands
+      ctx.strokeStyle = 'rgba(213, 0, 249, 0.3)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-15, 10);
+      ctx.lineTo(15, -10);
+      ctx.moveTo(-10, -15);
+      ctx.lineTo(15, 15);
+      ctx.stroke();
+      ctx.restore();
+
+      // Feature Labeling Highlights
+      if (activeHighlight === 'dna') {
+        drawGlowCircle(0, 0, 38, 'rgba(224, 64, 251, 0.15)');
+        ctx.font = '10px JetBrains Mono';
+        ctx.fillStyle = 'var(--purple-accent)';
+        ctx.fillText("TRUE NUCLEUS (DNA)", -50, -48);
+        ctx.fillText("(Double Membrane Bound)", -65, 48);
+      } else if (activeHighlight === 'organelles') {
+        drawGlowCircle(-50, 45, 16, 'rgba(0, 230, 118, 0.15)');
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillStyle = 'var(--green-accent)';
+        ctx.fillText("MEMBRANE-BOUND ORGANELLES", -68, -48);
+        ctx.fillText("Mitochondria", -80, 62);
+        ctx.fillText("Golgi Stack", 45, 72);
+      } else if (activeHighlight === 'ribosomes') {
+        ctx.font = '10px JetBrains Mono';
+        ctx.fillStyle = 'var(--cyan-accent)';
+        ctx.fillText("80S RIBOSOMES (LARGER)", -58, -48);
+      } else if (activeHighlight === 'envelope') {
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillStyle = 'var(--amber-accent)';
+        ctx.fillText("Plasma Membrane Only", -55, -125);
+        ctx.fillText("(NO CELL WALL)", -38, 134);
+      }
+
+      ctx.restore();
+    }
+
+    function drawGlowCircle(x, y, r, fillStyle) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, r + 6, 0, 2 * Math.PI);
+      ctx.fillStyle = fillStyle;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    /* ----------------------------------------------------
+       MAIN ANIMATION LOOP
+       ---------------------------------------------------- */
+    function animate() {
+      timeTicker++;
+
+      // Lerp scales smoothly
+      proScale += (proScaleTarget - proScale) * 0.08;
+
+      // Clear Canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 1. Draw Prokaryotic Cell on the Left (X: 220, Y: 300)
+      drawProkaryote(220, 300, proScale);
+
+      // 2. Draw Eukaryotic Cell on the Right (X: 580, Y: 300)
+      drawEukaryote(580, 300, 1.0);
+
+      // Draw middle divider line
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(400, 0);
+      ctx.lineTo(400, canvas.height);
+      ctx.stroke();
+
+      // Draw label overlays on canvas
+      ctx.save();
+      ctx.font = '13px Outfit';
+      ctx.fillStyle = '#fff';
+      
+      // Prokaryote header
+      ctx.fillText("PROKARYOTE (Bacterium)", 60, 35);
+      ctx.font = '10px JetBrains Mono';
+      ctx.fillStyle = 'var(--text-muted)';
+      ctx.fillText("Scale: 1-10 µm", 60, 50);
+
+      // Eukaryote header
+      ctx.font = '13px Outfit';
+      ctx.fillStyle = '#fff';
+      ctx.fillText("EUKARYOTE (Animal Cell)", 440, 35);
+      ctx.font = '10px JetBrains Mono';
+      ctx.fillStyle = 'var(--text-muted)';
+      ctx.fillText("Scale: 10-100 µm", 440, 50);
+
+      // Show comparison scale line indicators if true scale enabled
+      if (isTrueScale) {
+        ctx.strokeStyle = 'rgba(255, 179, 0, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        // Prokaryote envelope indicator
+        ctx.arc(220, 300, 24, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        ctx.font = '10px JetBrains Mono';
+        ctx.fillStyle = 'rgba(255, 179, 0, 0.95)';
+        ctx.fillText("Prokaryote is ~1/10th Eukaryote diameter", 240, 560);
+      }
+
+      ctx.restore();
+
+      requestAnimationFrame(animate);
+    }
+
+    /* ----------------------------------------------------
+       INIT ON PAGE LOAD
+       ---------------------------------------------------- */
+    window.addEventListener('load', () => {
+      setHighlight('dna');
+      animate();
+    });
+  </script>
+</body>
+</html>
