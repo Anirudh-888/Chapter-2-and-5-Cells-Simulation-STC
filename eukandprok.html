@@ -288,6 +288,12 @@
     .hl-btn.active.ribosomes { border-color: var(--cyan-accent); background: rgba(0, 229, 255, 0.1); }
     .hl-btn.active.envelope { border-color: var(--amber-accent); background: rgba(255, 179, 0, 0.1); }
 
+    .cell-focus-btn.active {
+      border-color: var(--purple-accent);
+      background: rgba(224, 64, 251, 0.1) !important;
+      box-shadow: var(--border-glow);
+    }
+
     .hl-badge {
       font-size: 0.65rem;
       font-family: var(--font-mono);
@@ -758,6 +764,25 @@
       </div>
       
       <div class="panel-content">
+        <!-- Focus Area Navigation -->
+        <div class="control-section">
+          <div class="control-label">Zoom Focus</div>
+          <div class="highlight-list">
+            <button class="hl-btn active cell-focus-btn both" id="btn_focus_both" onclick="setFocusTarget('both')">
+              <span>Compare Both</span>
+              <span class="hl-badge" style="background:rgba(255,255,255,0.08); color:#fff;">1.0x</span>
+            </button>
+            <button class="hl-btn cell-focus-btn pro" id="btn_focus_prokaryote" onclick="setFocusTarget('prokaryote')">
+              <span>Focus Prokaryote</span>
+              <span class="hl-badge">2.2x</span>
+            </button>
+            <button class="hl-btn cell-focus-btn euk" id="btn_focus_eukaryote" onclick="setFocusTarget('eukaryote')">
+              <span>Focus Eukaryote</span>
+              <span class="hl-badge">2.2x</span>
+            </button>
+          </div>
+        </div>
+
         <!-- Highlight category selection -->
         <div class="control-section">
           <div class="control-label">1. Select Highlight Feature</div>
@@ -811,6 +836,11 @@
     <!-- CENTER PANEL: DUAL CELL VIEWPORT -->
     <section class="viewport-container" id="centerPanel" tabindex="0">
       <canvas id="viewportCanvas" width="800" height="600"></canvas>
+      
+      <!-- Back button visible when zoomed in -->
+      <button id="btnZoomOut" class="btn" style="position: absolute; bottom: 70px; left: 15px; display: none; background: rgba(5,6,12,0.85); border: 1px solid var(--purple-accent); color: var(--purple-accent); z-index: 6; font-weight: bold;" onclick="setFocusTarget('both')">
+        🔍 Side-by-Side View
+      </button>
       
       <!-- HUD Overlays -->
       <div class="hud-element hud-top-left" id="hudStatus">CELL COMPARISON: DNA LAYOUT</div>
@@ -1013,6 +1043,16 @@
     let proScale = 1.0;
     let proScaleTarget = 1.0;
     
+    // Camera pan & zoom states
+    let camX = 400;
+    let camY = 300;
+    let camZoom = 1.0;
+    let targetCamX = 400;
+    let targetCamY = 300;
+    let targetCamZoom = 1.0;
+    let focusTarget = 'both'; // 'both', 'prokaryote', 'eukaryote'
+    let hoveredCell = null;
+    
     let selectedComponentId = null;
 
     // Canvas DOM elements
@@ -1076,6 +1116,99 @@
         hudRatio.textContent = "1:1 (DIAGRAM)";
         playSound('scale', 1.25);
       }
+      
+      // Dynamic camera zoom adjustment if already focused on prokaryote
+      if (focusTarget === 'prokaryote') {
+        targetCamZoom = isTrueScale ? 12.0 : 2.2;
+      }
+    }
+
+    function setFocusTarget(target) {
+      focusTarget = target;
+      
+      // Update focus buttons
+      document.querySelectorAll('.cell-focus-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.querySelector(`.cell-focus-btn.${target === 'both' ? 'both' : target === 'prokaryote' ? 'pro' : 'euk'}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const btnZoomOut = document.getElementById('btnZoomOut');
+      
+      if (target === 'both') {
+        targetCamX = 400;
+        targetCamY = 300;
+        targetCamZoom = 1.0;
+        if (btnZoomOut) btnZoomOut.style.display = 'none';
+        playSound('click', 0.9);
+      } else if (target === 'prokaryote') {
+        targetCamX = 220;
+        targetCamY = 300;
+        targetCamZoom = isTrueScale ? 12.0 : 2.2;
+        if (btnZoomOut) btnZoomOut.style.display = 'block';
+        playSound('click', 1.15);
+      } else if (target === 'eukaryote') {
+        targetCamX = 580;
+        targetCamY = 300;
+        targetCamZoom = 2.2;
+        if (btnZoomOut) btnZoomOut.style.display = 'block';
+        playSound('click', 1.1);
+      }
+    }
+
+    function handleCanvasClick(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mouseXScaled = (e.clientX - rect.left) * scaleX;
+      const mouseYScaled = (e.clientY - rect.top) * scaleY;
+      
+      // Map to world coordinates
+      const worldX = camX + (mouseXScaled - 400) / camZoom;
+      const worldY = camY + (mouseYScaled - 300) / camZoom;
+
+      const dPro = dist(worldX, worldY, 220, 300);
+      const dEuk = dist(worldX, worldY, 580, 300);
+
+      if (focusTarget === 'both') {
+        if (dPro < 120) {
+          setFocusTarget('prokaryote');
+        } else if (dEuk < 130) {
+          setFocusTarget('eukaryote');
+        }
+      } else {
+        // Zoomed in: click empty space to zoom out
+        if (focusTarget === 'prokaryote' && dPro > 160) {
+          setFocusTarget('both');
+        } else if (focusTarget === 'eukaryote' && dEuk > 180) {
+          setFocusTarget('both');
+        }
+      }
+    }
+
+    function handleCanvasMouseMove(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mouseXScaled = (e.clientX - rect.left) * scaleX;
+      const mouseYScaled = (e.clientY - rect.top) * scaleY;
+      
+      const worldX = camX + (mouseXScaled - 400) / camZoom;
+      const worldY = camY + (mouseYScaled - 300) / camZoom;
+
+      const dPro = dist(worldX, worldY, 220, 300);
+      const dEuk = dist(worldX, worldY, 580, 300);
+
+      hoveredCell = null;
+      if (focusTarget === 'both') {
+        if (dPro < 120) {
+          hoveredCell = 'prokaryote';
+        } else if (dEuk < 130) {
+          hoveredCell = 'eukaryote';
+        }
+      }
+    }
+
+    function dist(x1, y1, x2, y2) {
+      return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
     /* ----------------------------------------------------
@@ -1394,6 +1527,45 @@
         ctx.fillText("Plasma Membrane (inner)", -68, 56);
       }
 
+      // Draw high-detail labels when zoomed in
+      if (camZoom > 1.5) {
+        ctx.save();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.fillStyle = '#fff';
+        ctx.font = '8px JetBrains Mono';
+
+        // 1. Flagellum label
+        ctx.beginPath(); ctx.moveTo(-65, 0); ctx.lineTo(-100, -35); ctx.stroke();
+        ctx.fillText("FLAGELLUM (Locomotion)", -195, -38);
+
+        // 2. Capsule label
+        ctx.beginPath(); ctx.moveTo(0, -34); ctx.lineTo(-40, -70); ctx.stroke();
+        ctx.fillText("CAPSULE (Outer Coat)", -130, -73);
+
+        // 3. Cell Wall label
+        ctx.beginPath(); ctx.moveTo(40, -30); ctx.lineTo(60, -70); ctx.stroke();
+        ctx.fillText("CELL WALL (Peptidoglycan)", 65, -73);
+
+        // 4. Plasma Membrane label
+        ctx.beginPath(); ctx.moveTo(-35, 24); ctx.lineTo(-75, 65); ctx.stroke();
+        ctx.fillText("PLASMA MEMBRANE", -145, 75);
+
+        // 5. Nucleoid label
+        ctx.beginPath(); ctx.moveTo(0, 5); ctx.lineTo(40, 65); ctx.stroke();
+        ctx.fillText("NUCLEOID (Circular DNA)", 45, 75);
+
+        // 6. Plasmid label
+        ctx.beginPath(); ctx.moveTo(35, 15); ctx.lineTo(85, 45); ctx.stroke();
+        ctx.fillText("PLASMID (Extra DNA)", 90, 48);
+
+        // 7. 70S Ribosomes label
+        ctx.beginPath(); ctx.moveTo(-20, -10); ctx.lineTo(-65, -55); ctx.stroke();
+        ctx.fillText("70S RIBOSOMES", -135, -58);
+
+        ctx.restore();
+      }
+
       ctx.restore();
     }
 
@@ -1543,6 +1715,41 @@
         ctx.fillText("(NO CELL WALL)", -38, 134);
       }
 
+      // Draw high-detail labels when zoomed in
+      if (camZoom > 1.5) {
+        ctx.save();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.fillStyle = '#fff';
+        ctx.font = '8px JetBrains Mono';
+
+        // 1. Nucleus label
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-60, -75); ctx.stroke();
+        ctx.fillText("NUCLEUS (Genetic Center)", -155, -78);
+
+        // 2. Mitochondrion label
+        ctx.beginPath(); ctx.moveTo(-50, 45); ctx.lineTo(-95, 95); ctx.stroke();
+        ctx.fillText("MITOCHONDRION (ATP Power)", -200, 105);
+
+        // 3. Golgi label
+        ctx.beginPath(); ctx.moveTo(55, 45); ctx.lineTo(95, 95); ctx.stroke();
+        ctx.fillText("GOLGI COMPLEX (Packaging)", 100, 105);
+
+        // 4. ER label
+        ctx.beginPath(); ctx.moveTo(-45, -20); ctx.lineTo(-95, -45); ctx.stroke();
+        ctx.fillText("ENDOPLASMIC RETICULUM", -190, -48);
+
+        // 5. Plasma membrane label
+        ctx.beginPath(); ctx.moveTo(85, -60); ctx.lineTo(125, -95); ctx.stroke();
+        ctx.fillText("PLASMA MEMBRANE", 130, -98);
+
+        // 6. 80S Ribosomes label
+        ctx.beginPath(); ctx.moveTo(-15, -70); ctx.lineTo(35, -110); ctx.stroke();
+        ctx.fillText("80S RIBOSOMES (Large)", 40, -113);
+
+        ctx.restore();
+      }
+
       ctx.restore();
     }
 
@@ -1563,45 +1770,85 @@
 
       // Lerp scales smoothly
       proScale += (proScaleTarget - proScale) * 0.08;
+      
+      // Lerp camera panning and zoom scale dynamically
+      camX += (targetCamX - camX) * 0.08;
+      camY += (targetCamY - camY) * 0.08;
+      camZoom += (targetCamZoom - camZoom) * 0.08;
 
       // Clear Canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw middle divider line (drawn in screen space, faded out when zoomed)
+      if (camZoom < 1.15) {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(400, 0);
+        ctx.lineTo(400, canvas.height);
+        ctx.stroke();
+      }
+
+      // Apply camera view transformations
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(camZoom, camZoom);
+      ctx.translate(-camX, -camY);
+
+      // Hover glow overlays for clickable cells in 'both' view
+      if (focusTarget === 'both') {
+        if (hoveredCell === 'prokaryote') {
+          // pulsing light-green glow
+          const glow = Math.sin(timeTicker * 0.08) * 8 + 12;
+          ctx.strokeStyle = 'rgba(0, 230, 118, 0.15)';
+          ctx.lineWidth = glow;
+          ctx.beginPath();
+          ctx.arc(220, 300, 110, 0, 2 * Math.PI);
+          ctx.stroke();
+        } else if (hoveredCell === 'eukaryote') {
+          // pulsing purple glow
+          const glow = Math.sin(timeTicker * 0.08) * 8 + 12;
+          ctx.strokeStyle = 'rgba(224, 64, 251, 0.15)';
+          ctx.lineWidth = glow;
+          ctx.beginPath();
+          ctx.arc(580, 300, 135, 0, 2 * Math.PI);
+          ctx.stroke();
+        }
+      }
 
       // 1. Draw Prokaryotic Cell on the Left (X: 220, Y: 300)
       drawProkaryote(220, 300, proScale);
 
       // 2. Draw Eukaryotic Cell on the Right (X: 580, Y: 300)
-      drawEukaryote(580, 300, 1.0);
+      drawEukaryote(580, 300, 1.05);
 
-      // Draw middle divider line
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(400, 0);
-      ctx.lineTo(400, canvas.height);
-      ctx.stroke();
+      ctx.restore();
 
-      // Draw label overlays on canvas
-      ctx.save();
-      ctx.font = '13px Outfit';
-      ctx.fillStyle = '#fff';
-      
-      // Prokaryote header
-      ctx.fillText("PROKARYOTE (Bacterium)", 60, 35);
-      ctx.font = '10px JetBrains Mono';
-      ctx.fillStyle = 'var(--text-muted)';
-      ctx.fillText("Scale: 1-10 µm", 60, 50);
+      // Draw label overlays on canvas (drawn in screen space, faded out when zoomed)
+      if (camZoom < 1.15) {
+        ctx.save();
+        ctx.font = '13px Outfit';
+        ctx.fillStyle = '#fff';
+        
+        // Prokaryote header
+        ctx.fillText("PROKARYOTE (Bacterium)", 60, 35);
+        ctx.font = '10px JetBrains Mono';
+        ctx.fillStyle = 'var(--text-muted)';
+        ctx.fillText("Scale: 1-10 µm", 60, 50);
 
-      // Eukaryote header
-      ctx.font = '13px Outfit';
-      ctx.fillStyle = '#fff';
-      ctx.fillText("EUKARYOTE (Animal Cell)", 440, 35);
-      ctx.font = '10px JetBrains Mono';
-      ctx.fillStyle = 'var(--text-muted)';
-      ctx.fillText("Scale: 10-100 µm", 440, 50);
+        // Eukaryote header
+        ctx.font = '13px Outfit';
+        ctx.fillStyle = '#fff';
+        ctx.fillText("EUKARYOTE (Animal Cell)", 440, 35);
+        ctx.font = '10px JetBrains Mono';
+        ctx.fillStyle = 'var(--text-muted)';
+        ctx.fillText("Scale: 10-100 µm", 440, 50);
+        ctx.restore();
+      }
 
-      // Show comparison scale line indicators if true scale enabled
-      if (isTrueScale) {
+      // Show comparison scale line indicators if true scale enabled (drawn in screen space, faded when zoomed)
+      if (isTrueScale && camZoom < 1.15) {
+        ctx.save();
         ctx.strokeStyle = 'rgba(255, 179, 0, 0.3)';
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -1612,9 +1859,17 @@
         ctx.font = '10px JetBrains Mono';
         ctx.fillStyle = 'rgba(255, 179, 0, 0.95)';
         ctx.fillText("Prokaryote is ~1/10th Eukaryote diameter", 240, 560);
+        ctx.restore();
       }
 
-      ctx.restore();
+      // Zoom focus helper instruction overlay in HUD
+      if (focusTarget !== 'both') {
+        ctx.save();
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.fillText("[Click empty space to zoom out]", 20, canvas.height - 20);
+        ctx.restore();
+      }
 
       requestAnimationFrame(animate);
     }
@@ -1624,6 +1879,11 @@
        ---------------------------------------------------- */
     window.addEventListener('load', () => {
       setHighlight('dna');
+      
+      // Canvas Event listeners
+      canvas.addEventListener('mousemove', handleCanvasMouseMove);
+      canvas.addEventListener('mousedown', handleCanvasClick);
+      
       animate();
     });
   </script>
