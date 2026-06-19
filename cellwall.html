@@ -1,0 +1,2426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plant Cell Wall Structure & Permeability | Interactive Biology Lab</title>
+  <meta name="description" content="Explore the structural layering, rigidity, turgor pressure, and free permeability of the plant cell wall compared to the selectively permeable cell membrane underneath.">
+  
+  <!-- Google Fonts for premium UI typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #04090c;
+      --bg-panel: rgba(8, 20, 26, 0.75);
+      --bg-card: rgba(14, 30, 38, 0.5);
+      --border-color: rgba(0, 230, 118, 0.18);
+      --border-glow: 0 0 15px rgba(0, 230, 118, 0.15);
+      
+      --text-main: #e6f3ed;
+      --text-muted: #8fa69d;
+      
+      --plant-accent: #00e676;
+      --plant-glow: rgba(0, 230, 118, 0.4);
+      --cyan-accent: #00e5ff;
+      --cyan-glow: rgba(0, 229, 255, 0.4);
+      --amber-accent: #ffb300;
+      --amber-glow: rgba(255, 179, 0, 0.4);
+      --purple-accent: #e040fb;
+      --purple-glow: rgba(224, 64, 251, 0.4);
+      
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(0, 230, 118, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(10, 40, 30, 0.6) 0px, transparent 50%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Warning for mobile portrait users */
+    .mobile-warning {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #04090c;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .mobile-warning p {
+      font-size: 1.1rem;
+      color: var(--plant-accent);
+      margin-top: 15px;
+      line-height: 1.5;
+    }
+
+    /* Header Styling */
+    header {
+      background: rgba(4, 9, 12, 0.9);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      z-index: 10;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--plant-accent), var(--cyan-accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #000;
+      font-size: 1.1rem;
+      box-shadow: 0 0 15px var(--plant-glow);
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(to right, #ffffff, #8fa69d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-badge {
+      background: rgba(0, 230, 118, 0.1);
+      border: 1px solid var(--plant-accent);
+      color: var(--plant-accent);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: var(--border-glow);
+    }
+
+    /* Main Content Layout */
+    .main-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 320px 1fr 340px;
+      gap: 15px;
+      padding: 15px;
+      height: calc(100vh - 60px);
+    }
+
+    /* Panels Base (Glassmorphism) */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--plant-accent);
+      text-transform: uppercase;
+    }
+
+    .panel-content {
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Viewport Center Panel */
+    .viewport-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #020507;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9);
+      outline: none;
+    }
+
+    #viewportCanvas {
+      width: 100%;
+      height: 100%;
+      max-width: 800px;
+      max-height: 600px;
+      aspect-ratio: 4/3;
+      display: block;
+      background: transparent;
+      cursor: crosshair;
+    }
+
+    /* HUD Elements inside Viewport */
+    .hud-element {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: rgba(4, 12, 16, 0.8);
+      border: 1px solid rgba(0, 230, 118, 0.15);
+      padding: 6px 12px;
+      border-radius: 6px;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+      z-index: 5;
+    }
+
+    .hud-top-left { top: 15px; left: 15px; border-left: 3px solid var(--plant-accent); color: #fff; font-weight: bold; }
+    .hud-top-right { top: 15px; right: 15px; text-align: right; }
+    .hud-bottom-left { bottom: 15px; left: 15px; display: flex; flex-direction: column; gap: 4px; }
+    .hud-bottom-right { bottom: 15px; right: 15px; text-align: right; }
+
+    /* HUD Scale Bar indicator */
+    .scale-bar-line {
+      height: 4px;
+      background: var(--text-main);
+      width: 100px;
+      position: relative;
+      margin-top: 4px;
+      border-left: 2px solid var(--text-main);
+      border-right: 2px solid var(--text-main);
+    }
+
+    /* Control Sections */
+    .control-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Slider Styling */
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .slider-header span:last-child {
+      color: var(--plant-accent);
+      font-weight: bold;
+    }
+
+    .horizontal-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .horizontal-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--plant-accent);
+      box-shadow: 0 0 8px var(--plant-glow);
+      transition: transform 0.1s ease;
+    }
+
+    .horizontal-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Toggle Switches */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .switch-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: .3s;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 12px;
+      width: 12px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-muted);
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: rgba(0, 230, 118, 0.15);
+      border-color: var(--plant-accent);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(18px);
+      background-color: var(--plant-accent);
+      box-shadow: 0 0 8px var(--plant-glow);
+    }
+
+    /* Environment Selection Cards */
+    .environment-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--bg-card);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .env-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .env-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+    }
+
+    .env-option.active {
+      background: rgba(0, 230, 118, 0.1);
+      border-color: var(--plant-accent);
+      color: var(--plant-accent);
+      box-shadow: 0 0 8px rgba(0, 230, 118, 0.1);
+    }
+
+    .env-badge {
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    .env-option.hypo.active .env-badge { background: rgba(0, 229, 255, 0.2); color: var(--cyan-accent); }
+    .env-option.iso.active .env-badge { background: rgba(0, 230, 118, 0.2); color: var(--plant-accent); }
+    .env-option.hyper.active .env-badge { background: rgba(255, 179, 0, 0.2); color: var(--amber-accent); }
+
+    /* Spawner Buttons Grid */
+    .spawner-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-cyan { border-color: rgba(0, 229, 255, 0.2); }
+    .btn-cyan.active {
+      background: rgba(0, 229, 255, 0.1);
+      border-color: var(--cyan-accent);
+      color: var(--cyan-accent);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.15);
+    }
+
+    .btn-plant { border-color: rgba(0, 230, 118, 0.2); }
+    .btn-plant.active {
+      background: rgba(0, 230, 118, 0.1);
+      border-color: var(--plant-accent);
+      color: var(--plant-accent);
+      box-shadow: 0 0 10px rgba(0, 230, 118, 0.15);
+    }
+
+    .btn-purple { border-color: rgba(224, 64, 251, 0.2); }
+    .btn-purple.active {
+      background: rgba(224, 64, 251, 0.1);
+      border-color: var(--purple-accent);
+      color: var(--purple-accent);
+      box-shadow: 0 0 10px rgba(224, 64, 251, 0.15);
+    }
+
+    /* RIGHT PANEL: DETAILS & QUIZ TABS */
+    .tab-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 12px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      color: var(--plant-accent);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 15%;
+      width: 70%;
+      height: 2px;
+      background: var(--plant-accent);
+      box-shadow: 0 0 8px var(--plant-glow);
+    }
+
+    .tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .tab-pane.active {
+      display: flex;
+    }
+
+    .info-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .info-tag {
+      align-self: flex-start;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    .level-info-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .detail-text {
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    /* Hotspots/Legend list */
+    .legend-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .legend-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      text-align: left;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .legend-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .legend-btn.active {
+      background: rgba(0, 230, 118, 0.06);
+      border-color: var(--plant-accent);
+      color: var(--plant-accent);
+      box-shadow: var(--border-glow);
+    }
+
+    .legend-btn:after {
+      content: "→";
+      opacity: 0.3;
+      font-weight: bold;
+      transition: transform 0.2s ease;
+    }
+
+    .legend-btn:hover:after {
+      opacity: 1;
+      transform: translateX(3px);
+    }
+
+    /* Inspector Drawer */
+    .organelle-drawer {
+      background: rgba(0, 230, 118, 0.03);
+      border: 1px solid rgba(0, 230, 118, 0.15);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: inset 0 0 15px rgba(0, 230, 118, 0.05);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .organelle-name {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--plant-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .organelle-badge {
+      align-self: flex-start;
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      background: rgba(0, 230, 118, 0.1);
+      color: var(--plant-accent);
+      border: 1px solid rgba(0, 230, 118, 0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* QUIZ SYSTEM */
+    .quiz-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-progress {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .quiz-progress-bar {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .quiz-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--plant-accent);
+      transition: width 0.3s ease;
+    }
+
+    .quiz-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-question {
+      font-size: 0.85rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: #fff;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quiz-opt-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 10px;
+      color: var(--text-main);
+      text-align: left;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .quiz-opt-btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-opt-btn.correct {
+      background: rgba(0, 230, 118, 0.15);
+      border-color: var(--plant-accent);
+      color: var(--plant-accent);
+      font-weight: bold;
+    }
+
+    .quiz-opt-btn.wrong {
+      background: rgba(255, 82, 82, 0.15);
+      border-color: #ff5252;
+      color: #ff5252;
+    }
+
+    .quiz-feedback {
+      font-size: 0.75rem;
+      line-height: 1.4;
+      color: var(--text-muted);
+      min-height: 34px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 10px;
+    }
+
+    .quiz-results-card {
+      text-align: center;
+      padding: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .quiz-score-circle {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(0, 230, 118, 0.1);
+      border: 3px solid var(--plant-accent);
+      box-shadow: var(--border-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--plant-accent);
+    }
+
+    /* Scrollbar customization */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .main-container {
+        grid-template-columns: 260px 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
+        overflow-y: auto;
+      }
+      body {
+        overflow-y: auto;
+        height: auto;
+      }
+      header {
+        position: sticky;
+        top: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mobile-warning {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Warning overlay for mobile screens -->
+  <div class="mobile-warning" id="mobileWarning">
+    <div class="logo-icon">🌿</div>
+    <p>This cell wall structure simulation requires a tablet or desktop browser screen for high-fidelity interactive details.</p>
+  </div>
+
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">🌿</div>
+      <h1>PLANT CELL WALL LAB</h1>
+    </div>
+    <span class="nav-badge">Structure & Permeability</span>
+  </header>
+
+  <main class="main-container">
+    
+    <!-- LEFT PANEL: SIMULATION CONTROLS -->
+    <section class="glass-panel" id="leftPanel">
+      <div class="panel-header">
+        <div class="panel-title">🎛️ Controls</div>
+      </div>
+      
+      <div class="panel-content">
+        <!-- Scale Magnification -->
+        <div class="control-section">
+          <div class="control-label">Simulation Scale</div>
+          <div style="display: flex; flex-direction: column; gap: 8px; background: var(--bg-card); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <input type="range" min="1.00" max="3.00" step="0.01" value="1.00" class="horizontal-slider" id="zoomSlider" oninput="onZoomSliderChange(this.value)" aria-label="Zoom scale slider">
+            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted); min-width: 110px;">
+              <span id="lblTick1" class="active" style="cursor:pointer;" onclick="setZoomTarget(1.0)">1. Plant Tissue (1.0x)</span>
+              <span id="lblTick2" style="cursor:pointer;" onclick="setZoomTarget(2.0)">2. Boundary Layers (2.0x)</span>
+              <span id="lblTick3" style="cursor:pointer;" onclick="setZoomTarget(3.0)">3. Cellulose Mesh (3.0x)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Level 1 & 2 Controls: Osmotic Environment -->
+        <div id="osmoticControls" class="control-section" style="display: block; transition: opacity 0.3s ease;">
+          <div class="control-label">1. Osmotic Environment</div>
+          <div class="environment-selector">
+            <div class="env-option hypo active" onclick="setEnvironment('hypotonic')">
+              <span>Hypotonic (Pure Water)</span>
+              <span class="env-badge">Turgid</span>
+            </div>
+            <div class="env-option iso" onclick="setEnvironment('isotonic')">
+              <span>Isotonic (Normal Saline)</span>
+              <span class="env-badge">Flaccid</span>
+            </div>
+            <div class="env-option hyper" onclick="setEnvironment('hypertonic')">
+              <span>Hypertonic (Salt Water)</span>
+              <span class="env-badge">Plasmolyzed</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Level 3 Controls: Molecular Lab (visible only when zoomed in) -->
+        <div id="molecularControls" style="display: none; flex-direction: column; gap: 20px; transition: opacity 0.3s ease;">
+          <!-- Spawners -->
+          <div class="control-section">
+            <div class="control-label">1. Spawn Molecules</div>
+            <div class="spawner-grid">
+              <button class="btn btn-cyan active" id="btnSpawnWater" onclick="toggleSpawn('water')">Water (H₂O)</button>
+              <button class="btn btn-plant active" id="btnSpawnGlucose" onclick="toggleSpawn('glucose')">Glucose</button>
+              <button class="btn btn-purple active" id="btnSpawnStarch" onclick="toggleSpawn('starch')">Starch (Polymer)</button>
+            </div>
+          </div>
+
+          <!-- Channel States -->
+          <div class="control-section">
+            <div class="control-label">2. Membrane Channels</div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div class="switch-container">
+                <span class="switch-label" style="color: var(--cyan-accent);">Aquaporin (Water)</span>
+                <label class="switch">
+                  <input type="checkbox" checked id="aquaporinToggle" onchange="toggleGate('aquaporin')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="switch-container">
+                <span class="switch-label" style="color: var(--plant-accent);">Glucose Carrier</span>
+                <label class="switch">
+                  <input type="checkbox" checked id="glucoseGateToggle" onchange="toggleGate('glucose')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ambient Variables -->
+        <div class="control-section">
+          <div class="control-label">Ambient Environment</div>
+          
+          <!-- Synthesizer Sound Toggle -->
+          <div class="switch-container">
+            <span class="switch-label">Synthesizer Sound FX</span>
+            <label class="switch">
+              <input type="checkbox" checked id="soundToggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTER PANEL: INTERACTIVE CANVAS VIEWPORT -->
+    <section class="viewport-container" id="centerPanel" tabindex="0">
+      <canvas id="viewportCanvas" width="800" height="600"></canvas>
+      
+      <!-- HUD Overlays -->
+      <div class="hud-element hud-top-left" id="hudStatus">CELL WALL LAB: PLANT TISSUE SCALE</div>
+      <div class="hud-element hud-top-right">
+        <div>ENVIRONMENT: <span id="hudEnv" style="color:var(--cyan-accent); font-weight:bold; text-transform: uppercase;">Hypotonic</span></div>
+        <div style="margin-top: 4px;">ZOOM LEVEL: <span id="hudZoom" style="color:var(--plant-accent); font-weight:bold;">1.00x</span></div>
+      </div>
+      <div class="hud-element hud-bottom-left">
+        <div id="hudCellLabel">Tissue Grid (~50 µm Scale)</div>
+        <div class="scale-bar-line" id="hudScaleBar"></div>
+      </div>
+      <div class="hud-element hud-bottom-right">
+        <div id="hudTurgorStatus">Turgor Pressure: High (Turgid)</div>
+        <div style="margin-top: 4px; font-size: 0.65rem;" id="hudTurgorValue">Wall Tension: 100%</div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: COMPONENT INFO & FEATURE LEGEND / QUIZ -->
+    <section class="glass-panel" id="rightPanel">
+      <div class="tab-header">
+        <button class="tab-btn active" id="btnTabLegend" onclick="switchTab('legend')">📖 Inspector</button>
+        <button class="tab-btn" id="btnTabQuiz" onclick="switchTab('quiz')">✍️ Knowledge Quiz</button>
+      </div>
+      
+      <div class="panel-content">
+        <!-- TAB 1: INSPECTOR & LEGEND -->
+        <div class="tab-pane active" id="paneLegend">
+          <div class="info-header">
+            <span class="info-tag" id="levelScaleBadge">Tissue Scale (~50 µm)</span>
+            <h3 class="level-info-title" id="levelTitle">Plant Cell Grid</h3>
+            <div class="detail-text" id="levelDescription">
+              Plant cells are bound by a rigid cell wall, which provides structure and support. Use the <strong>zoom slider</strong> to look closer, or alter the <strong>osmotic environment</strong> to see how cell walls maintain cell shapes under osmotic stress.
+            </div>
+          </div>
+
+          <div id="legendWrapper" style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="control-label">Structure Guide (Click to Inspect)</div>
+            <div class="legend-list">
+              <button class="legend-btn" id="lbl_lamella" onclick="selectComponent('lamella')">Middle Lamella</button>
+              <button class="legend-btn" id="lbl_cellwall" onclick="selectComponent('cellwall')">Primary Cell Wall</button>
+              <button class="legend-btn" id="lbl_membrane" onclick="selectComponent('membrane')">Cell Membrane</button>
+              <button class="legend-btn" id="lbl_microfibril" onclick="selectComponent('microfibril')">Cellulose Microfibrils</button>
+              <button class="legend-btn" id="lbl_pectin" onclick="selectComponent('pectin')">Pectin & Matrix</button>
+              <button class="legend-btn" id="lbl_turgor" onclick="selectComponent('turgor')">Turgor Pressure</button>
+              <button class="legend-btn" id="lbl_plasmolysis" onclick="selectComponent('plasmolysis')">Plasmolysis</button>
+            </div>
+          </div>
+
+          <!-- Description Details Drawer -->
+          <div class="organelle-drawer" id="organelleDrawer" style="display: none;">
+            <h4 class="organelle-name" id="drawerOrganelleName">Component Name</h4>
+            <span class="organelle-badge" id="drawerOrganelleBadge">Grade 9 Curriculum</span>
+            <p class="detail-text" id="drawerOrganelleDesc">Details about structural composition go here.</p>
+            <button class="btn" style="padding: 6px 10px; font-size: 0.7rem; margin-top: 4px;" onclick="closeOrganelleDrawer()">Close Inspector</button>
+          </div>
+        </div>
+
+        <!-- TAB 2: KNOWLEDGE QUIZ -->
+        <div class="tab-pane" id="paneQuiz">
+          <div class="quiz-container" id="quizActiveContainer">
+            <div class="quiz-progress">
+              <span>Question <span id="quizCurrentNum">1</span> of 5</span>
+              <span>Score: <span id="quizScore">0</span></span>
+            </div>
+            <div class="quiz-progress-bar">
+              <div class="quiz-progress-fill" id="quizProgressFill"></div>
+            </div>
+            
+            <div class="quiz-card">
+              <div class="quiz-question" id="quizQuestionText">Question text goes here.</div>
+              <div class="quiz-options" id="quizOptionsContainer">
+                <!-- Buttons dynamically loaded -->
+              </div>
+            </div>
+            <div class="quiz-feedback" id="quizFeedbackText">Select an answer above to see explanation.</div>
+            <button class="btn btn-plant" style="display:none;" id="btnNextQuiz" onclick="nextQuestion()">Next Question</button>
+          </div>
+
+          <!-- Quiz Completion Card -->
+          <div class="quiz-results-card" id="quizResultsContainer" style="display: none;">
+            <h4>Knowledge Check Complete!</h4>
+            <div class="quiz-score-circle" id="quizFinalScore">4/5</div>
+            <p class="detail-text" id="quizResultsEval">Excellent job! You have a solid understanding of the plant cell wall structure.</p>
+            <button class="btn btn-plant" style="width: 100%; margin-top: 10px;" onclick="resetQuiz()">Try Quiz Again</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* ----------------------------------------------------
+       AUDIO SYSTEM (WEB AUDIO API)
+       ---------------------------------------------------- */
+    let audioCtx = null;
+    const soundToggle = document.getElementById('soundToggle');
+
+    function playSound(type, pitchModifier = 1.0) {
+      if (!soundToggle.checked) return;
+      
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        
+        const now = audioCtx.currentTime;
+        
+        if (type === 'click') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(500 * pitchModifier, now);
+          osc.frequency.exponentialRampToValueAtTime(800 * pitchModifier, now + 0.04);
+          gain.gain.setValueAtTime(0.005, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.04);
+        } else if (type === 'zoom-hum') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(80 + (pitchModifier * 120), now);
+          osc.frequency.exponentialRampToValueAtTime(120 + (pitchModifier * 120), now + 0.12);
+          gain.gain.setValueAtTime(0.008, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        } else if (type === 'correct') {
+          // Double chirp
+          const gain = audioCtx.createGain();
+          gain.gain.setValueAtTime(0.01, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+          gain.connect(audioCtx.destination);
+          
+          [523.25, 659.25].forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+            osc.connect(gain);
+            osc.start(now + idx * 0.06);
+            osc.stop(now + 0.25);
+          });
+        } else if (type === 'wrong') {
+          // Buzz down
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(130, now);
+          osc.frequency.linearRampToValueAtTime(90, now + 0.25);
+          gain.gain.setValueAtTime(0.015, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } else if (type === 'gate') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(220 * pitchModifier, now);
+          osc.frequency.exponentialRampToValueAtTime(110 * pitchModifier, now + 0.15);
+          gain.gain.setValueAtTime(0.012, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } else if (type === 'bounce') {
+          // Soft short click for molecule collisions
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(150, now);
+          gain.gain.setValueAtTime(0.0015, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.015);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.015);
+        }
+      } catch (e) {
+        console.warn('Audio Synthesis restrictions active.', e);
+      }
+    }
+
+    /* ----------------------------------------------------
+       SCIENTIFIC METADATA FOR COMPONENT INSPECTOR
+       ---------------------------------------------------- */
+    const componentDatabase = {
+      lamella: {
+        name: "Middle Lamella",
+        desc: "The outermost cement-like layer that bonds adjacent plant cells. It is rich in sticky polysaccharides called <strong>pectins</strong>. By gluing cell walls together, it provides tissue-level integrity, holding cells in place to form structural leaves, stems, and roots.",
+        badge: "Adhesive Cementing Layer"
+      },
+      cellwall: {
+        name: "Primary Cell Wall",
+        desc: "A tough, flexible, and rigid outer envelope consisting of cellulose microfibrils embedded in a gel-like pectin and hemicellulose matrix. Located outside the cell membrane, it defines cell shape, protects against mechanical injury, and exerts pressure to prevent cell bursting from high turgor.",
+        badge: "Structural Outer Shield"
+      },
+      membrane: {
+        name: "Cell Membrane (Plasma Membrane)",
+        desc: "A fluid, selectively permeable lipid bilayer lying <strong>directly underneath the cell wall</strong>. It contains carrier proteins and channel pores. While the cell wall allows all small/medium solutes to pass freely, the cell membrane decides exactly what enters the cytoplasm, maintaining cellular homeostasis.",
+        badge: "Selectively Permeable Barrier"
+      },
+      microfibril: {
+        name: "Cellulose Microfibrils",
+        desc: "Incredibly strong structural strands composed of linear glucose polymer chains. They align in different directions within the primary wall to create a porous, interwoven mesh. This mesh serves as a physical sieve: freely permeable to water and glucose, but physically blocking very large molecules.",
+        badge: "Interwoven Structural Skeleton"
+      },
+      pectin: {
+        name: "Pectin & Hemicellulose Matrix",
+        desc: "Pectins are branch-like hydrophilic polysaccharides that form a hydrated gel filling the spaces between cellulose microfibrils. Hemicelluloses act as cross-linking threads that bind cellulose strands together, enhancing the wall's tensile strength and resilience to compression.",
+        badge: "Hydrating & Cushioning Gel"
+      },
+      turgor: {
+        name: "Turgor Pressure",
+        desc: "Internal hydrostatic pressure generated when water enters the cell's large vacuole by osmosis, causing it to swell and press the cytoplasm against the cell membrane. The rigid cell wall pushes back with equal force (Wall Pressure), keeping the cell firm (turgid), which keeps the plant erect.",
+        badge: "Hydrostatic Support Force"
+      },
+      plasmolysis: {
+        name: "Plasmolysis",
+        desc: "The retraction of the cell membrane away from the cell wall when a plant cell is placed in a hypertonic (salty) environment. Water leaves the vacuole, causing the protoplast to shrink. However, the cell wall maintains its original shape due to its rigid cellulose skeleton.",
+        badge: "Shrinking of Cell Protoplast"
+      }
+    };
+
+    /* ----------------------------------------------------
+       SIMULATION STATE & VARIABLES
+       ---------------------------------------------------- */
+    let currentZoomVal = 1.0;
+    let targetZoomVal = 1.0;
+    let timeTicker = 0;
+
+    // Environmental state
+    // 'hypotonic' (turgid, high pressure), 'isotonic' (normal), 'hypertonic' (plasmolyzed, zero pressure)
+    let osmoticEnv = 'hypotonic'; 
+    let membraneSpread = 1.0; // multiplier representing membrane expansion (1.0 = hypo, 0.85 = iso, 0.65 = hyper)
+    let membraneSpreadTarget = 1.0;
+    
+    // Zoom boundary transitions
+    let activeLevel = 1; // 1: tissue, 2: boundary layers, 3: cellulose mesh
+
+    // Spawner active flags (Level 3)
+    const spawnState = {
+      water: true,
+      glucose: true,
+      starch: true
+    };
+
+    // Channel/Gate toggles (Level 3)
+    const gateState = {
+      aquaporin: true,
+      glucose: true
+    };
+
+    // Molecule particles list (Level 3)
+    const particles = [];
+    const maxParticles = 60; // Total molecules combined
+
+    // Animation variables for molecules
+    const carriers = {
+      left: { angle: 0, scale: 1, particle: null, state: 'idle', timer: 0 },
+      right: { angle: 0, scale: 1, particle: null, state: 'idle', timer: 0 }
+    };
+
+    // Mouse interactive coords
+    let mousePos = { x: 0, y: 0 };
+    let hoveredElementId = null;
+    let selectedComponentId = null;
+
+    // DOM Cache
+    const canvas = document.getElementById('viewportCanvas');
+    const ctx = canvas.getContext('2d');
+    const zoomSlider = document.getElementById('zoomSlider');
+    const aquaporinToggle = document.getElementById('aquaporinToggle');
+    const glucoseGateToggle = document.getElementById('glucoseGateToggle');
+    
+    const levelTitle = document.getElementById('levelTitle');
+    const levelScaleBadge = document.getElementById('levelScaleBadge');
+    const levelDescription = document.getElementById('levelDescription');
+    const organelleDrawer = document.getElementById('organelleDrawer');
+    const drawerOrganelleName = document.getElementById('drawerOrganelleName');
+    const drawerOrganelleDesc = document.getElementById('drawerOrganelleDesc');
+    const drawerOrganelleBadge = document.getElementById('drawerOrganelleBadge');
+
+    const osmoticControls = document.getElementById('osmoticControls');
+    const molecularControls = document.getElementById('molecularControls');
+    const legendWrapper = document.getElementById('legendWrapper');
+
+    const hudStatus = document.getElementById('hudStatus');
+    const hudEnv = document.getElementById('hudEnv');
+    const hudZoom = document.getElementById('hudZoom');
+    const hudCellLabel = document.getElementById('hudCellLabel');
+    const hudScaleBar = document.getElementById('hudScaleBar');
+    const hudTurgorStatus = document.getElementById('hudTurgorStatus');
+    const hudTurgorValue = document.getElementById('hudTurgorValue');
+
+    const lblTick1 = document.getElementById('lblTick1');
+    const lblTick2 = document.getElementById('lblTick2');
+    const lblTick3 = document.getElementById('lblTick3');
+
+    /* ----------------------------------------------------
+       EVENTS & ZOOM INTERACTIVE CONTROLS
+       ---------------------------------------------------- */
+    function onZoomSliderChange(val) {
+      targetZoomVal = parseFloat(val);
+      playSound('zoom-hum', (targetZoomVal - 1.0) / 2.0);
+      updateZoomLevelState();
+    }
+    
+    function setZoomTarget(val) {
+      targetZoomVal = val;
+      zoomSlider.value = val.toFixed(2);
+      playSound('click');
+      updateZoomLevelState();
+    }
+
+    function updateZoomLevelState() {
+      // Determine active view level based on target zoom
+      if (targetZoomVal < 1.6) {
+        activeLevel = 1;
+      } else if (targetZoomVal >= 1.6 && targetZoomVal < 2.5) {
+        activeLevel = 2;
+      } else {
+        activeLevel = 3;
+      }
+      updateUIForLevel();
+    }
+
+    function updateUIForLevel() {
+      // Manage tick highlights
+      lblTick1.classList.toggle('active', activeLevel === 1);
+      lblTick2.classList.toggle('active', activeLevel === 2);
+      lblTick3.classList.toggle('active', activeLevel === 3);
+
+      if (activeLevel === 1) {
+        hudStatus.textContent = "CELL WALL LAB: PLANT TISSUE SCALE";
+        hudCellLabel.textContent = "Tissue Grid (~50 µm Scale)";
+        hudScaleBar.style.width = "100px";
+
+        osmoticControls.style.display = 'block';
+        molecularControls.style.display = 'none';
+
+        if (!selectedComponentId) {
+          levelTitle.textContent = "Plant Cell Grid";
+          levelScaleBadge.textContent = "Tissue Scale (~50 µm)";
+          levelDescription.innerHTML = "Plant cells are bound by a rigid cell wall, which provides structure and support. Use the <strong>zoom slider</strong> to look closer, or alter the <strong>osmotic environment</strong> to see how cell walls maintain cell shapes under osmotic stress.";
+        }
+      } else if (activeLevel === 2) {
+        hudStatus.textContent = "CELL WALL LAB: LAYER CROSS-SECTION";
+        hudCellLabel.textContent = "Boundary Layers (~500 nm Scale)";
+        hudScaleBar.style.width = "75px";
+
+        osmoticControls.style.display = 'block';
+        molecularControls.style.display = 'none';
+
+        if (!selectedComponentId) {
+          levelTitle.textContent = "Boundary Layering";
+          levelScaleBadge.textContent = "Cell Boundary Scale (~500 nm)";
+          levelDescription.innerHTML = "At this scale, you can clearly see that the <strong>Cell Wall lies on top of the Cell Membrane</strong>. The Middle Lamella cements cells together. Look at what happens to the membrane when the cell is Plasmolyzed!";
+        }
+      } else {
+        hudStatus.textContent = "CELL WALL LAB: MOLECULAR PERMEABILITY";
+        hudCellLabel.textContent = "Cellulose Mesh (~5 nm Scale)";
+        hudScaleBar.style.width = "40px";
+
+        osmoticControls.style.display = 'none';
+        molecularControls.style.display = 'flex';
+
+        if (!selectedComponentId) {
+          levelTitle.textContent = "Cellulose Matrix & Pores";
+          levelScaleBadge.textContent = "Molecular Scale (~5 nm)";
+          levelDescription.innerHTML = "Explore the interwoven cellulose microfibrils forming the cell wall matrix. Notice that the <strong>Cell Wall is Freely Permeable</strong> (allows water and glucose through) while the <strong>Cell Membrane below is Selectively Permeable</strong>.";
+        }
+      }
+    }
+
+    function setEnvironment(env) {
+      osmoticEnv = env;
+      
+      // Update UI active buttons
+      document.querySelectorAll('.env-option').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.env-option.${env === 'hypotonic' ? 'hypo' : env === 'isotonic' ? 'iso' : 'hyper'}`).classList.add('active');
+      
+      playSound('click', env === 'hypotonic' ? 1.2 : env === 'isotonic' ? 1.0 : 0.85);
+
+      // Set membrane targets and HUD readouts
+      if (env === 'hypotonic') {
+        membraneSpreadTarget = 1.0;
+        hudEnv.textContent = "Hypotonic";
+        hudEnv.style.color = "var(--cyan-accent)";
+        hudTurgorStatus.textContent = "Turgor Pressure: High (Turgid)";
+        hudTurgorValue.textContent = "Wall Tension: 100%";
+        hudTurgorValue.style.color = "var(--plant-accent)";
+      } else if (env === 'isotonic') {
+        membraneSpreadTarget = 0.85;
+        hudEnv.textContent = "Isotonic";
+        hudEnv.style.color = "var(--plant-accent)";
+        hudTurgorStatus.textContent = "Turgor Pressure: Balanced (Flaccid)";
+        hudTurgorValue.textContent = "Wall Tension: 12%";
+        hudTurgorValue.style.color = "var(--text-muted)";
+      } else {
+        membraneSpreadTarget = 0.65;
+        hudEnv.textContent = "Hypertonic";
+        hudEnv.style.color = "var(--amber-accent)";
+        hudTurgorStatus.textContent = "Turgor Pressure: Zero (Plasmolyzed)";
+        hudTurgorValue.textContent = "Wall Tension: 0%";
+        hudTurgorValue.style.color = "var(--amber-accent)";
+      }
+    }
+
+    /* ----------------------------------------------------
+       LEGEND & INSPECTOR DRAWER
+       ---------------------------------------------------- */
+    function selectComponent(id) {
+      // Toggle button highlights
+      document.querySelectorAll('.legend-btn').forEach(b => b.classList.remove('active'));
+      selectedComponentId = id;
+      
+      if (id) {
+        document.getElementById(`lbl_${id}`).classList.add('active');
+        const data = componentDatabase[id];
+        
+        drawerOrganelleName.textContent = data.name;
+        drawerOrganelleBadge.textContent = data.badge;
+        drawerOrganelleDesc.innerHTML = data.desc;
+        
+        organelleDrawer.style.display = 'flex';
+        playSound('click', 1.15);
+      } else {
+        organelleDrawer.style.display = 'none';
+      }
+    }
+
+    function closeOrganelleDrawer() {
+      selectComponent(null);
+      playSound('click', 0.9);
+    }
+
+    /* ----------------------------------------------------
+       QUIZ SYSTEM LOGIC
+       ---------------------------------------------------- */
+    const quizQuestions = [
+      {
+        question: "Which layer lies directly on top (outside) of the plant cell membrane?",
+        options: [
+          "The middle lamella",
+          "The primary cell wall",
+          "The nuclear envelope",
+          "The chloroplast membrane"
+        ],
+        correct: 1,
+        explanation: "The cell wall lies directly on top of the cell membrane, forming a protective, rigid envelope around the protoplast."
+      },
+      {
+        question: "In what way do the permeability properties of the cell wall and cell membrane differ?",
+        options: [
+          "The cell wall is selectively permeable; the membrane is impermeable.",
+          "The cell wall is impermeable; the membrane is freely permeable.",
+          "The cell wall is freely permeable; the membrane is selectively permeable.",
+          "Both are selectively permeable to identical substances."
+        ],
+        correct: 2,
+        explanation: "Correct! The cell wall has large pores between cellulose fibers making it freely permeable to water and solutes. The cell membrane is selectively permeable, regulating transport."
+      },
+      {
+        question: "What structural carbohydrate forms the rigid, interwoven skeleton of the plant cell wall?",
+        options: [
+          "Starch",
+          "Cellulose",
+          "Phospholipids",
+          "Glycoproteins"
+        ],
+        correct: 1,
+        explanation: "Cellulose microfibrils are long, rigid glucose chains bundled together, creating the strong structural mesh of the cell wall."
+      },
+      {
+        question: "What happens to a plant cell's membrane and cell wall in a hypertonic environment (Plasmolysis)?",
+        options: [
+          "The cell wall swells and bursts while the membrane shrinks.",
+          "The cell membrane shrinks and pulls away, while the rigid cell wall maintains its boxy shape.",
+          "The cell wall collapses completely, crushing the cell membrane.",
+          "Both structures expand to release excessive salt molecules."
+        ],
+        correct: 1,
+        explanation: "During plasmolysis, the cell membrane shrinks inward due to water loss, but the rigid cell wall remains stable and maintains its shape."
+      },
+      {
+        question: "What is the primary function of the Middle Lamella in plant tissues?",
+        options: [
+          "It synthesizes energy (ATP) through cellular respiration.",
+          "It acts as a selectively permeable pore for sugar molecules.",
+          "It glues adjacent plant cell walls together using sticky pectins.",
+          "It forms the lipid bilayer that surrounds the central vacuole."
+        ],
+        correct: 2,
+        explanation: "The middle lamella is rich in pectins and serves as an extracellular adhesive cementing adjacent cell walls together."
+      }
+    ];
+
+    let currentQuestionIdx = 0;
+    let quizScoreVal = 0;
+    let answered = false;
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      
+      if (tab === 'legend') {
+        document.getElementById('btnTabLegend').classList.add('active');
+        document.getElementById('paneLegend').classList.add('active');
+      } else {
+        document.getElementById('btnTabQuiz').classList.add('active');
+        document.getElementById('paneQuiz').classList.add('active');
+        loadQuizQuestion();
+      }
+      playSound('click');
+    }
+
+    function loadQuizQuestion() {
+      answered = false;
+      document.getElementById('btnNextQuiz').style.display = 'none';
+      document.getElementById('quizFeedbackText').textContent = "Select an answer above to see explanation.";
+      document.getElementById('quizFeedbackText').style.color = 'var(--text-muted)';
+      
+      const q = quizQuestions[currentQuestionIdx];
+      document.getElementById('quizQuestionText').textContent = q.question;
+      document.getElementById('quizCurrentNum').textContent = (currentQuestionIdx + 1);
+      document.getElementById('quizScore').textContent = quizScoreVal;
+      
+      // Calculate progress fill
+      const progressPct = (currentQuestionIdx / quizQuestions.length) * 100;
+      document.getElementById('quizProgressFill').style.width = `${progressPct}%`;
+
+      const optionsBox = document.getElementById('quizOptionsContainer');
+      optionsBox.innerHTML = '';
+      
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-opt-btn';
+        btn.innerHTML = opt;
+        btn.onclick = () => selectOption(idx, btn);
+        optionsBox.appendChild(btn);
+      });
+    }
+
+    function selectOption(selectedIdx, btnElement) {
+      if (answered) return;
+      answered = true;
+      
+      const q = quizQuestions[currentQuestionIdx];
+      const optionButtons = document.querySelectorAll('.quiz-opt-btn');
+      
+      if (selectedIdx === q.correct) {
+        btnElement.classList.add('correct');
+        document.getElementById('quizFeedbackText').innerHTML = `<strong>Correct!</strong> ` + q.explanation;
+        document.getElementById('quizFeedbackText').style.color = 'var(--plant-accent)';
+        quizScoreVal++;
+        document.getElementById('quizScore').textContent = quizScoreVal;
+        playSound('correct');
+      } else {
+        btnElement.classList.add('wrong');
+        optionButtons[q.correct].classList.add('correct');
+        document.getElementById('quizFeedbackText').innerHTML = `<strong>Incorrect.</strong> ` + q.explanation;
+        document.getElementById('quizFeedbackText').style.color = '#ff5252';
+        playSound('wrong');
+      }
+
+      // Show next button
+      document.getElementById('btnNextQuiz').style.display = 'block';
+      if (currentQuestionIdx === quizQuestions.length - 1) {
+        document.getElementById('btnNextQuiz').textContent = "Finish Quiz";
+      } else {
+        document.getElementById('btnNextQuiz').textContent = "Next Question";
+      }
+    }
+
+    function nextQuestion() {
+      playSound('click');
+      if (currentQuestionIdx < quizQuestions.length - 1) {
+        currentQuestionIdx++;
+        loadQuizQuestion();
+      } else {
+        // Show results
+        document.getElementById('quizActiveContainer').style.display = 'none';
+        document.getElementById('quizResultsContainer').style.display = 'flex';
+        
+        document.getElementById('quizFinalScore').textContent = `${quizScoreVal}/${quizQuestions.length}`;
+        const pct = (quizScoreVal / quizQuestions.length) * 100;
+        
+        let evalText = "Keep studying the structure of plant cell walls and try again!";
+        if (pct >= 80) {
+          evalText = "Superb! You have fully mastered the plant cell wall layering, rigidity, and permeability mechanics.";
+        } else if (pct >= 60) {
+          evalText = "Good effort! Go through the Inspector tabs to reinforce details about Cellulose, Pectin, and Plasmolysis.";
+        }
+        document.getElementById('quizResultsEval').textContent = evalText;
+      }
+    }
+
+    function resetQuiz() {
+      playSound('click');
+      currentQuestionIdx = 0;
+      quizScoreVal = 0;
+      document.getElementById('quizActiveContainer').style.display = 'flex';
+      document.getElementById('quizResultsContainer').style.display = 'none';
+      loadQuizQuestion();
+    }
+
+    /* ----------------------------------------------------
+       MOLECULAR SIMULATION SPAWN & GATE HANDLERS (LEVEL 3)
+       ---------------------------------------------------- */
+    function toggleSpawn(type) {
+      spawnState[type] = !spawnState[type];
+      const btn = document.getElementById(`btnSpawn${type.charAt(0).toUpperCase() + type.slice(1)}`);
+      btn.classList.toggle('active', spawnState[type]);
+      playSound('click', spawnState[type] ? 1.1 : 0.8);
+      
+      // Spawn some immediately if toggled on
+      if (spawnState[type]) {
+        for (let i = 0; i < 8; i++) spawnMolecule(type);
+      }
+    }
+
+    function toggleGate(gate) {
+      gateState[gate] = !gateState[gate];
+      playSound('gate', gateState[gate] ? 1.2 : 0.85);
+    }
+
+    function setupMolecules() {
+      particles.length = 0; // Clear array
+      for (let i = 0; i < 20; i++) spawnMolecule('water');
+      for (let i = 0; i < 15; i++) spawnMolecule('glucose');
+      for (let i = 0; i < 10; i++) spawnMolecule('starch');
+    }
+
+    function spawnMolecule(type) {
+      let py;
+      // Start them either inside cytoplasm (bottom) or extracellular/middle lamella (top)
+      py = Math.random() > 0.5 ? Math.random() * 150 + 20 : Math.random() * 150 + 420;
+
+      let radius = 4;
+      let color = '#fff';
+      let speed = 1.0;
+
+      if (type === 'water') {
+        radius = 4; color = 'rgba(0, 229, 255, 0.95)'; speed = 1.6;
+      } else if (type === 'glucose') {
+        radius = 7; color = 'rgba(0, 230, 118, 0.95)'; speed = 1.1;
+      } else if (type === 'starch') {
+        radius = 16; color = 'rgba(224, 64, 251, 0.95)'; speed = 0.6;
+      }
+
+      const angle = Math.random() * Math.PI * 2;
+      particles.push({
+        type: type,
+        x: Math.random() * (canvas.width - 40) + 20,
+        y: py,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        radius: radius,
+        color: color,
+        speed: speed,
+        isBound: false,
+        timer: 0
+      });
+    }
+
+    /* ----------------------------------------------------
+       MOUSE HANDLING & INTERACTION DETECTIONS
+       ---------------------------------------------------- */
+    function handleMouseMove(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      mousePos.x = (e.clientX - rect.left) * scaleX;
+      mousePos.y = (e.clientY - rect.top) * scaleY;
+
+      // Identify hovered components based on active level and mouse position
+      hoveredElementId = null;
+      
+      if (activeLevel === 1) {
+        // Hexagon coordinates in center
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        const d = dist(mousePos.x, mousePos.y, cx, cy);
+        
+        if (d < 160) {
+          // Inner regions: Vacuole vs membrane vs cell wall
+          const mRadius = 150 * membraneSpread;
+          if (d < mRadius - 15) {
+            hoveredElementId = 'turgor'; // Vacuole/Pressure area
+          } else if (d >= mRadius - 15 && d <= mRadius + 5) {
+            hoveredElementId = 'membrane';
+          } else if (d > mRadius + 5 && d < 155) {
+            hoveredElementId = 'cellwall';
+          } else if (d >= 155 && d < 172) {
+            hoveredElementId = 'lamella';
+          }
+        }
+      } else if (activeLevel === 2) {
+        // Vertical bands
+        // Width of components:
+        // Left Membrane: 120-135
+        // Left Cell Wall: 140-270
+        // Middle Lamella: 280-320
+        // Right Cell Wall: 330-460
+        // Right Membrane: 465-480
+        // Adapt coordinates depending on membraneSpread (plasmolysis shifts membrane position)
+        const mx = mousePos.x;
+        const leftMemX = 260 - (1.0 - membraneSpread) * 120;
+        const rightMemX = 340 + (1.0 - membraneSpread) * 120;
+
+        if (mx > 290 && mx < 310) {
+          hoveredElementId = 'lamella';
+        } else if ((mx > 260 && mx <= 290) || (mx >= 310 && mx < 340)) {
+          hoveredElementId = 'cellwall';
+        } else if (Math.abs(mx - leftMemX) < 15 || Math.abs(mx - rightMemX) < 15) {
+          hoveredElementId = 'membrane';
+        } else if ((mx < leftMemX && mx > leftMemX - 60) || (mx > rightMemX && mx < rightMemX + 60)) {
+          hoveredElementId = 'turgor';
+        } else if (mx > leftMemX && mx < 260 && osmoticEnv === 'hypertonic') {
+          hoveredElementId = 'plasmolysis';
+        }
+      } else if (activeLevel === 3) {
+        // High zoom
+        const my = mousePos.y;
+        if (my < 180) {
+          // Cellulose fibrils area
+          if (mousePos.x % 120 > 80) {
+            hoveredElementId = 'pectin';
+          } else {
+            hoveredElementId = 'microfibril';
+          }
+        } else if (my >= 180 && my < 260) {
+          // Inner gap / top of membrane
+          hoveredElementId = 'cellwall';
+        } else if (my >= 260 && my <= 320) {
+          // Cell membrane bilayer
+          // Aquaporin: X: 160-240 or X: 560-640
+          const mx = mousePos.x;
+          if ((mx > 160 && mx < 240) || (mx > 560 && mx < 640)) {
+            hoveredElementId = 'membrane'; // Or channel specific
+          } else if (mx > 340 && mx < 460) {
+            hoveredElementId = 'membrane'; // Glucose carrier
+          } else {
+            hoveredElementId = 'membrane';
+          }
+        } else {
+          hoveredElementId = 'membrane';
+        }
+      }
+    }
+
+    function handleMouseDown() {
+      if (hoveredElementId) {
+        selectComponent(hoveredElementId);
+      }
+    }
+
+    function dist(x1, y1, x2, y2) {
+      return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    }
+
+    /* ----------------------------------------------------
+       PHYSICS & UPDATE LOOP (LEVEL 3 MOLECULES)
+       ---------------------------------------------------- */
+    function updatePhysics() {
+      // Smoothly slide membrane positions
+      membraneSpread += (membraneSpreadTarget - membraneSpread) * 0.05;
+
+      if (activeLevel !== 3) return;
+
+      // Handle molecule spawns and limit sizes
+      const waterCount = particles.filter(p => p.type === 'water').length;
+      if (spawnState.water && waterCount < 22) spawnMolecule('water');
+      
+      const glucoseCount = particles.filter(p => p.type === 'glucose').length;
+      if (spawnState.glucose && glucoseCount < 16) spawnMolecule('glucose');
+      
+      const starchCount = particles.filter(p => p.type === 'starch').length;
+      if (spawnState.starch && starchCount < 8) spawnMolecule('starch');
+
+      // Update Carrier state machines (Level 3 Glucose Carriers)
+      // Carrier 1 at X: 400
+      updateCarrier(carriers.left, 400);
+
+      // Particle physics & collision logic
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        
+        // Remove if spawned toggle turned off
+        if (!spawnState[p.type]) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        if (p.isBound) {
+          // Particle is currently docked inside a transporter
+          continue;
+        }
+
+        // Apply velocities
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Boundaries: Canvas Edges
+        if (p.x - p.radius < 0) { p.x = p.radius; p.vx *= -1; }
+        if (p.x + p.radius > canvas.width) { p.x = canvas.width - p.radius; p.vx *= -1; }
+        if (p.y - p.radius < 0) { p.y = p.radius; p.vy *= -1; }
+        if (p.y + p.radius > canvas.height) { p.y = canvas.height - p.radius; p.vy *= -1; }
+
+        // INTERACTION: Primary Cell Wall Mesh (Y: 60 - 180)
+        // Cellulose fibers act as a sieve.
+        // Cellulose fibers are drawn as diagonal strands.
+        // Starch is very large (radius 16) and will bounce off the fibers.
+        // Water (4) and Glucose (7) pass through easily.
+        if (p.type === 'starch') {
+          // Wall mesh bounds: Y: 50 to Y: 180
+          if (p.y + p.radius > 50 && p.y - p.radius < 185) {
+            // Bounce off the top/bottom boundary of the mesh
+            if (p.vy > 0 && p.y < 90) {
+              p.vy *= -1;
+              p.y = 50 - p.radius;
+              playSound('bounce');
+            } else if (p.vy < 0 && p.y > 150) {
+              p.vy *= -1;
+              p.y = 185 + p.radius;
+              playSound('bounce');
+            } else {
+              // Diagonal scatter inside mesh
+              p.vx *= -1;
+              p.vy *= -1;
+              p.x += p.vx * 3;
+            }
+          }
+        }
+
+        // INTERACTION: Cell Membrane Bilayer boundary (Y: 280)
+        // Water passes through if Aquaporins (X: 180-220 or X: 580-620) are open. Otherwise bounces off bilayer (Y: 270)
+        // Glucose bounces off bilayer (Y: 275) unless Glucose Carrier (X: 380-420) binds it.
+        const membraneTop = 275;
+        const membraneBottom = 305;
+
+        if (p.y + p.radius > membraneTop && p.y - p.radius < membraneBottom) {
+          
+          if (p.type === 'water') {
+            // Check if near Aquaporin channel 1 (X: 200) or Aquaporin channel 2 (X: 600)
+            const nearAquaporin = (Math.abs(p.x - 200) < 18) || (Math.abs(p.x - 600) < 18);
+            
+            if (nearAquaporin && gateState.aquaporin) {
+              // Allowed to pass through the channel without resistance
+              // Maintain downwards or upwards movement
+            } else {
+              // Bounce off cell membrane lipid heads
+              if (p.vy > 0 && p.y < membraneTop + 5) {
+                p.vy *= -1;
+                p.y = membraneTop - p.radius;
+              } else if (p.vy < 0 && p.y > membraneBottom - 5) {
+                p.vy *= -1;
+                p.y = membraneBottom + p.radius;
+              }
+            }
+          } else if (p.type === 'glucose') {
+            // Check if near Glucose Carrier (X: 400)
+            const nearCarrier = Math.abs(p.x - 400) < 22;
+            
+            if (nearCarrier && gateState.glucose && carriers.left.state === 'idle') {
+              // BIND TO CARRIER!
+              p.isBound = true;
+              carriers.left.state = 'binding';
+              carriers.left.particle = p;
+              carriers.left.timer = 0;
+              playSound('click', 1.3);
+            } else {
+              // Bounce off lipid heads
+              if (p.vy > 0 && p.y < membraneTop + 5) {
+                p.vy *= -1;
+                p.y = membraneTop - p.radius;
+              } else if (p.vy < 0 && p.y > membraneBottom - 5) {
+                p.vy *= -1;
+                p.y = membraneBottom + p.radius;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    function updateCarrier(carrier, cx) {
+      if (carrier.state === 'idle') {
+        carrier.angle = 0;
+      } else if (carrier.state === 'binding') {
+        // Hold molecule and slide inside the channel
+        carrier.timer += 0.05;
+        
+        // Pin particle inside carrier
+        if (carrier.particle) {
+          // Smoothly slide molecule from top (Y: 270) to center of membrane (Y: 290)
+          carrier.particle.x = cx;
+          carrier.particle.y = 270 + carrier.timer * 20;
+        }
+
+        if (carrier.timer >= 1.0) {
+          carrier.state = 'shifting';
+          carrier.timer = 0;
+        }
+      } else if (carrier.state === 'shifting') {
+        // Open/Close shape transition
+        carrier.timer += 0.06;
+        
+        if (carrier.particle) {
+          carrier.particle.y = 290 + carrier.timer * 20;
+        }
+
+        if (carrier.timer >= 1.0) {
+          // Release particle to cytoplasm!
+          if (carrier.particle) {
+            carrier.particle.isBound = false;
+            carrier.particle.y = 315;
+            carrier.particle.vy = Math.abs(carrier.particle.vy); // push down
+            carrier.particle = null;
+          }
+          carrier.state = 'resetting';
+          carrier.timer = 0;
+          playSound('click', 0.8);
+        }
+      } else if (carrier.state === 'resetting') {
+        // Shift back to outer opening
+        carrier.timer += 0.05;
+        if (carrier.timer >= 1.0) {
+          carrier.state = 'idle';
+          carrier.timer = 0;
+        }
+      }
+    }
+
+    /* ----------------------------------------------------
+       CANVAS RENDERING & DRAWING METHODS
+       ---------------------------------------------------- */
+    function drawHexagon(x, y, radius, drawFills = true) {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = (i * Math.PI) / 3;
+        const px = x + radius * Math.cos(angle);
+        const py = y + radius * Math.sin(angle);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      if (drawFills) {
+        ctx.fill();
+      }
+      ctx.stroke();
+    }
+
+    function drawLevel1() {
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+
+      // Draw adjacent plant cells surrounding center to show tissue grid structure
+      ctx.save();
+      
+      const cellRadius = 170;
+      const hexSpacingX = cellRadius * 1.732;
+      const hexSpacingY = cellRadius * 1.5;
+
+      const offsets = [
+        { dx: 0, dy: 0, isCenter: true },
+        { dx: -cellRadius * 1.5, dy: -cellRadius * 0.866, isCenter: false },
+        { dx: 0, dy: -cellRadius * 1.732, isCenter: false },
+        { dx: cellRadius * 1.5, dy: -cellRadius * 0.866, isCenter: false },
+        { dx: cellRadius * 1.5, dy: cellRadius * 0.866, isCenter: false },
+        { dx: 0, dy: cellRadius * 1.732, isCenter: false },
+        { dx: -cellRadius * 1.5, dy: cellRadius * 0.866, isCenter: false }
+      ];
+
+      // Draw all adjacent cells first
+      offsets.forEach(offset => {
+        const x = cx + offset.dx;
+        const y = cy + offset.dy;
+
+        // 1. Draw Middle Lamella boundary (Grey/Dark green cement border)
+        ctx.strokeStyle = hoveredElementId === 'lamella' && offset.isCenter ? 'rgba(0, 230, 118, 0.9)' : 'rgba(50, 80, 60, 0.4)';
+        ctx.lineWidth = 14;
+        drawHexagon(x, y, cellRadius, false);
+
+        // 2. Draw Primary Cell Wall (Thick green structural band)
+        ctx.strokeStyle = hoveredElementId === 'cellwall' && offset.isCenter ? 'rgba(0, 230, 118, 1.0)' : 'rgba(0, 200, 100, 0.75)';
+        ctx.lineWidth = 6;
+        ctx.fillStyle = 'rgba(10, 22, 18, 0.6)';
+        drawHexagon(x, y, cellRadius - 4, true);
+
+        // 3. Draw Cell Membrane (Thin bright blue line. Shrinks if Hypertonic/plasmolyzed)
+        const currentMRadius = (cellRadius - 10) * (offset.isCenter ? membraneSpread : (osmoticEnv === 'hypotonic' ? 1.0 : osmoticEnv === 'isotonic' ? 0.85 : 0.65));
+        
+        ctx.strokeStyle = hoveredElementId === 'membrane' && offset.isCenter ? 'rgba(0, 229, 255, 1.0)' : 'rgba(0, 229, 255, 0.7)';
+        ctx.lineWidth = 3.5;
+        
+        // Inner cell protoplast background
+        ctx.fillStyle = 'rgba(0, 140, 255, 0.05)';
+        drawHexagon(x, y, currentMRadius, true);
+
+        // 4. Draw Central Vacuole (blue oval bubble)
+        const vacRadius = currentMRadius * 0.75;
+        ctx.beginPath();
+        ctx.ellipse(x, y, vacRadius, vacRadius * 0.9, 0, 0, 2 * Math.PI);
+        ctx.fillStyle = osmoticEnv === 'hypertonic' ? 'rgba(0, 229, 255, 0.08)' : 'rgba(0, 229, 255, 0.18)';
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.fill();
+        ctx.stroke();
+
+        // 5. Draw Vacuole label/nucleolus details
+        if (offset.isCenter) {
+          // Nucleus (small purple circle near edge of vacuole)
+          const nucX = x + currentMRadius * 0.45;
+          const nucY = y - currentMRadius * 0.2;
+          ctx.beginPath();
+          ctx.arc(nucX, nucY, 15, 0, 2 * Math.PI);
+          ctx.fillStyle = 'rgba(224, 64, 251, 0.5)';
+          ctx.strokeStyle = 'rgba(224, 64, 251, 0.8)';
+          ctx.lineWidth = 1.5;
+          ctx.fill();
+          ctx.stroke();
+
+          // Chloroplasts (small green ovals)
+          ctx.fillStyle = 'rgba(0, 230, 118, 0.8)';
+          for (let angle = 0.5; angle < Math.PI * 2; angle += 1.25) {
+            const cxX = x + Math.cos(angle) * (currentMRadius * 0.7);
+            const cxY = y + Math.sin(angle) * (currentMRadius * 0.7);
+            ctx.beginPath();
+            ctx.ellipse(cxX, cxY, 8, 4, angle, 0, 2 * Math.PI);
+            ctx.fill();
+          }
+
+          // In Hypertonic: draw space label between cell wall and cell membrane
+          if (osmoticEnv === 'hypertonic') {
+            ctx.font = '10px JetBrains Mono';
+            ctx.fillStyle = 'rgba(255, 179, 0, 0.85)';
+            ctx.fillText("Separation space", x - 65, y - currentMRadius - 12);
+            ctx.fillText("(Plasmolysis)", x - 55, y - currentMRadius - 2);
+
+            // Gaps arrows
+            ctx.strokeStyle = 'rgba(255, 179, 0, 0.4)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(x - 5, y - cellRadius + 14);
+            ctx.lineTo(x - 5, y - currentMRadius - 2);
+            ctx.stroke();
+          }
+
+          // In Hypotonic: draw outward turgor pressure arrows pushing against wall
+          if (osmoticEnv === 'hypotonic') {
+            ctx.strokeStyle = 'rgba(0, 230, 118, 0.7)';
+            ctx.lineWidth = 2;
+            offsets.forEach((arrowOffset, index) => {
+              if (index === 0) return;
+              const angle = (index * Math.PI) / 3 - Math.PI/6;
+              const ax1 = x + vacRadius * Math.cos(angle);
+              const ay1 = y + vacRadius * Math.sin(angle);
+              const ax2 = x + (currentMRadius - 8) * Math.cos(angle);
+              const ay2 = y + (currentMRadius - 8) * Math.sin(angle);
+              
+              // Draw Arrow lines
+              ctx.beginPath();
+              ctx.moveTo(ax1, ay1);
+              ctx.lineTo(ax2, ay2);
+              
+              // Arrowhead
+              const headlen = 5;
+              ctx.lineTo(ax2 - headlen * Math.cos(angle - Math.PI/6), ay2 - headlen * Math.sin(angle - Math.PI/6));
+              ctx.moveTo(ax2, ay2);
+              ctx.lineTo(ax2 - headlen * Math.cos(angle + Math.PI/6), ay2 - headlen * Math.sin(angle + Math.PI/6));
+              
+              ctx.stroke();
+            });
+            ctx.font = '9px JetBrains Mono';
+            ctx.fillStyle = 'rgba(0, 230, 118, 0.85)';
+            ctx.fillText("TURGOR PRESSURE", x - 42, y + 4);
+          }
+        }
+      });
+
+      // Overlay glow on center hexagonal border to show selected / hovered state
+      if (hoveredElementId) {
+        ctx.strokeStyle = 'rgba(0, 230, 118, 0.2)';
+        ctx.lineWidth = 22;
+        drawHexagon(cx, cy, cellRadius, false);
+      }
+
+      ctx.restore();
+    }
+
+    function drawLevel2() {
+      // Zoomed to cell boundary cross-section showing layout:
+      // Left Cytoplasm | Left Membrane | Left Cell Wall | Middle Lamella | Right Cell Wall | Right Membrane | Right Cytoplasm
+      const cx = canvas.width / 2;
+      const ch = canvas.height;
+
+      // Membrane offsets based on environment state
+      // When hypertonic, membranes pull away from the middle lamella & cell wall
+      const leftMemX = 260 - (1.0 - membraneSpread) * 120;
+      const rightMemX = 340 + (1.0 - membraneSpread) * 120;
+
+      // Background Cytoplasms
+      ctx.fillStyle = 'rgba(0, 120, 255, 0.04)'; // Left cell protoplast
+      ctx.fillRect(0, 0, leftMemX, ch);
+      ctx.fillStyle = 'rgba(0, 120, 255, 0.04)'; // Right cell protoplast
+      ctx.fillRect(rightMemX, 0, canvas.width - rightMemX, ch);
+
+      // Gaps created by plasmolysis
+      if (osmoticEnv === 'hypertonic') {
+        ctx.fillStyle = 'rgba(255, 179, 0, 0.04)'; // filled with salt solution
+        ctx.fillRect(leftMemX, 0, 260 - leftMemX, ch);
+        ctx.fillRect(340, 0, rightMemX - 340, ch);
+
+        ctx.font = '11px JetBrains Mono';
+        ctx.fillStyle = 'rgba(255, 179, 0, 0.8)';
+        ctx.fillText("Membrane pulled away", leftMemX + 10, 40);
+        ctx.fillText("(Plasmolysis gap)", leftMemX + 10, 56);
+      }
+
+      // 1. Draw Middle Lamella in center (width: 300 +- 15)
+      ctx.fillStyle = hoveredElementId === 'lamella' ? 'rgba(0, 230, 118, 0.2)' : 'rgba(50, 80, 60, 0.35)';
+      ctx.strokeStyle = hoveredElementId === 'lamella' ? 'rgba(0, 230, 118, 0.9)' : 'rgba(0, 200, 100, 0.4)';
+      ctx.lineWidth = 2;
+      ctx.fillRect(290, 0, 20, ch);
+      ctx.strokeRect(290, -10, 20, ch + 20);
+
+      // Pectin blobs inside middle lamella
+      ctx.fillStyle = 'rgba(0, 230, 118, 0.3)';
+      for (let y = 30; y < ch; y += 60) {
+        ctx.beginPath();
+        ctx.arc(300, y + Math.sin(y/10)*5, 8, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      // 2. Draw Left and Right Cell Walls (Widths: left: 260-290, right: 310-340)
+      ctx.fillStyle = hoveredElementId === 'cellwall' ? 'rgba(0, 230, 118, 0.08)' : 'rgba(0, 200, 100, 0.04)';
+      ctx.strokeStyle = hoveredElementId === 'cellwall' ? 'rgba(0, 230, 118, 0.8)' : 'rgba(0, 200, 100, 0.4)';
+      ctx.lineWidth = 3;
+      
+      // Left Wall
+      ctx.fillRect(260, 0, 30, ch);
+      ctx.strokeRect(260, -10, 30, ch + 20);
+
+      // Right Wall
+      ctx.fillRect(310, 0, 30, ch);
+      ctx.strokeRect(310, -10, 30, ch + 20);
+
+      // Draw Cellulose microfibrils inside the walls (vertical textured bands)
+      ctx.strokeStyle = 'rgba(0, 200, 100, 0.25)';
+      ctx.lineWidth = 4;
+      for (let dx = 265; dx <= 285; dx += 8) {
+        ctx.beginPath();
+        ctx.moveTo(dx, 0);
+        ctx.lineTo(dx, ch);
+        ctx.stroke();
+      }
+      for (let dx = 315; dx <= 335; dx += 8) {
+        ctx.beginPath();
+        ctx.moveTo(dx, 0);
+        ctx.lineTo(dx, ch);
+        ctx.stroke();
+      }
+
+      // 3. Draw Left and Right Cell Membranes (Y line at leftMemX, rightMemX)
+      // Represent them as double-layered lipid barriers
+      ctx.strokeStyle = hoveredElementId === 'membrane' ? 'rgba(0, 229, 255, 1.0)' : 'rgba(0, 229, 255, 0.7)';
+      ctx.lineWidth = 6;
+      
+      // Left Membrane
+      ctx.beginPath();
+      ctx.moveTo(leftMemX, 0);
+      ctx.lineTo(leftMemX, ch);
+      ctx.stroke();
+
+      // Right Membrane
+      ctx.beginPath();
+      ctx.moveTo(rightMemX, 0);
+      ctx.lineTo(rightMemX, ch);
+      ctx.stroke();
+
+      // Label lines
+      ctx.font = '10px JetBrains Mono';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+
+      // Middle Lamella text
+      ctx.fillText("MIDDLE LAMELLA", 260, ch - 50);
+      
+      // Cell Wall text
+      ctx.fillStyle = 'rgba(0, 230, 118, 0.9)';
+      ctx.fillText("PRIMARY CELL WALL", 130, ch - 80);
+      ctx.fillText("PRIMARY CELL WALL", 360, ch - 80);
+
+      // Membrane text
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.9)';
+      ctx.fillText("PLASMA MEMBRANE", leftMemX - 110, ch - 110);
+      ctx.fillText("PLASMA MEMBRANE", rightMemX + 15, ch - 110);
+
+      // Show spatial arrows "Cell Wall on top of Cell Membrane"
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.lineWidth = 1;
+      
+      // Left gap arrow
+      ctx.beginPath();
+      ctx.moveTo(275, 150);
+      ctx.lineTo(leftMemX + 5, 150);
+      ctx.stroke();
+      ctx.fillStyle = '#fff';
+      ctx.fillText("Cell Wall is outside", 120, 145);
+      ctx.fillText("Cell Membrane is inside", 120, 160);
+    }
+
+    function drawLevel3() {
+      // Zoomed to Molecular view showing the Cellulose grid and the lipid bilayer
+      const ch = canvas.height;
+      const cw = canvas.width;
+
+      // 1. Draw Pectin/Matrix background in the Cell Wall region (Y: 0 - 180)
+      ctx.fillStyle = 'rgba(0, 230, 118, 0.03)';
+      ctx.fillRect(0, 0, cw, 180);
+
+      // Draw Hemicellulose networks (thin squiggly orange lines)
+      ctx.strokeStyle = 'rgba(255, 179, 0, 0.18)';
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i < cw; i += 60) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.bezierCurveTo(i + 20, 50, i - 20, 130, i + 10, 180);
+        ctx.stroke();
+      }
+
+      // Draw Pectin gel globs (light green translucent blobs)
+      ctx.fillStyle = hoveredElementId === 'pectin' ? 'rgba(0, 230, 118, 0.12)' : 'rgba(0, 230, 118, 0.06)';
+      for (let x = 40; x < cw; x += 150) {
+        ctx.beginPath();
+        ctx.arc(x + Math.sin(timeTicker/20 + x)*15, 90 + Math.cos(timeTicker/30 + x)*20, 22, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      // 2. Draw Cellulose Microfibrils (thick diagonal green structural bundles)
+      ctx.strokeStyle = hoveredElementId === 'microfibril' ? 'rgba(0, 230, 118, 0.85)' : 'rgba(0, 200, 100, 0.55)';
+      ctx.lineWidth = 14;
+
+      // Diagonal strand layer A
+      for (let x = -100; x < cw + 100; x += 120) {
+        ctx.beginPath();
+        ctx.moveTo(x, 20);
+        ctx.lineTo(x + 180, 170);
+        ctx.stroke();
+      }
+
+      // Diagonal strand layer B (crosswise)
+      ctx.strokeStyle = hoveredElementId === 'microfibril' ? 'rgba(0, 230, 118, 0.7)' : 'rgba(0, 180, 90, 0.45)';
+      ctx.lineWidth = 12;
+      for (let x = -50; x < cw + 200; x += 130) {
+        ctx.beginPath();
+        ctx.moveTo(x, 170);
+        ctx.lineTo(x - 180, 20);
+        ctx.stroke();
+      }
+
+      // 3. Draw Cell Membrane Bilayer (Y: 280-300)
+      const membraneTop = 275;
+      const membraneBottom = 305;
+      
+      // Cytoplasm background (below Y: 300)
+      ctx.fillStyle = 'rgba(0, 120, 255, 0.04)';
+      ctx.fillRect(0, membraneBottom, cw, ch - membraneBottom);
+
+      // Phospholipid heads (upper row at Y: 275, lower row at Y: 305)
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.6)';
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.35)';
+      ctx.lineWidth = 1;
+      
+      const headRadius = 4.5;
+      for (let x = 0; x < cw; x += 10) {
+        // Skip positions where Channel proteins are embedded
+        // Aquaporin 1: X: 175-225
+        // Aquaporin 2: X: 575-625
+        // Glucose Carrier: X: 370-430
+        const insideAquaporin = (x > 175 && x < 225) || (x > 575 && x < 625);
+        const insideCarrier = (x > 370 && x < 430);
+
+        if (!insideAquaporin && !insideCarrier) {
+          const waveY = Math.sin(timeTicker * 0.08 + x * 0.05) * 2;
+          
+          // Draw top head
+          ctx.beginPath();
+          ctx.arc(x, membraneTop + waveY, headRadius, 0, 2 * Math.PI);
+          ctx.fill();
+
+          // Draw bottom head
+          ctx.beginPath();
+          ctx.arc(x, membraneBottom + waveY, headRadius, 0, 2 * Math.PI);
+          ctx.fill();
+
+          // Draw tails (hydrophobic carbon chains)
+          ctx.strokeStyle = 'rgba(0, 229, 255, 0.25)';
+          ctx.beginPath();
+          ctx.moveTo(x, membraneTop + waveY + headRadius);
+          ctx.lineTo(x - 2, 290 + waveY);
+          ctx.lineTo(x, membraneBottom + waveY - headRadius);
+          ctx.moveTo(x, membraneTop + waveY + headRadius);
+          ctx.lineTo(x + 2, 290 + waveY);
+          ctx.lineTo(x, membraneBottom + waveY - headRadius);
+          ctx.stroke();
+        }
+      }
+
+      // 4. Draw Aquaporin Channel proteins (X: 200 & X: 600)
+      drawAquaporinChannel(200);
+      drawAquaporinChannel(600);
+
+      // 5. Draw Glucose Carrier (X: 400)
+      drawGlucoseCarrier(400);
+
+      // 6. Draw Molecules (Water, Glucose, Starch)
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = p.color;
+        
+        // Add subtle light glow around molecules
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        
+        // Reset shadow
+        ctx.shadowBlur = 0;
+
+        // Label starch
+        if (p.type === 'starch' && currentZoomVal > 2.8) {
+          ctx.font = '7px sans-serif';
+          ctx.fillStyle = '#fff';
+          ctx.fillText("STARCH", p.x - 12, p.y + 2);
+        }
+      });
+
+      // Visual helper labels
+      ctx.font = '10px JetBrains Mono';
+      ctx.fillStyle = 'rgba(0, 230, 118, 0.8)';
+      ctx.fillText("CELL WALL MESH (FREELY PERMEABLE)", 15, 20);
+
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.8)';
+      ctx.fillText("CELL MEMBRANE (SELECTIVELY PERMEABLE)", 15, 255);
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.fillText("[Extracellular Space]", cw - 160, 235);
+      ctx.fillText("[Cytoplasm of Cell]", cw - 150, ch - 20);
+    }
+
+    function drawAquaporinChannel(x) {
+      // Draw Aquaporin protein (pore) at X position
+      ctx.save();
+      ctx.fillStyle = gateState.aquaporin ? 'rgba(0, 229, 255, 0.8)' : 'rgba(0, 120, 255, 0.5)';
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.9)';
+      ctx.lineWidth = 2;
+
+      // Left subunit
+      ctx.beginPath();
+      ctx.ellipse(x - 14, 290, 8, 20, 0.1, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.stroke();
+
+      // Right subunit
+      ctx.beginPath();
+      ctx.ellipse(x + 14, 290, 8, 20, -0.1, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.stroke();
+
+      // Channel opening highlight
+      if (gateState.aquaporin) {
+        ctx.fillStyle = 'rgba(0, 229, 255, 0.15)';
+        ctx.fillRect(x - 6, 270, 12, 40);
+        
+        ctx.font = '8px JetBrains Mono';
+        ctx.fillStyle = '#fff';
+        ctx.fillText("AQ", x - 4, 325);
+      } else {
+        // Red barrier indicating closed gate
+        ctx.strokeStyle = '#ff5252';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(x - 10, 290);
+        ctx.lineTo(x + 10, 290);
+        ctx.stroke();
+        
+        ctx.font = '7px JetBrains Mono';
+        ctx.fillStyle = '#ff5252';
+        ctx.fillText("LOCKED", x - 12, 325);
+      }
+      ctx.restore();
+    }
+
+    function drawGlucoseCarrier(x) {
+      const c = carriers.left;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(0, 230, 118, 0.9)';
+      ctx.lineWidth = 2;
+
+      // Color shifts based on transporter state
+      if (c.state === 'idle') {
+        ctx.fillStyle = 'rgba(0, 230, 118, 0.7)';
+      } else if (c.state === 'binding') {
+        ctx.fillStyle = 'rgba(255, 179, 0, 0.8)';
+      } else {
+        ctx.fillStyle = 'rgba(224, 64, 251, 0.8)';
+      }
+
+      // Draw dynamic shape of carrier protein depending on conformation state
+      // Conformation A: Open to extracellular (top), pinched at cytoplasm (bottom)
+      // Conformation B: Open to cytoplasm (bottom), pinched at extracellular (top)
+      const timer = c.timer;
+
+      ctx.beginPath();
+      if (c.state === 'idle' || c.state === 'binding') {
+        // Conformation A
+        ctx.moveTo(x - 22, 270);
+        ctx.bezierCurveTo(x - 15, 290, x - 5, 295, x - 6, 310);
+        ctx.lineTo(x + 6, 310);
+        ctx.bezierCurveTo(x + 5, 295, x + 15, 290, x + 22, 270);
+        ctx.closePath();
+      } else if (c.state === 'shifting') {
+        // Transition morphing
+        // Pinching shut on both sides or shifting
+        ctx.moveTo(x - 18, 270);
+        ctx.bezierCurveTo(x - 12, 290, x - 12, 295, x - 18, 310);
+        ctx.lineTo(x + 18, 310);
+        ctx.bezierCurveTo(x + 12, 295, x + 12, 290, x + 18, 270);
+        ctx.closePath();
+      } else {
+        // Conformation B
+        ctx.moveTo(x - 6, 270);
+        ctx.bezierCurveTo(x - 5, 285, x - 15, 290, x - 22, 310);
+        ctx.lineTo(x + 22, 310);
+        ctx.bezierCurveTo(x + 15, 290, x + 5, 285, x + 6, 270);
+        ctx.closePath();
+      }
+      ctx.fill();
+      ctx.stroke();
+
+      // Channel gate labels
+      ctx.font = '8px JetBrains Mono';
+      ctx.fillStyle = '#fff';
+      ctx.fillText("CARRIER", x - 16, 260);
+
+      ctx.restore();
+    }
+
+    /* ----------------------------------------------------
+       MAIN ANIMATION LOOP
+       ---------------------------------------------------- */
+    function animate() {
+      timeTicker++;
+
+      // Lerp camera zoom
+      currentZoomVal += (targetZoomVal - currentZoomVal) * 0.08;
+      hudZoom.textContent = currentZoomVal.toFixed(2) + "x";
+
+      // Clear viewport
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Perform physics updates
+      updatePhysics();
+
+      // Render based on zoom scale thresholds
+      // Smooth transitions are achieved by blend drawing or switching at steps
+      if (currentZoomVal < 1.6) {
+        drawLevel1();
+      } else if (currentZoomVal >= 1.6 && currentZoomVal < 2.5) {
+        drawLevel2();
+      } else {
+        drawLevel3();
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    /* ----------------------------------------------------
+       INIT ON PAGE LOAD
+       ---------------------------------------------------- */
+    window.addEventListener('load', () => {
+      setupMolecules();
+      setEnvironment('hypotonic');
+      updateUIForLevel();
+
+      // Canvas Event listeners
+      canvas.addEventListener('mousemove', handleMouseMove);
+      canvas.addEventListener('mousedown', handleMouseDown);
+      
+      // Scroll wheel zoom handler
+      canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.08 : -0.08;
+        targetZoomVal = Math.min(3.0, Math.max(1.0, targetZoomVal + delta));
+        zoomSlider.value = targetZoomVal.toFixed(2);
+        playSound('zoom-hum', (targetZoomVal - 1.0) / 2.0);
+        updateZoomLevelState();
+      }, { passive: false });
+
+      // Run animation
+      animate();
+    });
+  </script>
+</body>
+</html>
