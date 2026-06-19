@@ -1,0 +1,1952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basic Parts of a Cell | Interactive Biology Lab</title>
+  <meta name="description" content="An interactive, scientifically accurate simulation showing the three fundamental parts of a cell: the Plasma Membrane, Cytoplasm, and Nucleus.">
+  
+  <!-- Google Fonts for premium UI typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #060713;
+      --bg-panel: rgba(12, 14, 33, 0.75);
+      --bg-card: rgba(20, 23, 51, 0.5);
+      --border-color: rgba(140, 158, 255, 0.18);
+      --border-glow: 0 0 15px rgba(140, 158, 255, 0.15);
+      
+      --text-main: #e8ecf8;
+      --text-muted: #9ba4c0;
+      
+      --cyan-accent: #00e5ff;
+      --cyan-glow: rgba(0, 229, 255, 0.4);
+      --purple-accent: #d500f9;
+      --purple-glow: rgba(213, 0, 249, 0.4);
+      --green-accent: #00e676;
+      --green-glow: rgba(0, 230, 118, 0.4);
+      --amber-accent: #ffab40;
+      
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(140, 158, 255, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(20, 15, 45, 0.6) 0px, transparent 50%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Warning for mobile portrait users */
+    .mobile-warning {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #060713;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .mobile-warning p {
+      font-size: 1.1rem;
+      color: var(--cyan-accent);
+      margin-top: 15px;
+      line-height: 1.5;
+    }
+
+    /* Header Styling */
+    header {
+      background: rgba(6, 7, 19, 0.9);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      z-index: 10;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--cyan-accent), var(--purple-accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #000;
+      font-size: 1.1rem;
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(to right, #ffffff, #9ba4c0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-badge {
+      background: rgba(140, 158, 255, 0.1);
+      border: 1px solid #8c9eff;
+      color: #8c9eff;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: var(--border-glow);
+    }
+
+    /* Main Content Layout */
+    .main-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 320px 1fr 340px;
+      gap: 15px;
+      padding: 15px;
+      height: calc(100vh - 60px);
+    }
+
+    /* Panels Base (Glassmorphism) */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--cyan-accent);
+      text-transform: uppercase;
+    }
+
+    .panel-content {
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Viewport Center Panel */
+    .viewport-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #030409;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9);
+      outline: none;
+    }
+
+    #viewportCanvas {
+      width: 100%;
+      height: 100%;
+      max-width: 800px;
+      max-height: 600px;
+      aspect-ratio: 4/3;
+      display: block;
+      background: transparent;
+      cursor: crosshair;
+    }
+
+    /* HUD Elements inside Viewport */
+    .hud-element {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: rgba(6, 8, 20, 0.8);
+      border: 1px solid rgba(140, 158, 255, 0.15);
+      padding: 6px 12px;
+      border-radius: 6px;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+      z-index: 5;
+    }
+
+    .hud-top-left { top: 15px; left: 15px; border-left: 3px solid var(--cyan-accent); color: #fff; font-weight: bold; }
+    .hud-top-right { top: 15px; right: 15px; text-align: right; }
+    .hud-bottom-left { bottom: 15px; left: 15px; display: flex; flex-direction: column; gap: 4px; }
+    .hud-bottom-right { bottom: 15px; right: 15px; text-align: right; }
+
+    /* HUD Scale Bar indicator */
+    .scale-bar-line {
+      height: 4px;
+      background: var(--text-main);
+      width: 120px;
+      position: relative;
+      margin-top: 4px;
+      border-left: 2px solid var(--text-main);
+      border-right: 2px solid var(--text-main);
+    }
+
+    /* Control Sections */
+    .control-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Navigation List */
+    .nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-btn:hover {
+      background: rgba(140, 158, 255, 0.08);
+      color: #fff;
+    }
+
+    .nav-btn.active {
+      color: #fff;
+      box-shadow: var(--border-glow);
+    }
+
+    .nav-btn.active.cell { border-color: #8c9eff; background: rgba(140, 158, 255, 0.12); }
+    .nav-btn.active.membrane { border-color: var(--cyan-accent); background: rgba(0, 229, 255, 0.1); }
+    .nav-btn.active.cytoplasm { border-color: var(--green-accent); background: rgba(0, 230, 118, 0.1); }
+    .nav-btn.active.nucleus { border-color: var(--purple-accent); background: rgba(213, 0, 249, 0.1); }
+
+    .nav-badge {
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    .nav-btn.membrane .nav-badge { background: rgba(0, 229, 255, 0.15); color: var(--cyan-accent); }
+    .nav-btn.cytoplasm .nav-badge { background: rgba(0, 230, 118, 0.15); color: var(--green-accent); }
+    .nav-btn.nucleus .nav-badge { background: rgba(213, 0, 249, 0.15); color: var(--purple-accent); }
+
+    /* Slider Styling */
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .slider-header span:last-child {
+      color: var(--cyan-accent);
+      font-weight: bold;
+    }
+
+    .horizontal-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .horizontal-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--cyan-accent);
+      box-shadow: 0 0 8px var(--cyan-glow);
+      transition: transform 0.1s ease;
+    }
+
+    .horizontal-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Toggle Switches */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .switch-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: .3s;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 12px;
+      width: 12px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-muted);
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: rgba(0, 229, 255, 0.15);
+      border-color: var(--cyan-accent);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(18px);
+      background-color: var(--cyan-accent);
+      box-shadow: 0 0 8px var(--cyan-glow);
+    }
+
+    /* Buttons */
+    .btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* RIGHT PANEL: DETAILS & QUIZ TABS */
+    .tab-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 12px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      color: var(--cyan-accent);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 15%;
+      width: 70%;
+      height: 2px;
+      background: var(--cyan-accent);
+      box-shadow: 0 0 8px var(--cyan-glow);
+    }
+
+    .tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .tab-pane.active {
+      display: flex;
+    }
+
+    .info-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .info-tag {
+      align-self: flex-start;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    .level-info-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .detail-text {
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    /* Hotspots/Legend list */
+    .legend-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .legend-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      text-align: left;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .legend-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .legend-btn.active {
+      background: rgba(140, 158, 255, 0.06);
+      border-color: #8c9eff;
+      color: #fff;
+      box-shadow: var(--border-glow);
+    }
+
+    .legend-btn.active.membrane { border-color: var(--cyan-accent); color: var(--cyan-accent); }
+    .legend-btn.active.cytoplasm { border-color: var(--green-accent); color: var(--green-accent); }
+    .legend-btn.active.nucleus { border-color: var(--purple-accent); color: var(--purple-accent); }
+
+    .legend-btn:after {
+      content: "→";
+      opacity: 0.3;
+      font-weight: bold;
+      transition: transform 0.2s ease;
+    }
+
+    .legend-btn:hover:after {
+      opacity: 1;
+      transform: translateX(3px);
+    }
+
+    /* Inspector Drawer */
+    .organelle-drawer {
+      background: rgba(140, 158, 255, 0.03);
+      border: 1px solid rgba(140, 158, 255, 0.15);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: inset 0 0 15px rgba(140, 158, 255, 0.05);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .organelle-drawer.membrane { border-color: rgba(0, 229, 255, 0.3); background: rgba(0, 229, 255, 0.02); }
+    .organelle-drawer.cytoplasm { border-color: rgba(0, 230, 118, 0.3); background: rgba(0, 230, 118, 0.02); }
+    .organelle-drawer.nucleus { border-color: rgba(213, 0, 249, 0.3); background: rgba(213, 0, 249, 0.02); }
+
+    .organelle-name {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #8c9eff;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .organelle-drawer.membrane .organelle-name { color: var(--cyan-accent); }
+    .organelle-drawer.cytoplasm .organelle-name { color: var(--green-accent); }
+    .organelle-drawer.nucleus .organelle-name { color: var(--purple-accent); }
+
+    .organelle-badge {
+      align-self: flex-start;
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .organelle-drawer.membrane .organelle-badge { background: rgba(0, 229, 255, 0.1); color: var(--cyan-accent); border-color: rgba(0, 229, 255, 0.2); }
+    .organelle-drawer.cytoplasm .organelle-badge { background: rgba(0, 230, 118, 0.1); color: var(--green-accent); border-color: rgba(0, 230, 118, 0.2); }
+    .organelle-drawer.nucleus .organelle-badge { background: rgba(213, 0, 249, 0.1); color: var(--purple-accent); border-color: rgba(213, 0, 249, 0.2); }
+
+    @keyframes slideIn {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* QUIZ SYSTEM */
+    .quiz-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-progress {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .quiz-progress-bar {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .quiz-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--cyan-accent);
+      transition: width 0.3s ease;
+    }
+
+    .quiz-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-question {
+      font-size: 0.85rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: #fff;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quiz-opt-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 10px;
+      color: var(--text-main);
+      text-align: left;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .quiz-opt-btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-opt-btn.correct {
+      background: rgba(0, 230, 118, 0.15);
+      border-color: var(--green-accent);
+      color: var(--green-accent);
+      font-weight: bold;
+    }
+
+    .quiz-opt-btn.wrong {
+      background: rgba(255, 82, 82, 0.15);
+      border-color: #ff5252;
+      color: #ff5252;
+    }
+
+    .quiz-feedback {
+      font-size: 0.75rem;
+      line-height: 1.4;
+      color: var(--text-muted);
+      min-height: 34px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 10px;
+    }
+
+    .quiz-results-card {
+      text-align: center;
+      padding: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .quiz-score-circle {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(140, 158, 255, 0.1);
+      border: 3px solid #8c9eff;
+      box-shadow: var(--border-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #8c9eff;
+    }
+
+    /* Scrollbar customization */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .main-container {
+        grid-template-columns: 260px 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
+        overflow-y: auto;
+      }
+      body {
+        overflow-y: auto;
+        height: auto;
+      }
+      header {
+        position: sticky;
+        top: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mobile-warning {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Warning overlay for mobile screens -->
+  <div class="mobile-warning" id="mobileWarning">
+    <div class="logo-icon">⚛</div>
+    <p>This cell structure simulation requires a tablet or desktop browser screen for high-fidelity interactive details.</p>
+  </div>
+
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">⚛</div>
+      <h1>BASIC CELL STRUCTURE</h1>
+    </div>
+    <span class="nav-badge">Three Core Components</span>
+  </header>
+
+  <main class="main-container">
+    
+    <!-- LEFT PANEL: SIMULATION CONTROLS -->
+    <section class="glass-panel" id="leftPanel">
+      <div class="panel-header">
+        <div class="panel-title">🎛️ Navigation & Controls</div>
+      </div>
+      
+      <div class="panel-content">
+        <!-- Scale Magnification -->
+        <div class="control-section">
+          <div class="control-label">Focus Area</div>
+          <div class="nav-list">
+            <button class="nav-btn cell active" id="btn_cell" onclick="setFocus('cell')">
+              <span>1. Whole Cell View</span>
+              <span class="nav-badge" style="background:rgba(255,255,255,0.08); color:#fff;">1.0x</span>
+            </button>
+            <button class="nav-btn membrane" id="btn_membrane" onclick="setFocus('membrane')">
+              <span>2. Plasma Membrane</span>
+              <span class="nav-badge">4.5x</span>
+            </button>
+            <button class="nav-btn cytoplasm" id="btn_cytoplasm" onclick="setFocus('cytoplasm')">
+              <span>3. Cytoplasm Fluid</span>
+              <span class="nav-badge">3.2x</span>
+            </button>
+            <button class="nav-btn nucleus" id="btn_nucleus" onclick="setFocus('nucleus')">
+              <span>4. Nucleus Sphere</span>
+              <span class="nav-badge">3.5x</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Zoom Slider manual override -->
+        <div class="control-section">
+          <div class="control-label">Manual Zoom Control</div>
+          <div class="slider-row">
+            <div class="slider-header">
+              <span>Scale Magnification:</span>
+              <span id="zoomReadout">1.00x</span>
+            </div>
+            <input type="range" min="1.00" max="5.00" step="0.01" value="1.00" class="horizontal-slider" id="zoomSlider" oninput="onZoomSliderChange(this.value)" aria-label="Manual Zoom Slider">
+          </div>
+        </div>
+
+        <!-- Cytoplasmic streaming controls -->
+        <div class="control-section" id="cytoplasmOptions">
+          <div class="control-label">Cytoplasm Variables</div>
+          <div class="slider-row">
+            <div class="slider-header">
+              <span>Streaming speed (Cyclosis):</span>
+              <span id="speedReadout">Normal</span>
+            </div>
+            <input type="range" min="0" max="3" value="1" step="1" class="horizontal-slider" id="speedSlider" oninput="updateStreamingSpeed(this.value)">
+          </div>
+        </div>
+
+        <!-- Ambient sound control -->
+        <div class="control-section">
+          <div class="control-label">Ambient Environment</div>
+          <div class="switch-container">
+            <span class="switch-label">Synthesizer Sound FX</span>
+            <label class="switch">
+              <input type="checkbox" checked id="soundToggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTER PANEL: INTERACTIVE CANVAS VIEWPORT -->
+    <section class="viewport-container" id="centerPanel" tabindex="0">
+      <canvas id="viewportCanvas" width="800" height="600"></canvas>
+      
+      <!-- HUD Overlays -->
+      <div class="hud-element hud-top-left" id="hudStatus">MICROSCOPE VIEW: WHOLE CELL</div>
+      <div class="hud-element hud-top-right">
+        <div>FOCUS TARGET: <span id="hudFocus" style="color:var(--cyan-accent); font-weight:bold; text-transform: uppercase;">Whole Cell</span></div>
+        <div style="margin-top: 4px;">ZOOM LEVEL: <span id="hudZoom" style="color:var(--purple-accent); font-weight:bold;">1.00x</span></div>
+      </div>
+      <div class="hud-element hud-bottom-left">
+        <div id="hudCellLabel">Generalized Eukaryotic Cell (~20 µm Scale)</div>
+        <div class="scale-bar-line" id="hudScaleBar"></div>
+      </div>
+      <div class="hud-element hud-bottom-right">
+        <div>ORGANELLE RESOLUTION: <span id="hudRes">STANDARD</span></div>
+        <div style="margin-top: 4px; font-size: 0.65rem;" id="hudCoors">Camera: (400, 300)</div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: COMPONENT INFO & FEATURE LEGEND / QUIZ -->
+    <section class="glass-panel" id="rightPanel">
+      <div class="tab-header">
+        <button class="tab-btn active" id="btnTabLegend" onclick="switchTab('legend')">📖 Inspector</button>
+        <button class="tab-btn" id="btnTabQuiz" onclick="switchTab('quiz')">✍️ Knowledge Quiz</button>
+      </div>
+      
+      <div class="panel-content">
+        <!-- TAB 1: INSPECTOR & LEGEND -->
+        <div class="tab-pane active" id="paneLegend">
+          <div class="info-header">
+            <span class="info-tag" id="levelScaleBadge">Cellular Scale (~20 µm)</span>
+            <h3 class="level-info-title" id="levelTitle">Generalized Cell</h3>
+            <div class="detail-text" id="levelDescription">
+              Eukaryotic cells are structured units of life. Under a standard light microscope, three basic parts are clearly distinguishable: the <strong>Plasma membrane</strong>, <strong>Cytoplasm</strong>, and <strong>Nucleus</strong>. Click on any label line or cell region to examine its structural details!
+            </div>
+          </div>
+
+          <div id="legendWrapper" style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="control-label">Structure Guide (Click to Inspect)</div>
+            <div class="legend-list">
+              <button class="legend-btn" id="lbl_membrane" onclick="selectComponent('membrane')">Plasma Membrane</button>
+              <button class="legend-btn" id="lbl_cytoplasm" onclick="selectComponent('cytoplasm')">Cytoplasm Space</button>
+              <button class="legend-btn" id="lbl_nucleus" onclick="selectComponent('nucleus')">Nucleus Sphere</button>
+            </div>
+          </div>
+
+          <!-- Description Details Drawer -->
+          <div class="organelle-drawer" id="organelleDrawer" style="display: none;">
+            <h4 class="organelle-name" id="drawerOrganelleName">Component Name</h4>
+            <span class="organelle-badge" id="drawerOrganelleBadge">Grade 9 Curriculum</span>
+            <p class="detail-text" id="drawerOrganelleDesc">Details about structural composition go here.</p>
+            <button class="btn" style="padding: 6px 10px; font-size: 0.7rem; margin-top: 4px;" onclick="closeOrganelleDrawer()">Close Inspector</button>
+          </div>
+        </div>
+
+        <!-- TAB 2: KNOWLEDGE QUIZ -->
+        <div class="tab-pane" id="paneQuiz">
+          <div class="quiz-container" id="quizActiveContainer">
+            <div class="quiz-progress">
+              <span>Question <span id="quizCurrentNum">1</span> of 5</span>
+              <span>Score: <span id="quizScore">0</span></span>
+            </div>
+            <div class="quiz-progress-bar">
+              <div class="quiz-progress-fill" id="quizProgressFill"></div>
+            </div>
+            
+            <div class="quiz-card">
+              <div class="quiz-question" id="quizQuestionText">Question text goes here.</div>
+              <div class="quiz-options" id="quizOptionsContainer">
+                <!-- Options buttons dynamically loaded -->
+              </div>
+            </div>
+            <div class="quiz-feedback" id="quizFeedbackText">Select an answer above to see explanation.</div>
+            <button class="btn btn-cyan" style="display:none;" id="btnNextQuiz" onclick="nextQuestion()">Next Question</button>
+          </div>
+
+          <!-- Quiz Completion Card -->
+          <div class="quiz-results-card" id="quizResultsContainer" style="display: none;">
+            <h4>Knowledge Check Complete!</h4>
+            <div class="quiz-score-circle" id="quizFinalScore">4/5</div>
+            <p class="detail-text" id="quizResultsEval">Excellent job! You have a solid understanding of the three basic cell components.</p>
+            <button class="btn btn-cyan" style="width: 100%; margin-top: 10px;" onclick="resetQuiz()">Try Quiz Again</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* ----------------------------------------------------
+       AUDIO SYSTEM (WEB AUDIO API SYNTHESIZER)
+       ---------------------------------------------------- */
+    let audioCtx = null;
+    const soundToggle = document.getElementById('soundToggle');
+
+    function playSound(type, pitchModifier = 1.0) {
+      if (!soundToggle.checked) return;
+      
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        
+        const now = audioCtx.currentTime;
+        
+        if (type === 'click') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(450 * pitchModifier, now);
+          osc.frequency.exponentialRampToValueAtTime(750 * pitchModifier, now + 0.04);
+          gain.gain.setValueAtTime(0.006, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.04);
+        } else if (type === 'zoom-hum') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(100 + (pitchModifier * 100), now);
+          osc.frequency.exponentialRampToValueAtTime(130 + (pitchModifier * 100), now + 0.1);
+          gain.gain.setValueAtTime(0.008, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.1);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        } else if (type === 'correct') {
+          const gain = audioCtx.createGain();
+          gain.gain.setValueAtTime(0.01, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+          gain.connect(audioCtx.destination);
+          
+          [440, 554, 659].forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+            osc.connect(gain);
+            osc.start(now + idx * 0.07);
+            osc.stop(now + 0.3);
+          });
+        } else if (type === 'wrong') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(120, now);
+          osc.frequency.linearRampToValueAtTime(80, now + 0.25);
+          gain.gain.setValueAtTime(0.015, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        }
+      } catch (e) {
+        console.warn('Audio Synthesis restrictions active.', e);
+      }
+    }
+
+    /* ----------------------------------------------------
+       SCIENTIFIC METADATA FOR CELL INSPECTOR
+       ---------------------------------------------------- */
+    const componentDatabase = {
+      membrane: {
+        name: "Plasma Membrane",
+        desc: "The selectively permeable boundary that surrounds the cell. Composed of a double layer of lipids (phospholipid bilayer) with embedded proteins. It acts as a protective shield, controls what substances enter and exit the cytoplasm, and maintains cellular shape and osmotic balance.",
+        badge: "Outer Boundary Layer"
+      },
+      cytoplasm: {
+        name: "Cytoplasm",
+        desc: "The entire region inside the plasma membrane and outside the nuclear envelope. It consists of the jelly-like <strong>cytosol</strong> (water, salts, and proteins) and various membrane-bound organelles (like mitochondria, ribosomes, and endoplasmic reticulum). The cytoplasm is the primary site for metabolic reactions and chemical activities in the cell.",
+        badge: "Metabolic Activity Field"
+      },
+      nucleus: {
+        name: "Nucleus",
+        desc: "The central spherical control center of the eukaryotic cell. Bound by a double membrane called the <strong>nuclear envelope</strong>, which has pores to regulate molecular traffic. It contains the nucleoplasm, nucleolus, and chromatin (long strands of DNA containing genes). It controls protein synthesis, heredity, cell division, and growth.",
+        badge: "Genetic Information Hub"
+      }
+    };
+
+    /* ----------------------------------------------------
+       SIMULATION STATE & VARIABLES
+       ---------------------------------------------------- */
+    let currentZoomVal = 1.0;
+    let targetZoomVal = 1.0;
+    let currentFocusTarget = 'cell'; // 'cell', 'membrane', 'cytoplasm', 'nucleus'
+    let timeTicker = 0;
+
+    // Smooth panning camera states
+    let camX = 400;
+    let camY = 300;
+    let targetCamX = 400;
+    let targetCamY = 300;
+
+    // Particle storage for cytoplasm streams & molecules
+    const cytoParticles = [];
+    const cytoSpeeds = [0.0, 0.4, 0.9, 1.6]; // maps slider positions to speeds
+    let cytoSpeedIdx = 1;
+
+    // Focus coordinate profiles
+    const focusProfiles = {
+      cell: { x: 400, y: 300, zoom: 1.0, scaleText: "Cellular Scale (~20 µm)", title: "Generalized Cell", desc: "Eukaryotic cells are structured units of life. Under a standard light microscope, three basic parts are clearly distinguishable: the <strong>Plasma membrane</strong>, <strong>Cytoplasm</strong>, and <strong>Nucleus</strong>. Click on any label line or cell region to examine its structural details!" },
+      membrane: { x: 220, y: 240, zoom: 4.5, scaleText: "Boundary Scale (~5 nm)", title: "Plasma Membrane Detail", desc: "Zoomed into the cell membrane. It consists of a <strong>phospholipid bilayer</strong> with hydrophilic heads facing outwards and hydrophobic fatty acid tails clustering inside. Transporter protein channels are scattered to selectively regulate entry." },
+      cytoplasm: { x: 300, y: 360, zoom: 3.2, scaleText: "Organelle Scale (~500 nm)", title: "Cytoplasm Deep Dive", desc: "Zoomed into the cytoplasm. You see the viscous cytosol fluid streaming slowly (cyclosis). Organelles like the double-membraned <strong>mitochondrion</strong> (energy converter) and clusters of tiny <strong>ribosomes</strong> (protein synthesizers) float here." },
+      nucleus: { x: 420, y: 280, zoom: 3.5, scaleText: "Nuclear Scale (~1 µm)", title: "Nucleus Details", desc: "Zoomed into the control center. Bounded by a double-layered <strong>nuclear envelope</strong> with tiny **nuclear pores** allowing RNA/protein transport. Inside is the dense **nucleolus** and threads of **chromatin** (genetic DNA strands)." }
+    };
+
+    // Interaction states
+    let mousePos = { x: 0, y: 0 };
+    let hoveredElementId = null;
+    let selectedComponentId = null;
+
+    // Canvas DOM elements
+    const canvas = document.getElementById('viewportCanvas');
+    const ctx = canvas.getContext('2d');
+    const zoomSlider = document.getElementById('zoomSlider');
+    const zoomReadout = document.getElementById('zoomReadout');
+    const speedSlider = document.getElementById('speedSlider');
+    const speedReadout = document.getElementById('speedReadout');
+
+    const levelTitle = document.getElementById('levelTitle');
+    const levelScaleBadge = document.getElementById('levelScaleBadge');
+    const levelDescription = document.getElementById('levelDescription');
+    const organelleDrawer = document.getElementById('organelleDrawer');
+    const drawerOrganelleName = document.getElementById('drawerOrganelleName');
+    const drawerOrganelleDesc = document.getElementById('drawerOrganelleDesc');
+    const drawerOrganelleBadge = document.getElementById('drawerOrganelleBadge');
+
+    const hudStatus = document.getElementById('hudStatus');
+    const hudFocus = document.getElementById('hudFocus');
+    const hudZoom = document.getElementById('hudZoom');
+    const hudCellLabel = document.getElementById('hudCellLabel');
+    const hudScaleBar = document.getElementById('hudScaleBar');
+    const hudRes = document.getElementById('hudRes');
+    const hudCoors = document.getElementById('hudCoors');
+
+    /* ----------------------------------------------------
+       INITIALIZE PARTICLES
+       ---------------------------------------------------- */
+    function setupParticles() {
+      cytoParticles.length = 0;
+      // Spawn random cytosol streaming particles inside cytoplasm limits
+      // We will model the animal cell boundary (approx oval) and skip nucleus
+      for (let i = 0; i < 45; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const distFromCenter = Math.random() * 110 + 70; // floating outside nucleus (radius 60)
+        cytoParticles.push({
+          angle: angle,
+          r: distFromCenter,
+          size: Math.random() * 2 + 1,
+          color: Math.random() > 0.5 ? 'rgba(0, 229, 255, 0.4)' : 'rgba(0, 230, 118, 0.4)',
+          speedModifier: Math.random() * 0.5 + 0.8
+        });
+      }
+    }
+
+    /* ----------------------------------------------------
+       NAVIGATION AND VIEW CONTROLS
+       ---------------------------------------------------- */
+    function setFocus(target) {
+      currentFocusTarget = target;
+      
+      // Update sidebar buttons
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`btn_${target}`).classList.add('active');
+
+      const profile = focusProfiles[target];
+      targetCamX = profile.x;
+      targetCamY = profile.y;
+      targetZoomVal = profile.zoom;
+      zoomSlider.value = targetZoomVal.toFixed(2);
+      
+      playSound('click', target === 'cell' ? 1.0 : target === 'membrane' ? 1.2 : target === 'cytoplasm' ? 1.1 : 0.9);
+      updateHUDText();
+      
+      // Update Inspector panel only if user hasn't explicitly selected something else
+      if (!selectedComponentId) {
+        levelTitle.textContent = profile.title;
+        levelScaleBadge.textContent = profile.scaleText;
+        levelDescription.innerHTML = profile.desc;
+      }
+    }
+
+    function onZoomSliderChange(val) {
+      targetZoomVal = parseFloat(val);
+      playSound('zoom-hum', (targetZoomVal - 1.0) / 4.0);
+      updateHUDText();
+    }
+
+    function updateStreamingSpeed(val) {
+      cytoSpeedIdx = parseInt(val);
+      const speeds = ["Stationary", "Normal Speed", "Fast Streaming", "High Speed"];
+      speedReadout.textContent = speeds[cytoSpeedIdx];
+      playSound('click', 1.0 + (cytoSpeedIdx * 0.1));
+    }
+
+    function updateHUDText() {
+      zoomReadout.textContent = targetZoomVal.toFixed(2) + "x";
+      hudZoom.textContent = currentZoomVal.toFixed(2) + "x";
+      hudFocus.textContent = currentFocusTarget === 'cell' ? "Whole Cell" : currentFocusTarget;
+      
+      if (currentFocusTarget === 'cell') {
+        hudStatus.textContent = "MICROSCOPE VIEW: WHOLE CELL";
+        hudCellLabel.textContent = "Generalized Eukaryotic Cell (~20 µm Scale)";
+        hudScaleBar.style.width = "120px";
+        hudRes.textContent = "STANDARD";
+      } else if (currentFocusTarget === 'membrane') {
+        hudStatus.textContent = "MICROSCOPE VIEW: PLASMA MEMBRANE";
+        hudCellLabel.textContent = "Bilayer Sub-structures (~5 nm Scale)";
+        hudScaleBar.style.width = "50px";
+        hudRes.textContent = "MOLECULAR HIGH-RES";
+      } else if (currentFocusTarget === 'cytoplasm') {
+        hudStatus.textContent = "MICROSCOPE VIEW: CYTOPLASM SPACE";
+        hudCellLabel.textContent = "Organelle Matrix (~500 nm Scale)";
+        hudScaleBar.style.width = "80px";
+        hudRes.textContent = "ULTRA HIGH-RES";
+      } else {
+        hudStatus.textContent = "MICROSCOPE VIEW: NUCLEUS HUB";
+        hudCellLabel.textContent = "Genetics & Chromatin (~1 µm Scale)";
+        hudScaleBar.style.width = "70px";
+        hudRes.textContent = "ULTRA HIGH-RES";
+      }
+
+      hudCoors.textContent = `Camera: (${Math.round(camX)}, ${Math.round(camY)})`;
+    }
+
+    /* ----------------------------------------------------
+       LEGEND & INSPECTOR DRAWER
+       ---------------------------------------------------- */
+    function selectComponent(id) {
+      document.querySelectorAll('.legend-btn').forEach(btn => btn.classList.remove('active'));
+      selectedComponentId = id;
+      
+      if (id) {
+        document.getElementById(`lbl_${id}`).classList.add(`active`);
+        
+        // Match drawer styles
+        organelleDrawer.className = "organelle-drawer " + id;
+        
+        const data = componentDatabase[id];
+        drawerOrganelleName.textContent = data.name;
+        drawerOrganelleBadge.textContent = data.badge;
+        drawerOrganelleDesc.innerHTML = data.desc;
+        
+        organelleDrawer.style.display = 'flex';
+        playSound('click', 1.15);
+
+        // Auto pan-zoom camera to center on that clicked component!
+        setFocus(id);
+      } else {
+        organelleDrawer.style.display = 'none';
+      }
+    }
+
+    function closeOrganelleDrawer() {
+      selectComponent(null);
+      playSound('click', 0.95);
+    }
+
+    /* ----------------------------------------------------
+       QUIZ SYSTEM LOGIC
+       ---------------------------------------------------- */
+    const quizQuestions = [
+      {
+        question: "Which of the following three basic cell parts acts as a selectively permeable barrier?",
+        options: [
+          "The Cytoplasm",
+          "The Plasma membrane",
+          "The Nucleus",
+          "The Central vacuole"
+        ],
+        correct: 1,
+        explanation: "Correct! The plasma membrane is selectively permeable, regulating transport of materials into and out of the cytoplasm."
+      },
+      {
+        question: "Where inside a eukaryotic cell do most metabolic and chemical reactions take place?",
+        options: [
+          "Within the nucleus sphere",
+          "On the surface of the cell wall",
+          "In the fluid cytoplasm matrix",
+          "Inside the genetic chromosomes"
+        ],
+        correct: 2,
+        explanation: "The cytoplasm consists of viscous cytosol which acts as the chemical medium where cell metabolic actions occur."
+      },
+      {
+        question: "What double-membraned structure holds genetic information and coordinates cell activities?",
+        options: [
+          "The Nucleus",
+          "The Mitochondrion",
+          "The Plasma membrane",
+          "The Ribosome"
+        ],
+        correct: 0,
+        explanation: "Correct! The nucleus contains the cell's genetic chromatin (DNA) and directs gene activity and division."
+      },
+      {
+        question: "Which components are clearly visible under a standard school microscope in a general cell?",
+        options: [
+          "Only atoms and hydrogen bonds",
+          "The cell wall and microfibrils mesh only",
+          "Plasma membrane, Cytoplasm, and Nucleus",
+          "Starch, glucose, and individual ATP molecules"
+        ],
+        correct: 2,
+        explanation: "The nucleus, cytoplasm, and outer plasma membrane boundary are the three primary components visible under light microscopes."
+      },
+      {
+        question: "What is the function of the nuclear pores in the nuclear envelope membrane?",
+        options: [
+          "They synthesize lipid molecules for the membrane.",
+          "They permit selective entry and exit of molecules like RNA and proteins.",
+          "They pump sodium ions out of the cytoplasm.",
+          "They act as structural anchors for cellular flagella."
+        ],
+        correct: 1,
+        explanation: "Nuclear pores are selective pathways bridging the nucleoplasm and cytoplasm to enable essential mRNA and protein communication."
+      }
+    ];
+
+    let currentQuestionIdx = 0;
+    let quizScoreVal = 0;
+    let answered = false;
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      
+      if (tab === 'legend') {
+        document.getElementById('btnTabLegend').classList.add('active');
+        document.getElementById('paneLegend').classList.add('active');
+      } else {
+        document.getElementById('btnTabQuiz').classList.add('active');
+        document.getElementById('paneQuiz').classList.add('active');
+        loadQuizQuestion();
+      }
+      playSound('click');
+    }
+
+    function loadQuizQuestion() {
+      answered = false;
+      document.getElementById('btnNextQuiz').style.display = 'none';
+      document.getElementById('quizFeedbackText').textContent = "Select an answer above to see explanation.";
+      document.getElementById('quizFeedbackText').style.color = 'var(--text-muted)';
+      
+      const q = quizQuestions[currentQuestionIdx];
+      document.getElementById('quizQuestionText').textContent = q.question;
+      document.getElementById('quizCurrentNum').textContent = (currentQuestionIdx + 1);
+      document.getElementById('quizScore').textContent = quizScoreVal;
+      
+      const progressPct = (currentQuestionIdx / quizQuestions.length) * 100;
+      document.getElementById('quizProgressFill').style.width = `${progressPct}%`;
+
+      const optionsBox = document.getElementById('quizOptionsContainer');
+      optionsBox.innerHTML = '';
+      
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-opt-btn';
+        btn.innerHTML = opt;
+        btn.onclick = () => selectOption(idx, btn);
+        optionsBox.appendChild(btn);
+      });
+    }
+
+    function selectOption(selectedIdx, btnElement) {
+      if (answered) return;
+      answered = true;
+      
+      const q = quizQuestions[currentQuestionIdx];
+      const optionButtons = document.querySelectorAll('.quiz-opt-btn');
+      
+      if (selectedIdx === q.correct) {
+        btnElement.classList.add('correct');
+        document.getElementById('quizFeedbackText').innerHTML = `<strong>Correct!</strong> ` + q.explanation;
+        document.getElementById('quizFeedbackText').style.color = 'var(--green-accent)';
+        quizScoreVal++;
+        document.getElementById('quizScore').textContent = quizScoreVal;
+        playSound('correct');
+      } else {
+        btnElement.classList.add('wrong');
+        optionButtons[q.correct].classList.add('correct');
+        document.getElementById('quizFeedbackText').innerHTML = `<strong>Incorrect.</strong> ` + q.explanation;
+        document.getElementById('quizFeedbackText').style.color = '#ff5252';
+        playSound('wrong');
+      }
+
+      document.getElementById('btnNextQuiz').style.display = 'block';
+      if (currentQuestionIdx === quizQuestions.length - 1) {
+        document.getElementById('btnNextQuiz').textContent = "Finish Quiz";
+      } else {
+        document.getElementById('btnNextQuiz').textContent = "Next Question";
+      }
+    }
+
+    function nextQuestion() {
+      playSound('click');
+      if (currentQuestionIdx < quizQuestions.length - 1) {
+        currentQuestionIdx++;
+        loadQuizQuestion();
+      } else {
+        document.getElementById('quizActiveContainer').style.display = 'none';
+        document.getElementById('quizResultsContainer').style.display = 'flex';
+        
+        document.getElementById('quizFinalScore').textContent = `${quizScoreVal}/${quizQuestions.length}`;
+        const pct = (quizScoreVal / quizQuestions.length) * 100;
+        
+        let evalText = "Review the basic structures and attempt the quiz again!";
+        if (pct >= 80) {
+          evalText = "Superb! You fully understand the roles of the Plasma Membrane, Cytoplasm, and Nucleus.";
+        } else if (pct >= 60) {
+          evalText = "Good effort! Read the inspector drawers of all parts to clarify core details.";
+        }
+        document.getElementById('quizResultsEval').textContent = evalText;
+      }
+    }
+
+    function resetQuiz() {
+      playSound('click');
+      currentQuestionIdx = 0;
+      quizScoreVal = 0;
+      document.getElementById('quizActiveContainer').style.display = 'flex';
+      document.getElementById('quizResultsContainer').style.display = 'none';
+      loadQuizQuestion();
+    }
+
+    /* ----------------------------------------------------
+       MOUSE HANDLING & INTERACTION TARGETS
+       ---------------------------------------------------- */
+    function handleMouseMove(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mouseXScaled = (e.clientX - rect.left) * scaleX;
+      const mouseYScaled = (e.clientY - rect.top) * scaleY;
+
+      // Translate screen coordinates to camera space to check hovering on canvas cell parts
+      // Equation: screen = (canvasCenter) + (camSpace - camPos) * zoom
+      // Invert: camSpace = camPos + (screen - canvasCenter) / zoom
+      const zoom = currentZoomVal;
+      mousePos.x = camX + (mouseXScaled - 400) / zoom;
+      mousePos.y = camY + (mouseYScaled - 300) / zoom;
+
+      hoveredElementId = null;
+
+      if (currentZoomVal < 2.0) {
+        // Checking hover on Whole Cell View 
+        // 1. Nucleus hover check (X:400, Y:300 profile radius ~ 60)
+        const dNucleus = dist(mousePos.x, mousePos.y, 400, 300);
+        
+        // 2. Cell outline hover check
+        // Oval limits: rx ~ 210, ry ~ 160
+        const insideCellRatio = (mousePos.x - 400)**2 / 210**2 + (mousePos.y - 300)**2 / 160**2;
+
+        if (dNucleus < 60) {
+          hoveredElementId = 'nucleus';
+        } else if (insideCellRatio > 0.9 && insideCellRatio < 1.05) {
+          hoveredElementId = 'membrane';
+        } else if (insideCellRatio <= 0.9) {
+          hoveredElementId = 'cytoplasm';
+        }
+
+        // Also check if hovering on visual label text areas
+        // Membrane label box: X: 110-230, Y: 120-155
+        // Nucleus label box: X: 480-580, Y: 110-145
+        // Cytoplasm label box: X: 130-220, Y: 430-465
+        const mx = mousePos.x;
+        const my = mousePos.y;
+        if (mx > 105 && mx < 235 && my > 120 && my < 155) {
+          hoveredElementId = 'membrane';
+        } else if (mx > 480 && mx < 580 && my > 110 && my < 145) {
+          hoveredElementId = 'nucleus';
+        } else if (mx > 130 && mx < 220 && my > 430 && my < 465) {
+          hoveredElementId = 'cytoplasm';
+        }
+      } else {
+        // Checking detail zoomed views
+        if (currentFocusTarget === 'membrane') {
+          // Hovering near the lipid bilayer wall at center profile X: 220
+          if (Math.abs(mousePos.x - 220) < 60) hoveredElementId = 'membrane';
+        } else if (currentFocusTarget === 'nucleus') {
+          // Hovering centered near nucleus coordinates X: 420, Y: 280
+          if (dist(mousePos.x, mousePos.y, 420, 280) < 140) hoveredElementId = 'nucleus';
+        } else if (currentFocusTarget === 'cytoplasm') {
+          // Hovering inside the cytoplasm matrix coordinates X:300, Y:360
+          hoveredElementId = 'cytoplasm';
+        }
+      }
+    }
+
+    function handleMouseDown() {
+      if (hoveredElementId) {
+        selectComponent(hoveredElementId);
+      }
+    }
+
+    function dist(x1, y1, x2, y2) {
+      return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    }
+
+    /* ----------------------------------------------------
+       CANVAS RENDERING METHODS (CELL DRAWING & CAMERA EFFECT)
+       ---------------------------------------------------- */
+    function drawCellBase() {
+      // Draw standard animal cell shape (wobbly oval)
+      ctx.beginPath();
+      const rx = 210;
+      const ry = 160;
+      const steps = 120;
+      for (let i = 0; i < steps; i++) {
+        const angle = (i * Math.PI * 2) / steps;
+        // Subtle waviness animation
+        const wave = Math.sin(timeTicker * 0.02 + angle * 4) * 2.5;
+        const px = 400 + (rx + wave) * Math.cos(angle);
+        const py = 300 + (ry + wave) * Math.sin(angle);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+    }
+
+    function drawWholeCellView() {
+      // 1. Draw Cytoplasm fluid filling cell interior
+      ctx.save();
+      drawCellBase();
+      ctx.fillStyle = hoveredElementId === 'cytoplasm' ? 'rgba(0, 230, 118, 0.08)' : 'rgba(0, 230, 118, 0.04)';
+      ctx.fill();
+      ctx.restore();
+
+      // 2. Draw Cytoplasmic organelle dots (mitochondria, ribosomes)
+      drawOrganellesMacro();
+
+      // 3. Draw Nucleus (violet sphere at center)
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(400, 300, 56, 0, 2 * Math.PI);
+      ctx.fillStyle = hoveredElementId === 'nucleus' ? 'rgba(213, 0, 249, 0.16)' : 'rgba(213, 0, 249, 0.12)';
+      ctx.strokeStyle = hoveredElementId === 'nucleus' ? 'rgba(213, 0, 249, 1.0)' : 'rgba(213, 0, 249, 0.7)';
+      ctx.lineWidth = 4;
+      ctx.shadowColor = 'rgba(213, 0, 249, 0.4)';
+      ctx.shadowBlur = hoveredElementId === 'nucleus' ? 12 : 4;
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      // Nucleolus inside nucleus
+      ctx.beginPath();
+      ctx.arc(388, 290, 14, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(213, 0, 249, 0.45)';
+      ctx.fill();
+
+      // 4. Draw Plasma Membrane outer boundary
+      ctx.save();
+      drawCellBase();
+      ctx.strokeStyle = hoveredElementId === 'membrane' ? 'rgba(0, 229, 255, 1.0)' : 'rgba(0, 229, 255, 0.7)';
+      ctx.lineWidth = hoveredElementId === 'membrane' ? 6 : 4;
+      ctx.shadowColor = 'rgba(0, 229, 255, 0.4)';
+      ctx.shadowBlur = hoveredElementId === 'membrane' ? 10 : 2;
+      ctx.stroke();
+      ctx.restore();
+
+      // 5. Render labeling lines (only at whole cell view zoom < 1.6)
+      if (currentZoomVal < 1.6) {
+        drawLabelLines();
+      }
+    }
+
+    function drawOrganellesMacro() {
+      // Draw small floating organelles to populate macro cytoplasm
+      ctx.save();
+      
+      // Mitochondria shapes (little orange ovals)
+      ctx.fillStyle = 'rgba(255, 171, 64, 0.7)';
+      const mitochondriaPos = [
+        { x: 300, y: 220, rot: 0.6 },
+        { x: 500, y: 360, rot: -0.4 },
+        { x: 480, y: 210, rot: 1.2 },
+        { x: 280, y: 350, rot: -0.9 }
+      ];
+      mitochondriaPos.forEach(p => {
+        ctx.beginPath();
+        ctx.ellipse(p.x, p.y, 14, 6, p.rot, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+
+      // Endoplasmic reticulum fold structures near nucleus
+      ctx.strokeStyle = 'rgba(213, 0, 249, 0.25)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      // Loop channels around left side of nucleus
+      ctx.arc(400, 300, 72, Math.PI * 0.7, Math.PI * 1.3);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(400, 300, 84, Math.PI * 0.75, Math.PI * 1.25);
+      ctx.stroke();
+
+      // Ribosomes (tiny dot clusters)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      const ribosomeSpots = [
+        {x: 320, y: 240}, {x: 323, y: 243}, {x: 317, y: 245},
+        {x: 460, y: 380}, {x: 465, y: 382}, {x: 457, y: 385},
+        {x: 270, y: 280}, {x: 274, y: 277}
+      ];
+      ribosomeSpots.forEach(pt => {
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 2, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+
+      ctx.restore();
+    }
+
+    function drawLabelLines() {
+      // Draws lines callouts labeling membrane, cytoplasm, nucleus
+      ctx.save();
+      ctx.lineWidth = 1.5;
+      ctx.font = '11px JetBrains Mono';
+      
+      // 1. Plasma Membrane Callout (left pointing)
+      // Line: label at X:170, Y:130 -> Cell edge at X:230, Y:210
+      ctx.strokeStyle = hoveredElementId === 'membrane' ? 'var(--cyan-accent)' : 'rgba(255, 255, 255, 0.25)';
+      ctx.fillStyle = hoveredElementId === 'membrane' ? 'var(--cyan-accent)' : 'var(--text-muted)';
+      ctx.beginPath();
+      ctx.moveTo(170, 150);
+      ctx.lineTo(230, 215);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(230, 215, 3.5, 0, 2 * Math.PI);
+      ctx.fillStyle = hoveredElementId === 'membrane' ? 'var(--cyan-accent)' : '#fff';
+      ctx.fill();
+      // Text box
+      ctx.fillStyle = hoveredElementId === 'membrane' ? 'rgba(0, 229, 255, 0.08)' : 'rgba(255,255,255,0.01)';
+      ctx.fillRect(105, 120, 130, 30);
+      ctx.strokeRect(105, 120, 130, 30);
+      ctx.fillStyle = hoveredElementId === 'membrane' ? 'var(--cyan-accent)' : '#fff';
+      ctx.fillText("PLASMA MEMBRANE", 112, 138);
+
+      // 2. Nucleus Callout (right pointing)
+      // Line: label at X:530, Y:130 -> Nucleus center at X:415, Y:265
+      ctx.strokeStyle = hoveredElementId === 'nucleus' ? 'var(--purple-accent)' : 'rgba(255, 255, 255, 0.25)';
+      ctx.fillStyle = hoveredElementId === 'nucleus' ? 'var(--purple-accent)' : 'var(--text-muted)';
+      ctx.beginPath();
+      ctx.moveTo(530, 140);
+      ctx.lineTo(435, 270);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(435, 270, 3.5, 0, 2 * Math.PI);
+      ctx.fillStyle = hoveredElementId === 'nucleus' ? 'var(--purple-accent)' : '#fff';
+      ctx.fill();
+      // Text box
+      ctx.fillStyle = hoveredElementId === 'nucleus' ? 'rgba(213, 0, 249, 0.08)' : 'rgba(255,255,255,0.01)';
+      ctx.fillRect(480, 110, 100, 30);
+      ctx.strokeRect(480, 110, 100, 30);
+      ctx.fillStyle = hoveredElementId === 'nucleus' ? 'var(--purple-accent)' : '#fff';
+      ctx.fillText("NUCLEUS HUB", 493, 128);
+
+      // 3. Cytoplasm Callout (bottom left pointing)
+      // Line: label at X:170, Y:430 -> Cytoplasm at X:310, Y:350
+      ctx.strokeStyle = hoveredElementId === 'cytoplasm' ? 'var(--green-accent)' : 'rgba(255, 255, 255, 0.25)';
+      ctx.fillStyle = hoveredElementId === 'cytoplasm' ? 'var(--green-accent)' : 'var(--text-muted)';
+      ctx.beginPath();
+      ctx.moveTo(175, 430);
+      ctx.lineTo(290, 360);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(290, 360, 3.5, 0, 2 * Math.PI);
+      ctx.fillStyle = hoveredElementId === 'cytoplasm' ? 'var(--green-accent)' : '#fff';
+      ctx.fill();
+      // Text box
+      ctx.fillStyle = hoveredElementId === 'cytoplasm' ? 'rgba(0, 230, 118, 0.08)' : 'rgba(255,255,255,0.01)';
+      ctx.fillRect(130, 430, 90, 30);
+      ctx.strokeRect(130, 430, 90, 30);
+      ctx.fillStyle = hoveredElementId === 'cytoplasm' ? 'var(--green-accent)' : '#fff';
+      ctx.fillText("CYTOPLASM", 143, 448);
+
+      ctx.restore();
+    }
+
+    function drawDetailedMembrane() {
+      // Zoom focus on boundary layer at X: 220
+      const ch = canvas.height;
+      const cy = canvas.height / 2;
+
+      // Draw background cytoplasm (right) and extracellular (left)
+      ctx.fillStyle = 'rgba(0, 120, 255, 0.02)'; // Extracellular fluid
+      ctx.fillRect(0, 0, 205, ch);
+      ctx.fillStyle = 'rgba(0, 230, 118, 0.03)'; // Inside Cytoplasm
+      ctx.fillRect(235, 0, canvas.width - 235, ch);
+
+      // Phospholipid heads (upper layer at X: 205, lower layer at X: 235)
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.75)';
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)';
+      
+      const headRad = 4.0;
+      for (let y = 0; y < ch; y += 10) {
+        // Skip positions where membrane protein channel is embedded (Y: 260-340)
+        const insideChannel = (y > 250 && y < 350);
+
+        if (!insideChannel) {
+          const waveX = Math.sin(timeTicker * 0.07 + y * 0.06) * 1.5;
+
+          // Left head (extracellular side)
+          ctx.beginPath();
+          ctx.arc(205 + waveX, y, headRad, 0, 2 * Math.PI);
+          ctx.fill();
+
+          // Right head (cytoplasm side)
+          ctx.beginPath();
+          ctx.arc(235 + waveX, y, headRad, 0, 2 * Math.PI);
+          ctx.fill();
+
+          // Hydrophobic tails
+          ctx.strokeStyle = 'rgba(0, 229, 255, 0.3)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(205 + waveX + headRad, y);
+          ctx.lineTo(220 + waveX, y);
+          ctx.lineTo(235 + waveX - headRad, y);
+          ctx.stroke();
+        }
+      }
+
+      // Draw Channel Protein (Y: 300)
+      ctx.fillStyle = 'rgba(0, 150, 255, 0.8)';
+      ctx.strokeStyle = 'rgba(0, 229, 255, 1.0)';
+      ctx.lineWidth = 2.5;
+
+      // Top subunit
+      ctx.beginPath();
+      ctx.ellipse(220, 270, 25, 10, 0, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.stroke();
+
+      // Bottom subunit
+      ctx.beginPath();
+      ctx.ellipse(220, 330, 25, 10, 0, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.stroke();
+
+      // Pore channel glow
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.1)';
+      ctx.fillRect(212, 270, 16, 60);
+
+      // Add label text inside channel
+      ctx.save();
+      ctx.translate(222, 300);
+      ctx.rotate(-Math.PI / 2);
+      ctx.font = '7px JetBrains Mono';
+      ctx.fillStyle = '#fff';
+      ctx.fillText("CHANNEL", -14, 2);
+      ctx.restore();
+
+      // Render molecules passing through or bouncing
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.font = '9px JetBrains Mono';
+      ctx.fillText("Extracellular Space", 60, 40);
+      ctx.fillStyle = 'rgba(0, 230, 118, 0.8)';
+      ctx.fillText("Cytoplasm (Cell interior)", 260, 40);
+    }
+
+    function drawDetailedCytoplasm() {
+      // Zoomed into cytoplasmic space focusing on mitochondria & streaming particles
+      const cw = canvas.width;
+      const ch = canvas.height;
+
+      // Draw detailed Mitochondrion (at X: 320, Y: 330, rotated)
+      ctx.save();
+      ctx.translate(320, 330);
+      ctx.rotate(0.3);
+      
+      // Outer membrane
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 45, 22, 0, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(255, 171, 64, 0.2)';
+      ctx.strokeStyle = '#ffab40';
+      ctx.lineWidth = 3.5;
+      ctx.fill();
+      ctx.stroke();
+
+      // Inner membrane folds (Cristae)
+      ctx.strokeStyle = 'rgba(255, 171, 64, 0.8)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(-35, 0);
+      ctx.lineTo(-25, 12);
+      ctx.lineTo(-15, -12);
+      ctx.lineTo(-5, 12);
+      ctx.lineTo(5, -12);
+      ctx.lineTo(15, 12);
+      ctx.lineTo(25, -12);
+      ctx.lineTo(35, 0);
+      ctx.stroke();
+
+      // Label
+      ctx.font = '8px JetBrains Mono';
+      ctx.fillStyle = '#ffab40';
+      ctx.fillText("MITOCHONDRION", -25, 34);
+      ctx.restore();
+
+      // Draw ribosomes cluster (X: 250, Y: 430)
+      ctx.fillStyle = '#fff';
+      for (let i = 0; i < 6; i++) {
+        ctx.beginPath();
+        ctx.arc(240 + (i%3)*6, 420 + Math.floor(i/3)*6, 2.5, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+      ctx.font = '8px JetBrains Mono';
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillText("RIBOSOMES", 232, 442);
+
+      // Draw Cytoskeleton microfilaments (fine structural lines in background)
+      ctx.strokeStyle = 'rgba(0, 230, 118, 0.12)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(100, 100);
+      ctx.lineTo(400, 250);
+      ctx.moveTo(150, 480);
+      ctx.lineTo(350, 300);
+      ctx.moveTo(480, 150);
+      ctx.lineTo(200, 350);
+      ctx.stroke();
+
+      ctx.font = '9px JetBrains Mono';
+      ctx.fillStyle = 'rgba(0, 230, 118, 0.8)';
+      ctx.fillText("CYTOSOL FLUID MEDIUM", 120, 220);
+    }
+
+    function drawDetailedNucleus() {
+      // Zoomed into Nucleus sphere coordinates X: 420, Y: 280
+      const cx = 420;
+      const cy = 280;
+
+      // 1. Nucleolus (Dense inner circle)
+      ctx.beginPath();
+      ctx.arc(cx - 25, cy - 25, 26, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(213, 0, 249, 0.4)';
+      ctx.strokeStyle = 'rgba(213, 0, 249, 0.75)';
+      ctx.lineWidth = 2;
+      ctx.fill();
+      ctx.stroke();
+      
+      ctx.font = '8px JetBrains Mono';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.fillText("NUCLEOLUS", cx - 48, cy + 14);
+
+      // 2. Chromatin fibers (wavy thin spaghetti threads inside nucleoplasm)
+      ctx.strokeStyle = 'rgba(213, 0, 249, 0.28)';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(cx - 50 + i*20, cy + 40);
+        ctx.bezierCurveTo(cx - 20, cy - 10 + i*10, cx + 50, cy + 20, cx + 40, cy - 30);
+        ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(213, 0, 249, 0.65)';
+      ctx.fillText("CHROMATIN (DNA)", cx + 10, cy + 50);
+
+      // 3. Nuclear Envelope double-membrane with Nuclear Pores
+      ctx.strokeStyle = 'rgba(213, 0, 249, 0.95)';
+      ctx.lineWidth = 6;
+      
+      const radius = 90;
+      const steps = 60;
+      
+      // Draw segmented circular boundary representing nuclear pores
+      for (let i = 0; i < steps; i++) {
+        // Skip angles every few iterations to show pores gaps
+        if (i % 6 === 0) continue; 
+        
+        const angle1 = (i * Math.PI * 2) / steps;
+        const angle2 = ((i + 1) * Math.PI * 2) / steps;
+        
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, angle1, angle2);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = 'rgba(213, 0, 249, 0.9)';
+      ctx.fillText("NUCLEAR PORE GAPS", cx + 30, cy - 100);
+      ctx.fillText("NUCLEAR ENVELOPE", cx - 110, cy - 100);
+    }
+
+    /* ----------------------------------------------------
+       PHYSICS / UPDATES LOOP
+       ---------------------------------------------------- */
+    function updatePhysics() {
+      // Lerp camera panning and zoom scale dynamically
+      camX += (targetCamX - camX) * 0.08;
+      camY += (targetCamY - camY) * 0.08;
+      currentZoomVal += (targetZoomVal - currentZoomVal) * 0.08;
+
+      // Cytoplasm cyclosis particles motion
+      const currentSpeed = cytoSpeeds[cytoSpeedIdx];
+      cytoParticles.forEach(p => {
+        // Rotate around cell center
+        p.angle += 0.003 * currentSpeed * p.speedModifier;
+      });
+    }
+
+    /* ----------------------------------------------------
+       MAIN DRAW LOOP
+       ---------------------------------------------------- */
+    function animate() {
+      timeTicker++;
+
+      // Physics update
+      updatePhysics();
+
+      // Clear Canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Apply camera view transformations
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(currentZoomVal, currentZoomVal);
+      ctx.translate(-camX, -camY);
+
+      // 1. Draw cytoplasm particle streams in background
+      const currentSpeed = cytoSpeeds[cytoSpeedIdx];
+      if (currentSpeed > 0 && (currentFocusTarget === 'cell' || currentFocusTarget === 'cytoplasm')) {
+        cytoParticles.forEach(p => {
+          // Compute orbital coordinates centered around (400, 300)
+          const px = 400 + p.r * Math.cos(p.angle);
+          const py = 300 + p.r * Math.sin(p.angle) * 0.8; // squashed oval orbit
+          
+          ctx.beginPath();
+          ctx.arc(px, py, p.size, 0, 2 * Math.PI);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        });
+      }
+
+      // 2. Render cell details based on the current active target focus
+      drawWholeCellView();
+
+      if (currentZoomVal > 2.0) {
+        if (currentFocusTarget === 'membrane') {
+          drawDetailedMembrane();
+        } else if (currentFocusTarget === 'cytoplasm') {
+          drawDetailedCytoplasm();
+        } else if (currentFocusTarget === 'nucleus') {
+          drawDetailedNucleus();
+        }
+      }
+
+      ctx.restore();
+
+      // Update HUD scale and stats
+      updateHUDText();
+
+      requestAnimationFrame(animate);
+    }
+
+    /* ----------------------------------------------------
+       WINDOW INITIALIZATION
+       ---------------------------------------------------- */
+    window.addEventListener('load', () => {
+      setupParticles();
+      setFocus('cell');
+      
+      // Canvas Event listeners
+      canvas.addEventListener('mousemove', handleMouseMove);
+      canvas.addEventListener('mousedown', handleMouseDown);
+      
+      // Scroll wheel manual zoom override handler
+      canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.08 : -0.08;
+        targetZoomVal = Math.min(5.0, Math.max(1.0, targetZoomVal + delta));
+        zoomSlider.value = targetZoomVal.toFixed(2);
+        playSound('zoom-hum', (targetZoomVal - 1.0) / 4.0);
+        updateHUDText();
+      }, { passive: false });
+
+      // Run main draw loop
+      animate();
+    });
+  </script>
+</body>
+</html>
