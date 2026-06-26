@@ -523,6 +523,13 @@
       box-shadow: var(--border-glow);
     }
 
+    .org-btn.active.nucleus { border-color: var(--purple-accent); }
+    .org-btn.active.rer { border-color: var(--green-accent); }
+    .org-btn.active.ser { border-color: var(--amber-accent); }
+    .org-btn.active.mitochondria { border-color: #ff6e40; }
+    .org-btn.active.golgi { border-color: var(--cyan-accent); }
+    .org-btn.active.lysosomes { border-color: var(--rose-accent); }
+
     .org-btn.active::after {
       content: "🔍";
       font-size: 0.75rem;
@@ -746,7 +753,7 @@
           </div>
         </div>
 
-        <!-- Real-Time Metrics -->
+        <!-- Live Output Metrics -->
         <div class="control-section">
           <div class="control-label">Live Output Metrics</div>
           <div class="metrics-container">
@@ -840,14 +847,14 @@
           <div id="inspectorDefaultWrapper" style="display: flex; flex-direction: column; gap: 8px;">
             <div class="control-label">Select Organelle to Inspect</div>
             <div class="organelle-list">
-              <button class="org-btn" id="lbl_nucleus" onclick="selectOrganelle('nucleus')">Nucleus</button>
-              <button class="org-btn" id="lbl_mitochondria" onclick="selectOrganelle('mitochondria')">Mitochondria</button>
-              <button class="org-btn" id="lbl_rer" onclick="selectOrganelle('rer')">Rough ER (Ribosomes)</button>
-              <button class="org-btn" id="lbl_ser" onclick="selectOrganelle('ser')">Smooth ER</button>
-              <button class="org-btn" id="lbl_golgi" onclick="selectOrganelle('golgi')">Golgi Apparatus</button>
-              <button class="org-btn" id="lbl_lysosomes" onclick="selectOrganelle('lysosomes')">Lysosomes</button>
-              <button class="org-btn" id="lbl_vacuoles" onclick="selectOrganelle('vacuoles')">Vacuoles</button>
-              <button class="org-btn" id="lbl_membrane" onclick="selectOrganelle('membrane')">Plasma Membrane</button>
+              <button class="org-btn nucleus" id="lbl_nucleus" onclick="selectOrganelle('nucleus')">Nucleus</button>
+              <button class="org-btn mitochondria" id="lbl_mitochondria" onclick="selectOrganelle('mitochondria')">Mitochondria</button>
+              <button class="org-btn rer" id="lbl_rer" onclick="selectOrganelle('rer')">Rough ER (Ribosomes)</button>
+              <button class="org-btn ser" id="lbl_ser" onclick="selectOrganelle('ser')">Smooth ER</button>
+              <button class="org-btn golgi" id="lbl_golgi" onclick="selectOrganelle('golgi')">Golgi Apparatus</button>
+              <button class="org-btn lysosomes" id="lbl_lysosomes" onclick="selectOrganelle('lysosomes')">Lysosomes</button>
+              <button class="org-btn vacuoles" id="lbl_vacuoles" onclick="selectOrganelle('vacuoles')">Vacuoles</button>
+              <button class="org-btn membrane" id="lbl_membrane" onclick="selectOrganelle('membrane')">Plasma Membrane</button>
             </div>
           </div>
 
@@ -1059,6 +1066,7 @@
     let currentScenario = 'normal'; // 'normal', 'protein', 'crisis', 'toxic'
     let selectedOrganelleId = null;
     let timeTicker = 0;
+    let pipAnimFrame = 0;
     
     // Camera coordinates & zoom
     let camX = 400;
@@ -1198,6 +1206,9 @@
         drawerOrgDesc.innerHTML = data.desc;
         drawerOrgCoop.innerHTML = `<strong>Cooperation:</strong> ${data.coop}`;
         
+        // Match drawer theme classes
+        drawer.className = "organelle-drawer " + id;
+        
         // Show drawer and hide default list
         drawer.style.display = 'flex';
         defaultWrapper.style.display = 'none';
@@ -1313,6 +1324,7 @@
 
     function updateSimulation() {
       timeTicker++;
+      pipAnimFrame++;
 
       // Adjust ATP level metric based on Scenario
       if (currentScenario === 'crisis') {
@@ -1335,61 +1347,67 @@
       // Spawning loops for processes
       
       // 1. Mitochondria ATP Spark generation
-      if (timeTicker % 20 === 0) {
+      let atpSpawnInterval = 20;
+      if (selectedOrganelleId === 'mitochondria') atpSpawnInterval = 6; // accelerate if selected to show functions!
+      
+      if (timeTicker % atpSpawnInterval === 0) {
         if (currentScenario !== 'crisis') {
-          // Mito 1 (510, 210) & Mito 2 (470, 380)
-          spawnATP(510, 210);
-          spawnATP(470, 380);
+          // Mito 1 (500, 205) & Mito 2 (475, 385)
+          spawnATP(500, 205);
+          spawnATP(475, 385);
           if (Math.random() > 0.7) playSound('atp');
         }
       }
 
       // 2. Transcription (Nucleus -> mRNA)
       let transcriptionInterval = 120; // frame ticks
+      if (selectedOrganelleId === 'nucleus') transcriptionInterval = 35; // accelerate if selected
       if (currentScenario === 'protein') transcriptionInterval = 40;
       if (currentScenario === 'crisis') transcriptionInterval = 300;
 
       if (timeTicker % transcriptionInterval === 0) {
         // Spawn mRNA inside nucleolus (335, 255)
-        // Target coordinates: RER or cytoplasm ribosomes
         const targetSelection = Math.random() > 0.4 ? 'rer' : 'cytoplasm';
         let tx = 350 + (Math.random()*100 - 50);
         let ty = 300 + (Math.random()*100 - 50);
         
         if (targetSelection === 'rer') {
-          // Random point along Rough ER arcs
           const angle = -0.5 + Math.random() * 3.0;
           const r = 58 + Math.floor(Math.random()*3)*12;
           tx = 350 + r * Math.cos(angle);
           ty = 270 + r * Math.sin(angle);
         }
         
-        spawnParticle(335, 255, tx, ty, 'mrna', 1.2, 'var(--purple-accent)', 3.5);
+        spawnParticle(335, 255, tx, ty, 'mrna', 1.2, '#d500f9', 3.5);
         addLog("Nucleus: Coding and shipping mRNA work order.", "nucleus");
       }
 
       // 3. Spawning waste debris from outside the cell
       let wasteSpawnRate = 260;
+      if (selectedOrganelleId === 'lysosomes') wasteSpawnRate = 45; // immediately spawn waste when inspecting lysosome!
       if (currentScenario === 'toxic') wasteSpawnRate = 90;
       if (timeTicker % wasteSpawnRate === 0) {
-        // Spawn drift particle on the boundary wall
         const a = Math.random() * Math.PI * 2;
         const wx = 390 + 175 * Math.cos(a) * 1.1;
         const wy = 300 + 175 * Math.sin(a);
         
-        // Target is random space in cell cytoplasm
-        const ta = Math.random() * Math.PI * 2;
-        const td = Math.random() * 110;
-        const tx = 390 + td * Math.cos(ta);
-        const ty = 300 + td * Math.sin(ta);
+        // Target is random space in cell cytoplasm (homing to lysosomes if selected)
+        let tx = 390 + Math.random()*220 - 110;
+        let ty = 300 + Math.random()*220 - 110;
+        
+        if (selectedOrganelleId === 'lysosomes') {
+          // target close to lysosomes to quickly trigger digestion
+          tx = Math.random() > 0.5 ? 290 + Math.random()*40 - 20 : 315 + Math.random()*40 - 20;
+          ty = Math.random() > 0.5 ? 215 + Math.random()*40 - 20 : 395 + Math.random()*40 - 20;
+        }
 
         wasteMaterials.push({
           x: wx, y: wy,
           tx, ty,
           progress: 0,
-          speed: 0.3 + Math.random() * 0.4,
+          speed: selectedOrganelleId === 'lysosomes' ? 1.4 : 0.3 + Math.random() * 0.4,
           size: 4 + Math.random() * 4,
-          color: '#8d7a6e', // dusty brown waste
+          color: '#8d7a6e',
           digesting: false
         });
         addLog("Plasma Membrane: Foreign waste particle leaked into cytoplasm.", "sys");
@@ -1397,15 +1415,25 @@
 
       // 4. Smooth ER lipid refining
       let serInterval = 180;
-      if (currentScenario === 'toxic') serInterval = 70; // Smooth ER active in toxic surge
+      if (selectedOrganelleId === 'ser') serInterval = 45; // accelerate lipid budding if selected
+      if (currentScenario === 'toxic') serInterval = 70;
       if (currentScenario === 'crisis') serInterval = 450;
       if (timeTicker % serInterval === 0) {
         // SER is centered (300, 240)
-        // Lipid vesicle bud -> ships to membrane or golgi
         const tx = 530 + Math.random()*20 - 10;
         const ty = 300 + Math.random()*20 - 10;
-        spawnParticle(300, 240, tx, ty, 'lipid', 1.1, 'var(--amber-accent)', 4);
+        spawnParticle(300, 240, tx, ty, 'lipid', 1.1, '#ffab40', 4);
         addLog("Smooth ER: Finished lipid molecule refinement.", "ser");
+      }
+
+      // 5. Vacuole water transport
+      if (selectedOrganelleId === 'vacuoles' && timeTicker % 40 === 0) {
+        // spawn blue water drop moving into vacuole (240, 330)
+        const a = Math.random() * Math.PI * 2;
+        const wx = 390 + 175 * Math.cos(a) * 1.1;
+        const wy = 300 + 175 * Math.sin(a);
+        spawnParticle(wx, wy, 240, 330, 'water', 1.6, '#00e5ff', 3.0);
+        addLog("Vacuole: Storing water molecules to regulate pressure.", "sys");
       }
 
       // Update and move particles
@@ -1415,12 +1443,10 @@
         p.age++;
 
         if (p.type === 'atp') {
-          // ATP floats randomly
           p.x += Math.sin(timeTicker * 0.05 + p.size) * 0.3;
           p.y += Math.cos(timeTicker * 0.03 + p.progress) * 0.3;
-          // Slowly move to target
-          p.x += (p.tx - p.x) * 0.01;
-          p.y += (p.ty - p.y) * 0.01;
+          p.x += (p.tx - p.x) * 0.015;
+          p.y += (p.ty - p.y) * 0.015;
           
           if (p.age >= p.maxAge) {
             particles.splice(i, 1);
@@ -1433,7 +1459,6 @@
           
           const d = Math.hypot(p.tx - p.x, p.ty - p.y);
           if (d < 3 || p.age >= p.maxAge) {
-            // Particle reached target destination!
             triggerParticleEvent(p);
             particles.splice(i, 1);
             continue;
@@ -1442,38 +1467,35 @@
       }
 
       // Update waste materials & lysosome homing
-      // Lysosome centers: Lys 1 (290, 215), Lys 2 (315, 395)
       for (let i = wasteMaterials.length - 1; i >= 0; i--) {
         const w = wasteMaterials[i];
         
-        // Move towards target in cell
         if (!w.digesting) {
           w.x += (w.tx - w.x) * 0.005 * w.speed;
           w.y += (w.ty - w.y) * 0.005 * w.speed;
           
-          // Check if close to a lysosome
           const d1 = Math.hypot(w.x - 290, w.y - 215);
           const d2 = Math.hypot(w.x - 315, w.y - 395);
           
           let targetLys = null;
-          if (d1 < 100) targetLys = { x: 290, y: 215 };
-          else if (d2 < 100) targetLys = { x: 315, y: 395 };
+          // homing threshold is wider if lysosomes selected to show activity!
+          const threshold = selectedOrganelleId === 'lysosomes' ? 140 : 100;
+          
+          if (d1 < threshold) targetLys = { x: 290, y: 215 };
+          else if (d2 < threshold) targetLys = { x: 315, y: 395 };
           
           if (targetLys) {
-            // Lysosome homes in on it!
             w.tx = targetLys.x;
             w.ty = targetLys.y;
             w.digesting = true;
-            w.speed = 1.8; // accelerate into lysosome
+            w.speed = selectedOrganelleId === 'lysosomes' ? 2.5 : 1.8;
           }
         } else {
-          // moving directly into lysosome center
           w.x += (w.tx - w.x) * 0.03 * w.speed;
           w.y += (w.ty - w.y) * 0.03 * w.speed;
           
           const distToCenter = Math.hypot(w.x - w.tx, w.y - w.ty);
           if (distToCenter < 4) {
-            // digested!
             wasteRecycled++;
             document.getElementById('val_waste').textContent = wasteRecycled;
             playSound('digest');
@@ -1490,57 +1512,50 @@
 
     function triggerParticleEvent(p) {
       if (p.type === 'mrna') {
-        // Docked mRNA triggers Protein translation vesicle on RER
-        // Spawn RER vesicle heading to Golgi Stack (530, 300)
         playSound('fusion');
-        spawnParticle(p.x, p.y, 515, 290, 'vesicle', 1.0, 'var(--green-accent)', 5.0);
+        spawnParticle(p.x, p.y, 515, 290, 'vesicle', 1.0, '#00e676', 5.0);
         addLog("Rough ER: Ribosome completed translation. Shipping vesicle to Golgi.", "rer");
       } 
       else if (p.type === 'vesicle') {
-        // RER vesicle reaches Golgi
-        // Golgi processes, tags, and ships it to membrane (400, 130) or lysosome
         playSound('fusion');
         addLog("Golgi Complex: Processing and sorting finished proteins.", "golgi");
         
         setTimeout(() => {
-          if (currentScenario === 'crisis') return; // halts packaging
+          if (currentScenario === 'crisis') return;
           
-          // Shipping destination
           const destSelect = Math.random() > 0.35 ? 'membrane' : 'lysosome';
           if (destSelect === 'membrane') {
-            // Ship vesicle to cell boundary exocytosis
-            spawnParticle(530, 300, 480, 150, 'export_vesicle', 1.2, 'var(--cyan-accent)', 5.5);
+            spawnParticle(530, 300, 480, 150, 'export_vesicle', 1.2, '#00e5ff', 5.5);
             addLog("Golgi Complex: Dispatched protein shipping vesicle to Cell Membrane.", "golgi");
           } else {
-            // Ship to lysosome
-            spawnParticle(530, 300, 315, 395, 'enzyme_vesicle', 1.1, 'var(--rose-accent)', 4.0);
+            spawnParticle(530, 300, 315, 395, 'enzyme_vesicle', 1.1, '#ff2a6d', 4.0);
             addLog("Golgi Complex: Delivering enzymes to Lysosome recycling center.", "golgi");
           }
         }, 800);
       } 
       else if (p.type === 'export_vesicle') {
-        // Exocytosis at Plasma Membrane
         playSound('fusion');
         proteinsShipped++;
         document.getElementById('val_proteins').textContent = proteinsShipped;
         addLog("Plasma Membrane: Exocytosis successful. Protein product exported.", "sys");
         
-        // Spawn tiny decorative fading sparks outside
         for (let s = 0; s < 5; s++) {
           spawnATP(p.x, p.y);
         }
       }
       else if (p.type === 'enzyme_vesicle') {
-        // Reached lysosome
         playSound('fusion');
         addLog("Lysosome: Enzymes absorbed. Recycling capacity optimized.", "lysosome");
       }
       else if (p.type === 'lipid') {
-        // SER Lipid reaches Golgi or membrane
         playSound('fusion');
         lipidsRefined++;
         document.getElementById('val_lipids').textContent = lipidsRefined;
         addLog("Golgi Complex: Packaging lipids for cell membrane maintenance.", "golgi");
+      }
+      else if (p.type === 'water') {
+        playSound('water');
+        addLog("Vacuole: Absorbed water molecule. Storing osmotic content.", "sys");
       }
     }
 
@@ -1585,12 +1600,12 @@
       ctx.fill();
       
       // Selectively Permeable Membrane Border Outline
-      ctx.strokeStyle = selectedOrganelleId === 'membrane' || hoveredOrganelle === 'membrane' ? 'var(--cyan-accent)' : 'rgba(0, 229, 255, 0.45)';
+      ctx.strokeStyle = selectedOrganelleId === 'membrane' || hoveredOrganelle === 'membrane' ? '#00e5ff' : 'rgba(0, 229, 255, 0.45)';
       ctx.lineWidth = selectedOrganelleId === 'membrane' || hoveredOrganelle === 'membrane' ? 6 : 2.5;
       
       // Shadow glow for selected membrane
       if (selectedOrganelleId === 'membrane') {
-        ctx.shadowColor = 'var(--cyan-accent)';
+        ctx.shadowColor = '#00e5ff';
         ctx.shadowBlur = 18;
       }
       ctx.stroke();
@@ -1618,11 +1633,11 @@
       // Outer nuclear envelope with pores (dashed)
       ctx.beginPath();
       ctx.arc(350, 270, 51, 0, Math.PI * 2);
-      ctx.strokeStyle = selectedOrganelleId === 'nucleus' || hoveredOrganelle === 'nucleus' ? 'var(--purple-accent)' : 'rgba(213, 0, 249, 0.5)';
+      ctx.strokeStyle = selectedOrganelleId === 'nucleus' || hoveredOrganelle === 'nucleus' ? '#d500f9' : 'rgba(213, 0, 249, 0.5)';
       ctx.lineWidth = selectedOrganelleId === 'nucleus' || hoveredOrganelle === 'nucleus' ? 4 : 2;
       ctx.setLineDash([7, 4.5]);
       if (selectedOrganelleId === 'nucleus') {
-        ctx.shadowColor = 'var(--purple-accent)';
+        ctx.shadowColor = '#d500f9';
         ctx.shadowBlur = 15;
       }
       ctx.stroke();
@@ -1634,7 +1649,7 @@
       ctx.beginPath();
       ctx.arc(335, 255, 14, 0, Math.PI * 2);
       const nucleolusGrad = ctx.createRadialGradient(332, 252, 2, 335, 255, 14);
-      nucleolusGrad.addColorStop(0, 'var(--rose-accent)');
+      nucleolusGrad.addColorStop(0, '#ff2a6d');
       nucleolusGrad.addColorStop(1, '#a3003b');
       ctx.fillStyle = nucleolusGrad;
       ctx.fill();
@@ -1658,11 +1673,11 @@
 
       // 3. ROUGH ENDOPLASMIC RETICULUM (RER - ASSEMBLY LINE)
       ctx.save();
-      ctx.strokeStyle = selectedOrganelleId === 'rer' || hoveredOrganelle === 'rer' ? 'var(--green-accent)' : 'rgba(0, 230, 118, 0.45)';
+      ctx.strokeStyle = selectedOrganelleId === 'rer' || hoveredOrganelle === 'rer' ? '#00e676' : 'rgba(0, 230, 118, 0.45)';
       ctx.lineWidth = 6;
       ctx.lineCap = 'round';
       if (selectedOrganelleId === 'rer') {
-        ctx.shadowColor = 'var(--green-accent)';
+        ctx.shadowColor = '#00e676';
         ctx.shadowBlur = 15;
       }
 
@@ -1688,7 +1703,7 @@
 
       // Ribosomes Studding RER (red/cyan dots along the arcs)
       ctx.save();
-      ctx.fillStyle = selectedOrganelleId === 'rer' || hoveredOrganelle === 'rer' ? 'var(--cyan-accent)' : 'rgba(255, 82, 82, 0.9)';
+      ctx.fillStyle = selectedOrganelleId === 'rer' || hoveredOrganelle === 'rer' ? '#00e5ff' : 'rgba(255, 82, 82, 0.9)';
       rerArcs.forEach(arc => {
         for (let a = arc.start + 0.1; a <= arc.end - 0.1; a += 0.28) {
           const wiggle = Math.sin(a * 14) * 1.8;
@@ -1702,13 +1717,12 @@
       ctx.restore();
 
       // 4. SMOOTH ENDOPLASMIC RETICULUM (SER - LIPID REFINERY)
-      // Tubular loop structures extending from angle 2.8 to 4.2
       ctx.save();
-      ctx.strokeStyle = selectedOrganelleId === 'ser' || hoveredOrganelle === 'ser' ? 'var(--amber-accent)' : 'rgba(255, 171, 64, 0.45)';
+      ctx.strokeStyle = selectedOrganelleId === 'ser' || hoveredOrganelle === 'ser' ? '#ffab40' : 'rgba(255, 171, 64, 0.45)';
       ctx.lineWidth = 6.5;
       ctx.lineCap = 'round';
       if (selectedOrganelleId === 'ser') {
-        ctx.shadowColor = 'var(--amber-accent)';
+        ctx.shadowColor = '#ffab40';
         ctx.shadowBlur = 12;
       }
       
@@ -1729,7 +1743,6 @@
         ctx.stroke();
       });
       
-      // Individual smooth tubes looping out
       ctx.beginPath();
       ctx.arc(280, 240, 11, -Math.PI/2, Math.PI/2);
       ctx.stroke();
@@ -1739,28 +1752,24 @@
       ctx.restore();
 
       // 5. MITOCHONDRIA (POWER PLANT)
-      // Double membrane, cristae inside. We draw 2 mitochondria.
       drawMitochondrion(ctx, 500, 205, 0.5, 0.95);
       drawMitochondrion(ctx, 475, 385, -0.7, 1.05);
 
       // 6. GOLGI APPARATUS (PACKAGING & SHIPPING)
-      // Stack of curved, flattened membrane sacs centered at (530, 305)
       ctx.save();
       ctx.translate(530, 305);
       ctx.rotate(-0.35);
-      ctx.strokeStyle = selectedOrganelleId === 'golgi' || hoveredOrganelle === 'golgi' ? 'var(--cyan-accent)' : 'rgba(0, 229, 255, 0.55)';
+      ctx.strokeStyle = selectedOrganelleId === 'golgi' || hoveredOrganelle === 'golgi' ? '#00e5ff' : 'rgba(0, 229, 255, 0.55)';
       ctx.lineWidth = 5.2;
       ctx.lineCap = 'round';
       if (selectedOrganelleId === 'golgi') {
-        ctx.shadowColor = 'var(--cyan-accent)';
+        ctx.shadowColor = '#00e5ff';
         ctx.shadowBlur = 15;
       }
       
-      // Draw 5 stacked cisternae curves
       for (let d = -16; d <= 16; d += 8) {
         ctx.beginPath();
         for (let ty = -24; ty <= 24; ty += 3) {
-          // Curved shape
           const curveFactor = Math.cos(ty * 0.055) * 8.5 - d * 0.12;
           const tx = d + curveFactor;
           if (ty === -24) ctx.moveTo(tx, ty);
@@ -1768,7 +1777,6 @@
         }
         ctx.stroke();
       }
-      // Budding vesicles at edge of Golgi
       ctx.fillStyle = 'rgba(0, 229, 255, 0.6)';
       ctx.beginPath();
       ctx.arc(26, -18, 3.5, 0, Math.PI*2);
@@ -1778,26 +1786,23 @@
       ctx.restore();
 
       // 7. LYSOSOMES (RECYCLING CENTER)
-      // Small vacuoles containing enzymes. Lys 1 (290, 215), Lys 2 (315, 395)
       drawLysosome(ctx, 290, 215, 12.5);
       drawLysosome(ctx, 315, 395, 14.0);
 
       // 8. VACUOLES (STORAGE WAREHOUSE)
-      // Water-filled bubble centered at (240, 330)
       ctx.save();
       ctx.beginPath();
       ctx.arc(240, 330, 21, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(0, 229, 255, 0.06)';
       ctx.fill();
-      ctx.strokeStyle = selectedOrganelleId === 'vacuoles' || hoveredOrganelle === 'vacuoles' ? 'var(--cyan-accent)' : 'rgba(0, 229, 255, 0.38)';
+      ctx.strokeStyle = selectedOrganelleId === 'vacuoles' || hoveredOrganelle === 'vacuoles' ? '#00e5ff' : 'rgba(0, 229, 255, 0.38)';
       ctx.lineWidth = selectedOrganelleId === 'vacuoles' || hoveredOrganelle === 'vacuoles' ? 3.5 : 1.5;
       if (selectedOrganelleId === 'vacuoles') {
-        ctx.shadowColor = 'var(--cyan-accent)';
+        ctx.shadowColor = '#00e5ff';
         ctx.shadowBlur = 10;
       }
       ctx.stroke();
       
-      // Floating storage bubbles inside
       ctx.fillStyle = 'rgba(255,255,255,0.18)';
       ctx.beginPath();
       ctx.arc(236, 324, 3, 0, Math.PI*2);
@@ -1807,17 +1812,14 @@
       ctx.restore();
 
       // 9. RIBOSOMES (FREE-FLOATING WORKERS)
-      // Scattered tiny dots
       ctx.save();
-      ctx.fillStyle = selectedOrganelleId === 'rer' || hoveredOrganelle === 'rer' ? 'var(--cyan-accent)' : 'rgba(255, 255, 255, 0.45)';
+      ctx.fillStyle = selectedOrganelleId === 'rer' || hoveredOrganelle === 'rer' ? '#00e5ff' : 'rgba(255, 255, 255, 0.45)';
       const riboRadius = selectedOrganelleId === 'rer' || hoveredOrganelle === 'rer' ? 2.2 : 1.3;
       
-      // Deterministic coordinates using Math.sin to avoid re-generating positions
       for (let i = 0; i < 22; i++) {
         const rx = 350 + Math.sin(i * 328.7) * 145;
         const ry = 300 + Math.cos(i * 123.4) * 115;
         
-        // Ensure they aren't inside the nucleus (distance to 350,270 > 55)
         const dNuc = Math.hypot(rx - 350, ry - 270);
         if (dNuc > 58) {
           ctx.beginPath();
@@ -1828,7 +1830,6 @@
       ctx.restore();
 
       // 10. CELL FACTORY ACTIVITY PARTICLE STREAM
-      // Drawing all active cellular processes running at the same time!
       particles.forEach(p => {
         ctx.save();
         ctx.shadowColor = p.color;
@@ -1836,12 +1837,10 @@
         ctx.fillStyle = p.color;
         
         if (p.type === 'atp') {
-          // Spark star
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
           ctx.fill();
         } else if (p.type === 'mrna') {
-          // Squiggly mRNA strand
           ctx.strokeStyle = p.color;
           ctx.lineWidth = 2.5;
           ctx.beginPath();
@@ -1850,7 +1849,6 @@
           ctx.quadraticCurveTo(p.x + 2, p.y - 3, p.x + 4, p.y);
           ctx.stroke();
         } else {
-          // Vesicles (circles with outer boundaries)
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
           ctx.fill();
@@ -1866,7 +1864,6 @@
         ctx.save();
         ctx.fillStyle = w.color;
         ctx.beginPath();
-        // irregular waste shape (triangle/diamond)
         ctx.moveTo(w.x, w.y - w.size);
         ctx.lineTo(w.x + w.size, w.y);
         ctx.lineTo(w.x, w.y + w.size);
@@ -1875,7 +1872,6 @@
         ctx.fill();
         
         if (w.digesting) {
-          // Draw connecting chemical warning line from lysosome to waste
           ctx.strokeStyle = 'rgba(255, 42, 109, 0.28)';
           ctx.lineWidth = 1;
           ctx.beginPath();
@@ -1888,17 +1884,20 @@
 
       // 11. FACTORY ANALOGY LABELS OVERLAYS (Toggled on/off)
       if (isAnalogyOverlay) {
-        drawFactoryLabel("HEADQUARTERS (Nucleus)", 350, 325, 'var(--purple-accent)');
+        drawFactoryLabel("HEADQUARTERS (Nucleus)", 350, 325, '#d500f9');
         drawFactoryLabel("POWER PLANT (Mitochondria)", 480, 442, '#ff6e40');
-        drawFactoryLabel("ASSEMBLY LINE (Rough ER)", 465, 172, 'var(--green-accent)');
-        drawFactoryLabel("LIPID REFINERY (Smooth ER)", 232, 206, 'var(--amber-accent)');
-        drawFactoryLabel("SHIPPING & PACKAGING (Golgi)", 540, 250, 'var(--cyan-accent)');
-        drawFactoryLabel("RECYCLING PLANT (Lysosomes)", 310, 445, 'var(--rose-accent)');
-        drawFactoryLabel("STORAGE WAREHOUSE (Vacuoles)", 218, 362, 'rgba(0, 229, 255, 0.8)');
-        drawFactoryLabel("SECURITY GATES (Plasma Membrane)", 400, 100, 'rgba(0, 229, 255, 0.85)');
+        drawFactoryLabel("ASSEMBLY LINE (Rough ER)", 465, 172, '#00e676');
+        drawFactoryLabel("LIPID REFINERY (Smooth ER)", 232, 206, '#ffab40');
+        drawFactoryLabel("SHIPPING & PACKAGING (Golgi)", 540, 250, '#00e5ff');
+        drawFactoryLabel("RECYCLING PLANT (Lysosomes)", 310, 445, '#ff2a6d');
+        drawFactoryLabel("STORAGE WAREHOUSE (Vacuoles)", 218, 362, '#00e5ff');
+        drawFactoryLabel("SECURITY GATES (Plasma Membrane)", 400, 100, '#00e5ff');
       }
 
       ctx.restore(); // restore camera transformations
+
+      // 12. DRAW PICTURE-IN-PICTURE MAGNIFIED MOLECULAR PROCESS VIEW (Enhanced interaction)
+      drawPIPWindow(ctx);
     }
 
     function drawMitochondrion(ctx, cx, cy, angle, scale) {
@@ -1944,10 +1943,10 @@
       ctx.arc(cx, cy, radius, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(255, 42, 109, 0.16)';
       ctx.fill();
-      ctx.strokeStyle = isSelected ? 'var(--rose-accent)' : 'rgba(255, 42, 109, 0.6)';
+      ctx.strokeStyle = isSelected ? '#ff2a6d' : 'rgba(255, 42, 109, 0.6)';
       ctx.lineWidth = isSelected ? 3.5 : 1.5;
       if (selectedOrganelleId === 'lysosomes') {
-        ctx.shadowColor = 'var(--rose-accent)';
+        ctx.shadowColor = '#ff2a6d';
         ctx.shadowBlur = 12;
       }
       ctx.stroke();
@@ -1969,7 +1968,6 @@
       ctx.font = '8.5px JetBrains Mono';
       ctx.fillStyle = '#fff';
       
-      // Label container background
       const width = ctx.measureText(text).width + 12;
       ctx.fillStyle = 'rgba(4, 5, 12, 0.88)';
       ctx.strokeStyle = color;
@@ -1980,11 +1978,460 @@
       ctx.fill();
       ctx.stroke();
       
-      // Text
       ctx.fillStyle = color;
       ctx.textAlign = 'center';
       ctx.fillText(text, x, y + 3);
       ctx.restore();
+    }
+
+    /* ----------------------------------------------------
+       PICTURE-IN-PICTURE (PIP) VISUALIZER SYSTEM
+       ---------------------------------------------------- */
+    function drawPIPWindow(ctx) {
+      if (!selectedOrganelleId) return;
+
+      const px = 520;
+      const py = 75;
+      const pw = 260;
+      const ph = 210;
+
+      // 1. Draw glowing panel border
+      ctx.save();
+      ctx.fillStyle = 'rgba(5, 7, 20, 0.9)';
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)';
+      ctx.lineWidth = 1.5;
+      
+      // Shadow glow
+      ctx.shadowColor = 'rgba(0, 229, 255, 0.25)';
+      ctx.shadowBlur = 10;
+      
+      ctx.beginPath();
+      ctx.roundRect(px, py, pw, ph, 10);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      // Draw scanner bar line animation
+      ctx.save();
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.15)';
+      ctx.lineWidth = 1;
+      const scanY = py + 30 + ((timeTicker % 200) / 200) * (ph - 40);
+      ctx.beginPath();
+      ctx.moveTo(px + 10, scanY);
+      ctx.lineTo(px + pw - 10, scanY);
+      ctx.stroke();
+      ctx.restore();
+
+      // 2. Title block
+      ctx.save();
+      ctx.font = 'bold 8.5px JetBrains Mono';
+      ctx.fillStyle = '#00e5ff';
+      ctx.fillText("🔬 PROCESS MAGNIFICATION", px + 15, py + 20);
+      
+      // Inner divider line
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(px + 10, py + 28);
+      ctx.lineTo(px + pw - 10, py + 28);
+      ctx.stroke();
+      ctx.restore();
+
+      // 3. Render specific organelle molecular simulation
+      ctx.save();
+      // Clip rendering context inside the box
+      ctx.beginPath();
+      ctx.rect(px + 5, py + 32, pw - 10, ph - 40);
+      ctx.clip();
+      
+      const cx = px + pw / 2;
+      const cy = py + 110;
+      
+      drawMolecularSim(ctx, cx, cy, selectedOrganelleId);
+      ctx.restore();
+    }
+
+    function drawMolecularSim(ctx, cx, cy, id) {
+      if (id === 'nucleus') {
+        // DNA double helix splitting & mRNA transcript forming
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.5)';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        for (let x = -100; x <= 100; x += 3) {
+          const theta = x * 0.09 - pipAnimFrame * 0.06;
+          const distFromCenter = Math.abs(x);
+          const amp = distFromCenter < 40 ? (40 - distFromCenter) * 0.4 + 6 : 6;
+          const y1 = Math.sin(theta) * amp;
+          const y2 = -Math.sin(theta) * amp;
+          
+          if (x === -100) ctx.moveTo(cx + x, cy + y1);
+          else ctx.lineTo(cx + x, cy + y1);
+          
+          if (Math.round(x) % 15 === 0) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(cx + x, cy + y1);
+            ctx.lineTo(cx + x, cy + y2);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+        ctx.stroke();
+        
+        ctx.strokeStyle = 'rgba(213, 0, 249, 0.5)';
+        ctx.beginPath();
+        for (let x = -100; x <= 100; x += 3) {
+          const theta = x * 0.09 - pipAnimFrame * 0.06;
+          const distFromCenter = Math.abs(x);
+          const amp = distFromCenter < 40 ? (40 - distFromCenter) * 0.4 + 6 : 6;
+          const y2 = -Math.sin(theta) * amp;
+          if (x === -100) ctx.moveTo(cx + x, cy + y2);
+          else ctx.lineTo(cx + x, cy + y2);
+        }
+        ctx.stroke();
+
+        // mRNA forming
+        ctx.strokeStyle = '#ff2a6d';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        const mrnaLen = (pipAnimFrame % 150) * 1.25;
+        for (let x = -80; x < -80 + mrnaLen && x <= 80; x += 3) {
+          const theta = x * 0.09 - pipAnimFrame * 0.06;
+          const distFromCenter = Math.abs(x);
+          const amp = distFromCenter < 40 ? (40 - distFromCenter) * 0.4 + 6 : 6;
+          const y = -Math.sin(theta) * (amp * 0.55);
+          if (x === -80) ctx.moveTo(cx + x, cy + y + 14);
+          else ctx.lineTo(cx + x, cy + y + 14);
+        }
+        ctx.stroke();
+
+        ctx.fillStyle = '#ff2a6d';
+        for (let i = 0; i < 3; i++) {
+          const ox = Math.sin(pipAnimFrame * 0.03 + i) * 35 + 20;
+          const oy = Math.cos(pipAnimFrame * 0.025 + i * 2) * 20 - 25;
+          ctx.beginPath();
+          ctx.arc(cx + ox, cy + oy, 2.5, 0, Math.PI*2);
+          ctx.fill();
+        }
+        
+        ctx.font = '8px JetBrains Mono';
+        ctx.fillStyle = '#d500f9';
+        ctx.fillText("DNA Template", cx - 90, cy - 25);
+        ctx.fillStyle = '#ff2a6d';
+        ctx.fillText("mRNA synthesis: Transcription", cx - 90, cy + 42);
+      } 
+      else if (id === 'mitochondria') {
+        // Mitochondria respiration visualizer
+        ctx.strokeStyle = 'rgba(255, 110, 64, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, 65, 38, 0, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(255, 110, 64, 0.05)';
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.strokeStyle = '#ff6e40';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(cx - 50, cy);
+        ctx.bezierCurveTo(cx - 40, cy - 25, cx - 35, cy + 25, cx - 25, cy);
+        ctx.bezierCurveTo(cx - 15, cy - 25, cx - 10, cy + 25, cx, cy);
+        ctx.bezierCurveTo(cx + 10, cy - 25, cx + 15, cy + 25, cx + 25, cy);
+        ctx.bezierCurveTo(cx + 35, cy - 25, cx + 40, cy + 25, cx + 50, cy);
+        ctx.stroke();
+        
+        // input molecules
+        ctx.fillStyle = '#00e5ff'; // O2
+        const phase = pipAnimFrame * 0.025;
+        ctx.beginPath();
+        ctx.arc(cx - 95 + (pipAnimFrame % 85), cy - 20 + Math.sin(phase)*8, 3, 0, Math.PI*2);
+        ctx.fillStyle = '#00e676'; // Glucose
+        ctx.arc(cx - 100 + ((pipAnimFrame + 40) % 85), cy + 15 + Math.cos(phase)*8, 4.5, 0, Math.PI*2);
+        ctx.fill();
+        
+        // output ATP
+        ctx.fillStyle = '#ffab40';
+        for (let i = 0; i < 4; i++) {
+          const startTick = (pipAnimFrame + i * 30) % 120;
+          const speedFactor = startTick * 0.75;
+          const angle = -0.4 + i * 0.35;
+          const ax = cx - 20 + Math.cos(angle) * speedFactor;
+          const ay = cy + Math.sin(angle) * speedFactor;
+          const size = Math.max(1, 4 - startTick * 0.02);
+          
+          ctx.beginPath();
+          ctx.arc(ax, ay, size, 0, Math.PI*2);
+          ctx.fill();
+        }
+        
+        ctx.font = '8px JetBrains Mono';
+        ctx.fillStyle = '#ffab40';
+        ctx.fillText("Glucose + O2 ➔ CO2 + H2O + ATP Energy", cx - 88, cy + 50);
+      }
+      else if (id === 'rer') {
+        // Ribosome translation
+        ctx.strokeStyle = '#ff2a6d';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(cx - 90, cy + 15);
+        ctx.lineTo(cx + 90, cy + 15);
+        ctx.stroke();
+        
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 1;
+        for (let x = cx - 80; x <= cx + 80; x += 12) {
+          ctx.beginPath();
+          ctx.moveTo(x, cy + 12);
+          ctx.lineTo(x, cy + 18);
+          ctx.stroke();
+        }
+        
+        const riboX = cx + Math.sin(pipAnimFrame * 0.015) * 20;
+        ctx.fillStyle = 'rgba(200, 200, 200, 0.7)';
+        ctx.beginPath();
+        ctx.roundRect(riboX - 25, cy + 18, 50, 12, 5);
+        ctx.fill();
+        
+        ctx.fillStyle = 'rgba(150, 150, 150, 0.85)';
+        ctx.beginPath();
+        ctx.arc(riboX, cy - 4, 20, Math.PI, 0);
+        ctx.lineTo(riboX + 22, cy + 10);
+        ctx.lineTo(riboX - 22, cy + 10);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Polypeptide chain
+        ctx.fillStyle = '#00e676';
+        let px = riboX;
+        let py = cy - 24;
+        ctx.beginPath();
+        ctx.arc(px, py, 4, 0, Math.PI*2);
+        ctx.fill();
+        
+        for (let j = 1; j <= 6; j++) {
+          const angle = Math.sin(pipAnimFrame * 0.035 + j) * 0.5 - Math.PI/2;
+          px += Math.cos(angle) * 8;
+          py += Math.sin(angle) * 8;
+          ctx.beginPath();
+          ctx.arc(px, py, 3.5, 0, Math.PI*2);
+          ctx.fill();
+          
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(px, py);
+          ctx.lineTo(px - Math.cos(angle)*8, py - Math.sin(angle)*8);
+          ctx.stroke();
+        }
+        
+        ctx.font = '8px JetBrains Mono';
+        ctx.fillStyle = '#00e676';
+        ctx.fillText("Translation: mRNA ➔ Protein chain", cx - 85, cy + 45);
+      }
+      else if (id === 'ser') {
+        // Lipid Synthesis
+        ctx.strokeStyle = '#ffab40';
+        ctx.lineWidth = 8;
+        ctx.lineCap = 'round';
+        
+        ctx.beginPath();
+        ctx.moveTo(cx - 70, cy - 20);
+        ctx.bezierCurveTo(cx - 30, cy - 40, cx - 40, cy + 10, cx - 10, cy - 10);
+        ctx.bezierCurveTo(cx + 20, cy - 30, cx + 30, cy + 20, cx + 70, cy);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(cx - 50, cy + 10);
+        ctx.bezierCurveTo(cx - 20, cy + 30, cx + 10, cy - 20, cx + 40, cy + 15);
+        ctx.stroke();
+        
+        ctx.fillStyle = '#ffab40';
+        for (let i = 0; i < 3; i++) {
+          const t = (pipAnimFrame + i * 50) % 150;
+          const scale = Math.min(1, t / 40);
+          const lx = cx - 10 + i * 25 + Math.sin(t * 0.05) * 4;
+          const ly = cy - 10 + Math.cos(t * 0.04) * 15;
+          
+          ctx.beginPath();
+          ctx.arc(lx, ly, 3.5 * scale, 0, Math.PI*2);
+          ctx.fill();
+        }
+        
+        ctx.font = '8px JetBrains Mono';
+        ctx.fillStyle = '#ffab40';
+        ctx.fillText("Synthesizing lipids & membrane pieces", cx - 85, cy + 45);
+      }
+      else if (id === 'golgi') {
+        // Protein modification and sorting
+        ctx.strokeStyle = '#00e5ff';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(cx - 35, cy - 30, 70, 48);
+        
+        ctx.fillStyle = '#00e676';
+        ctx.beginPath();
+        ctx.arc(cx, cy - 6, 8, 0, Math.PI*2);
+        ctx.fill();
+        
+        ctx.fillStyle = '#04050d';
+        ctx.fillRect(cx - 28, cy + 2, 56, 12);
+        ctx.strokeStyle = '#ffab40';
+        ctx.strokeRect(cx - 28, cy + 2, 56, 12);
+        
+        ctx.font = 'bold 7px JetBrains Mono';
+        ctx.fillStyle = '#ffab40';
+        ctx.textAlign = 'center';
+        const stamp = (pipAnimFrame % 160) < 80 ? "MEMBRANE" : "LYSOSOME";
+        ctx.fillText(stamp, cx, cy + 10);
+        ctx.textAlign = 'left';
+        
+        ctx.strokeStyle = '#00e5ff';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 2]);
+        ctx.beginPath();
+        ctx.arc(cx, cy - 6, 14 + Math.sin(pipAnimFrame*0.05)*1.5, 0, Math.PI*2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.font = '8px JetBrains Mono';
+        ctx.fillStyle = '#00e5ff';
+        ctx.fillText("Sorting: Vesicle packaging active", cx - 80, cy + 42);
+      }
+      else if (id === 'lysosomes') {
+        // Digestion
+        ctx.strokeStyle = '#ff2a6d';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 38, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(255, 42, 109, 0.05)';
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = '#ff2a6d';
+        for (let i = 0; i < 5; i++) {
+          const ex = Math.sin(pipAnimFrame * 0.03 + i) * 18;
+          const ey = Math.cos(pipAnimFrame * 0.02 + i * 3) * 18;
+          ctx.beginPath();
+          ctx.arc(cx + ex, cy + ey, 2.5, 0, Math.PI*2);
+          ctx.fill();
+        }
+        
+        const wCycle = pipAnimFrame % 120;
+        ctx.fillStyle = '#8d7a6e';
+        
+        if (wCycle < 50) {
+          const wx = cx - 90 + wCycle * 1.5;
+          ctx.fillRect(wx - 4, cy - 4, 8, 8);
+        } else if (wCycle >= 50 && wCycle < 85) {
+          ctx.fillStyle = '#ffab40';
+          const explodeScale = (wCycle - 50) * 0.45;
+          ctx.fillRect(cx - 3, cy - 3, 6, 6);
+          
+          ctx.fillStyle = 'rgba(255, 42, 109, 0.8)';
+          for (let j = 0; j < 6; j++) {
+            const sx = cx + Math.cos(j) * explodeScale;
+            const sy = cy + Math.sin(j) * explodeScale;
+            ctx.fillRect(sx - 1.5, sy - 1.5, 3, 3);
+          }
+        }
+        
+        ctx.font = '8px JetBrains Mono';
+        ctx.fillStyle = '#ff2a6d';
+        ctx.fillText("Enzymes breaking down waste debris", cx - 82, cy + 50);
+      }
+      else if (id === 'vacuoles') {
+        // storage expansion
+        const vCycle = pipAnimFrame % 200;
+        const swell = Math.sin((vCycle / 200) * Math.PI) * 15;
+        const vRad = 26 + swell;
+        
+        ctx.strokeStyle = '#00e5ff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, vRad, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(0, 229, 255, 0.04)';
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = 'rgba(0, 229, 255, 0.4)';
+        for (let i = 0; i < 4; i++) {
+          const wx = cx + Math.sin(pipAnimFrame * 0.01 + i * 15) * (vRad * 0.5);
+          const wy = cy + Math.cos(pipAnimFrame * 0.015 + i * 25) * (vRad * 0.5);
+          ctx.beginPath();
+          ctx.arc(wx, wy, 2.5, 0, Math.PI*2);
+          ctx.fill();
+        }
+        
+        ctx.font = '8px JetBrains Mono';
+        ctx.fillStyle = '#00e5ff';
+        ctx.fillText("Storing water & metabolic compounds", cx - 82, cy + 50);
+      }
+      else if (id === 'membrane') {
+        // active transport channels
+        ctx.fillStyle = '#00e5ff';
+        for (let x = cx - 90; x <= cx + 90; x += 10) {
+          if (Math.abs(x - cx) > 22) {
+            ctx.beginPath();
+            ctx.arc(x, cy - 25, 3.5, 0, Math.PI*2);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(0, 229, 255, 0.3)';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(x, cy - 22); ctx.lineTo(x, cy - 10); ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(x, cy + 25, 3.5, 0, Math.PI*2);
+            ctx.fill();
+            ctx.beginPath(); ctx.moveTo(x, cy + 22); ctx.lineTo(x, cy + 10); ctx.stroke();
+          }
+        }
+        
+        const gateCycle = pipAnimFrame % 150;
+        const isOpenTop = gateCycle < 65;
+        
+        ctx.strokeStyle = '#00e676';
+        ctx.lineWidth = 4.5;
+        ctx.lineCap = 'round';
+        
+        ctx.beginPath();
+        ctx.moveTo(cx - 16, cy - 35);
+        ctx.lineTo(cx - 12, cy - 15);
+        ctx.lineTo(cx - 12, cy + 15);
+        ctx.lineTo(cx - 16, cy + 35);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(cx + 16, cy - 35);
+        ctx.lineTo(cx + 12, cy - 15);
+        ctx.lineTo(cx + 12, cy + 15);
+        ctx.lineTo(cx + 16, cy + 35);
+        ctx.stroke();
+        
+        ctx.fillStyle = '#d500f9';
+        let ny = cy;
+        if (gateCycle < 60) {
+          ny = cy - 45 + (gateCycle / 60) * 45;
+        } else if (gateCycle >= 60 && gateCycle < 90) {
+          ny = cy;
+        } else {
+          ny = cy + ((gateCycle - 90) / 60) * 45;
+        }
+        ctx.beginPath();
+        ctx.arc(cx, ny, 5.0, 0, Math.PI*2);
+        ctx.fill();
+        
+        ctx.strokeStyle = '#00e676';
+        ctx.lineWidth = 3;
+        if (isOpenTop) {
+          ctx.beginPath(); ctx.moveTo(cx - 12, cy + 15); ctx.lineTo(cx + 12, cy + 15); ctx.stroke();
+        } else {
+          ctx.beginPath(); ctx.moveTo(cx - 12, cy - 15); ctx.lineTo(cx + 12, cy - 15); ctx.stroke();
+        }
+        
+        ctx.font = '8px JetBrains Mono';
+        ctx.fillStyle = '#00e676';
+        ctx.fillText("Permeability: carrier gates in bilayer", cx - 85, cy + 50);
+      }
     }
 
     /* ----------------------------------------------------
@@ -1995,11 +2442,9 @@
       const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
       const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
       
-      // Map to camera space coordinates (world coordinates)
       const worldX = camX + (mouseX - canvas.width/2) / camZoom;
       const worldY = camY + (mouseY - canvas.height/2) / camZoom;
 
-      // Distance checking helper
       const dNuc = Math.hypot(worldX - 350, worldY - 270);
       const dGolgi = Math.hypot(worldX - 530, worldY - 305);
       const dMito1 = Math.hypot(worldX - 500, worldY - 205);
@@ -2009,40 +2454,39 @@
       const dVac = Math.hypot(worldX - 240, worldY - 330);
       const dCenter = Math.hypot(worldX - 390, worldY - 300);
 
-      // 1. Nucleus
       if (dNuc < 50) {
         return 'nucleus';
       }
-      // 2. Rough ER wrapping (radius 54-85, angle -1.1 to 2.8)
+      
       const nAngle = Math.atan2(worldY - 270, worldX - 350);
       if (dNuc >= 50 && dNuc <= 84 && nAngle >= -1.2 && nAngle <= 2.8) {
         return 'rer';
       }
-      // 3. Smooth ER wrapping (radius 50-84, angle 2.8 to 4.2)
+      
       if (dNuc >= 50 && dNuc <= 84 && (nAngle > 2.8 || nAngle < -1.2)) {
         return 'ser';
       }
-      // 4. Golgi Stack
+      
       if (dGolgi < 38) {
         return 'golgi';
       }
-      // 5. Mitochondria
+      
       if (dMito1 < 28 || dMito2 < 28) {
         return 'mitochondria';
       }
-      // 6. Lysosomes
+      
       if (dLys1 < 14 || dLys2 < 14) {
         return 'lysosomes';
       }
-      // 7. Vacuole
+      
       if (dVac < 24) {
         return 'vacuoles';
       }
-      // 8. Membrane Border (thick band)
+      
       if (dCenter >= 170 && dCenter <= 200) {
         return 'membrane';
       }
-      // 9. Cytoplasm fluid
+      
       if (dCenter < 170) {
         return 'cytoplasm';
       }
@@ -2055,7 +2499,6 @@
       if (hit !== hoveredOrganelle) {
         hoveredOrganelle = hit;
         
-        // Pointer cursor change
         if (hit && hit !== 'cytoplasm') {
           canvas.style.cursor = 'pointer';
         } else {
@@ -2069,7 +2512,6 @@
       if (hit && hit !== 'cytoplasm') {
         selectOrganelle(hit);
       } else {
-        // click empty background to zoom out
         closeInspectorDrawer();
       }
     }
@@ -2083,16 +2525,13 @@
       requestAnimationFrame(animate);
     }
 
-    // Attach interaction listeners
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('click', handleCanvasClick);
     
-    // Initialize Simulation
     setScenario('normal');
     addLog("Eukaryotic Cell Factory initialized. All organelles running independently.", "sys");
     addLog("Ready for student interaction. Click any part to inspect.", "sys");
     
-    // Start loop
     animate();
   </script>
 </body>
