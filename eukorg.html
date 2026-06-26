@@ -1,0 +1,2099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eukaryotic Organelles: The Living Factory | Interactive Biology Lab</title>
+  <meta name="description" content="An interactive grade 9 biology simulation showing how eukaryotic organelles carry out various life processes independently at the same time, working together like a tiny living factory.">
+  
+  <!-- Google Fonts for premium UI typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #04050d;
+      --bg-panel: rgba(10, 12, 28, 0.78);
+      --bg-card: rgba(18, 22, 48, 0.5);
+      --border-color: rgba(0, 229, 255, 0.18);
+      --border-glow: 0 0 15px rgba(0, 229, 255, 0.12);
+      
+      --text-main: #e8ecf8;
+      --text-muted: #9ba4c0;
+      
+      --cyan-accent: #00e5ff;
+      --cyan-glow: rgba(0, 229, 255, 0.4);
+      --purple-accent: #d500f9;
+      --purple-glow: rgba(213, 0, 249, 0.4);
+      --green-accent: #00e676;
+      --green-glow: rgba(0, 230, 118, 0.4);
+      --amber-accent: #ffab40;
+      --amber-glow: rgba(255, 171, 64, 0.4);
+      --rose-accent: #ff2a6d;
+      --rose-glow: rgba(255, 42, 109, 0.4);
+      
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(213, 0, 249, 0.03) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(0, 229, 255, 0.05) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(10, 12, 35, 0.8) 0px, transparent 100%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Warning for mobile portrait users */
+    .mobile-warning {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #04050d;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .mobile-warning p {
+      font-size: 1.1rem;
+      color: var(--cyan-accent);
+      margin-top: 15px;
+      line-height: 1.5;
+    }
+
+    /* Header Styling */
+    header {
+      background: rgba(4, 5, 13, 0.92);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      z-index: 10;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--cyan-accent), var(--purple-accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #000;
+      font-size: 1.1rem;
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    h1 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(to right, #ffffff, #9ba4c0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-badge {
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid var(--cyan-accent);
+      color: var(--cyan-accent);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: var(--border-glow);
+    }
+
+    /* Main Content Layout */
+    .main-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 330px 1fr 345px;
+      gap: 15px;
+      padding: 15px;
+      height: calc(100vh - 60px);
+    }
+
+    /* Panels Base (Glassmorphism) */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--cyan-accent);
+      text-transform: uppercase;
+    }
+
+    .panel-content {
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Viewport Center Panel */
+    .viewport-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #020307;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: inset 0 0 45px rgba(0, 0, 0, 0.95);
+      outline: none;
+    }
+
+    #viewportCanvas {
+      width: 100%;
+      height: 100%;
+      max-width: 800px;
+      max-height: 600px;
+      aspect-ratio: 4/3;
+      display: block;
+      background: transparent;
+      cursor: crosshair;
+    }
+
+    /* HUD Elements inside Viewport */
+    .hud-element {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: rgba(4, 5, 12, 0.85);
+      border: 1px solid rgba(0, 229, 255, 0.15);
+      padding: 6px 12px;
+      border-radius: 6px;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+      z-index: 5;
+    }
+
+    .hud-top-left { top: 15px; left: 15px; border-left: 3px solid var(--cyan-accent); color: #fff; font-weight: bold; }
+    .hud-top-right { top: 15px; right: 15px; text-align: right; }
+    .hud-bottom-left { bottom: 15px; left: 15px; display: flex; flex-direction: column; gap: 4px; }
+    .hud-bottom-right { bottom: 15px; right: 15px; text-align: right; }
+
+    /* Control Sections */
+    .control-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Scenarios Buttons */
+    .scenarios-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+
+    .scenario-btn {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .scenario-btn:hover {
+      background: rgba(0, 229, 255, 0.05);
+      color: #fff;
+      border-color: rgba(0, 229, 255, 0.2);
+    }
+
+    .scenario-btn.active {
+      color: #fff;
+      background: rgba(0, 229, 255, 0.1);
+      border-color: var(--cyan-accent);
+      box-shadow: var(--border-glow);
+    }
+
+    .scenario-btn.active.normal { border-color: var(--cyan-accent); background: rgba(0, 229, 255, 0.1); }
+    .scenario-btn.active.protein { border-color: var(--green-accent); background: rgba(0, 230, 118, 0.1); }
+    .scenario-btn.active.crisis { border-color: var(--rose-accent); background: rgba(255, 42, 109, 0.1); }
+    .scenario-btn.active.toxic { border-color: var(--amber-accent); background: rgba(255, 171, 64, 0.1); }
+
+    .scenario-icon {
+      font-size: 1.1rem;
+    }
+
+    /* Live Dashboard Metrics */
+    .metrics-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .metric-card {
+      background: rgba(5, 6, 15, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 8px;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .metric-title {
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      font-size: 1.1rem;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      color: var(--cyan-accent);
+    }
+
+    .metric-value.green { color: var(--green-accent); }
+    .metric-value.rose { color: var(--rose-accent); }
+    .metric-value.amber { color: var(--amber-accent); }
+
+    /* Switch Component */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .switch-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: .3s;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 12px;
+      width: 12px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-muted);
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: rgba(0, 229, 255, 0.15);
+      border-color: var(--cyan-accent);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(18px);
+      background-color: var(--cyan-accent);
+      box-shadow: 0 0 8px var(--cyan-glow);
+    }
+
+    /* Tab Layout for Right Panel */
+    .tab-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 12px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      color: var(--cyan-accent);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 15%;
+      width: 70%;
+      height: 2px;
+      background: var(--cyan-accent);
+      box-shadow: 0 0 8px var(--cyan-glow);
+    }
+
+    .tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .tab-pane.active {
+      display: flex;
+    }
+
+    /* Inspector Styling */
+    .info-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .info-tag {
+      align-self: flex-start;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: bold;
+      background: rgba(0, 229, 255, 0.08);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: var(--cyan-accent);
+    }
+
+    .info-tag.factory {
+      background: rgba(255, 171, 64, 0.08);
+      border-color: rgba(255, 171, 64, 0.2);
+      color: var(--amber-accent);
+    }
+
+    .level-info-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .detail-text {
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    .detail-text strong {
+      color: #fff;
+    }
+
+    /* Interactive list of organelles */
+    .organelle-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .org-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .org-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .org-btn.active {
+      background: rgba(0, 229, 255, 0.06);
+      border-color: var(--cyan-accent);
+      color: #fff;
+      box-shadow: var(--border-glow);
+    }
+
+    .org-btn.active::after {
+      content: "🔍";
+      font-size: 0.75rem;
+    }
+
+    /* Drawer Box for selected Organelle detailed profile */
+    .organelle-drawer {
+      background: rgba(0, 229, 255, 0.02);
+      border: 1px solid rgba(0, 229, 255, 0.15);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.05);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .organelle-drawer.nucleus { border-color: rgba(213, 0, 249, 0.3); background: rgba(213, 0, 249, 0.01); }
+    .organelle-drawer.rer { border-color: rgba(0, 230, 118, 0.3); background: rgba(0, 230, 118, 0.01); }
+    .organelle-drawer.ser { border-color: rgba(255, 171, 64, 0.3); background: rgba(255, 171, 64, 0.01); }
+    .organelle-drawer.mitochondria { border-color: rgba(255, 110, 64, 0.3); background: rgba(255, 110, 64, 0.01); }
+    .organelle-drawer.golgi { border-color: rgba(0, 229, 255, 0.3); background: rgba(0, 229, 255, 0.01); }
+    .organelle-drawer.lysosomes { border-color: rgba(255, 42, 109, 0.3); background: rgba(255, 42, 109, 0.01); }
+    .organelle-drawer.vacuoles { border-color: rgba(0, 229, 255, 0.2); background: rgba(0, 229, 255, 0.01); }
+    .organelle-drawer.ribosomes { border-color: rgba(0, 229, 255, 0.2); background: rgba(0, 229, 255, 0.01); }
+    .organelle-drawer.membrane { border-color: rgba(0, 229, 255, 0.2); background: rgba(0, 229, 255, 0.01); }
+
+    .organelle-name {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--cyan-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .organelle-drawer.nucleus .organelle-name { color: var(--purple-accent); }
+    .organelle-drawer.rer .organelle-name { color: var(--green-accent); }
+    .organelle-drawer.ser .organelle-name { color: var(--amber-accent); }
+    .organelle-drawer.mitochondria .organelle-name { color: #ff6e40; }
+    .organelle-drawer.golgi .organelle-name { color: var(--cyan-accent); }
+    .organelle-drawer.lysosomes .organelle-name { color: var(--rose-accent); }
+
+    .analogy-title {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: var(--amber-accent);
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Live Activity Console Box */
+    .console-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      height: 100%;
+    }
+
+    .console-box {
+      flex: 1;
+      background: rgba(2, 3, 8, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 10px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 380px;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+    }
+
+    .console-line {
+      line-height: 1.3;
+      border-left: 2px solid rgba(255, 255, 255, 0.1);
+      padding-left: 6px;
+    }
+
+    .console-line.nucleus { border-left-color: var(--purple-accent); color: #f8e1ff; }
+    .console-line.rer { border-left-color: var(--green-accent); color: #e1ffe8; }
+    .console-line.ser { border-left-color: var(--amber-accent); color: #fffae8; }
+    .console-line.mitochondria { border-left-color: #ff6e40; color: #ffede8; }
+    .console-line.golgi { border-left-color: var(--cyan-accent); color: #e8fcff; }
+    .console-line.lysosome { border-left-color: var(--rose-accent); color: #ffe8ee; }
+    .console-line.sys { border-left-color: var(--text-muted); color: var(--text-muted); }
+
+    .console-line .time {
+      color: rgba(255, 255, 255, 0.25);
+      margin-right: 4px;
+    }
+
+    .btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1100px) {
+      .main-container {
+        grid-template-columns: 290px 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
+        overflow-y: auto;
+      }
+      body {
+        overflow-y: auto;
+        height: auto;
+      }
+      header {
+        position: sticky;
+        top: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mobile-warning {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Warning overlay for mobile screens -->
+  <div class="mobile-warning" id="mobileWarning">
+    <div class="logo-icon">🧬</div>
+    <p>This eukaryotic cell factory simulation requires a tablet or desktop browser screen for high-fidelity interactive details.</p>
+  </div>
+
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">🧬</div>
+      <h1>EUKARYOTIC CELL ORGANELLES</h1>
+    </div>
+    <span class="nav-badge">The Living Cell Factory</span>
+  </header>
+
+  <main class="main-container">
+    
+    <!-- LEFT PANEL: CONTROLS & SCENARIOS -->
+    <section class="glass-panel" id="leftPanel">
+      <div class="panel-header">
+        <div class="panel-title">🎛️ Control Center</div>
+      </div>
+      
+      <div class="panel-content">
+        
+        <!-- Factory Scenario Selection -->
+        <div class="control-section">
+          <div class="control-label">Select Cell Factory Scenario</div>
+          <div class="scenarios-grid">
+            <button class="scenario-btn active normal" id="scen_normal" onclick="setScenario('normal')">
+              <span class="scenario-icon">⚖️</span>
+              <div style="text-align: left;">
+                <div style="font-weight:bold; font-size:0.8rem;">Balanced Metabolism</div>
+                <div style="font-size:0.68rem; color:var(--text-muted);">Normal cell operations running smoothly</div>
+              </div>
+            </button>
+            <button class="scenario-btn protein" id="scen_protein" onclick="setScenario('protein')">
+              <span class="scenario-icon">🏭</span>
+              <div style="text-align: left;">
+                <div style="font-weight:bold; font-size:0.8rem;">Protein Demand Surge</div>
+                <div style="font-size:0.68rem; color:var(--text-muted);">Accelerated transcription & translation</div>
+              </div>
+            </button>
+            <button class="scenario-btn crisis" id="scen_crisis" onclick="setScenario('crisis')">
+              <span class="scenario-icon">⚠️</span>
+              <div style="text-align: left;">
+                <div style="font-weight:bold; font-size:0.8rem;">Energy Crisis (Hypoxia)</div>
+                <div style="font-size:0.68rem; color:var(--text-muted);">ATP synthesis halts; cell operations freeze</div>
+              </div>
+            </button>
+            <button class="scenario-btn toxic" id="scen_toxic" onclick="setScenario('toxic')">
+              <span class="scenario-icon">🧹</span>
+              <div style="text-align: left;">
+                <div style="font-weight:bold; font-size:0.8rem;">Detoxification Surge</div>
+                <div style="font-size:0.68rem; color:var(--text-muted);">Waste clearance & lipid synthesis peak</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Real-Time Metrics -->
+        <div class="control-section">
+          <div class="control-label">Live Output Metrics</div>
+          <div class="metrics-container">
+            <div class="metric-card">
+              <span class="metric-title">ATP Energy</span>
+              <span class="metric-value" id="val_atp">98%</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Proteins Shipped</span>
+              <span class="metric-value green" id="val_proteins">0</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Lipids Refined</span>
+              <span class="metric-value amber" id="val_lipids">0</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Waste Recycled</span>
+              <span class="metric-value rose" id="val_waste">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="control-section">
+          <div class="control-label">Display Settings</div>
+          
+          <div class="switch-container">
+            <span class="switch-label" style="color:var(--amber-accent); font-weight:bold;">Factory Analogy Overlays</span>
+            <label class="switch">
+              <input type="checkbox" id="analogyToggle" onchange="toggleAnalogyOverlay(this.checked)">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="switch-container">
+            <span class="switch-label">Synthesizer Sound FX</span>
+            <label class="switch">
+              <input type="checkbox" checked id="soundToggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CENTER PANEL: CELL VIEWPORT -->
+    <section class="viewport-container" id="centerPanel" tabindex="0">
+      <canvas id="viewportCanvas" width="800" height="600"></canvas>
+      
+      <!-- Back button visible when zoomed in -->
+      <button id="btnZoomOut" class="btn" style="position: absolute; bottom: 70px; left: 15px; display: none; background: rgba(4,5,12,0.85); border: 1px solid var(--cyan-accent); color: var(--cyan-accent); z-index: 6; font-weight: bold;" onclick="resetCamera()">
+        🔍 Whole Cell View
+      </button>
+      
+      <!-- HUD Overlays -->
+      <div class="hud-element hud-top-left" id="hudStatus">CELL FACTORY: BALANCED METABOLISM</div>
+      <div class="hud-element hud-top-right">
+        <div>ACTIVE SCENARIO: <span id="hudScenario" style="color:var(--cyan-accent); font-weight:bold; text-transform: uppercase;">NORMAL</span></div>
+        <div style="margin-top: 4px;">ZOOM SCALE: <span id="hudZoom" style="color:var(--amber-accent); font-weight:bold;">1.0x</span></div>
+      </div>
+      <div class="hud-element hud-bottom-left">
+        <div>Eukaryotic Cell (Highly Interactive Model)</div>
+        <div style="color:var(--text-muted); font-size:0.68rem; margin-top:2px;">Click organelles to inspect factory jobs</div>
+      </div>
+      <div class="hud-element hud-bottom-right">
+        <div>ACTIVE PROCESSES: Running concurrently</div>
+        <div style="margin-top: 4px;" id="hudActiveCount">ATP: Active | Vesicles: Active</div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: DETAILS & WORKFLOW -->
+    <section class="glass-panel" id="rightPanel">
+      <div class="tab-header">
+        <button class="tab-btn active" id="btnTabInspector" onclick="switchTab('inspector')">📖 Inspector</button>
+        <button class="tab-btn" id="btnTabWorkflow" onclick="switchTab('workflow')">⚙️ Live Workflow</button>
+      </div>
+      
+      <div class="panel-content">
+        
+        <!-- TAB 1: INSPECTOR -->
+        <div class="tab-pane active" id="paneInspector">
+          <div class="info-header" id="inspectorHeader">
+            <span class="info-tag">Eukaryotic Cell</span>
+            <h3 class="level-info-title">Organelle Inspector</h3>
+            <div class="detail-text">
+              Click any organelle on the cell model, or select one below, to inspect its scientific details, biochemical pathways, and role in the cell's <strong>"Living Factory"</strong> analogy.
+            </div>
+          </div>
+
+          <div id="inspectorDefaultWrapper" style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="control-label">Select Organelle to Inspect</div>
+            <div class="organelle-list">
+              <button class="org-btn" id="lbl_nucleus" onclick="selectOrganelle('nucleus')">Nucleus</button>
+              <button class="org-btn" id="lbl_mitochondria" onclick="selectOrganelle('mitochondria')">Mitochondria</button>
+              <button class="org-btn" id="lbl_rer" onclick="selectOrganelle('rer')">Rough ER (Ribosomes)</button>
+              <button class="org-btn" id="lbl_ser" onclick="selectOrganelle('ser')">Smooth ER</button>
+              <button class="org-btn" id="lbl_golgi" onclick="selectOrganelle('golgi')">Golgi Apparatus</button>
+              <button class="org-btn" id="lbl_lysosomes" onclick="selectOrganelle('lysosomes')">Lysosomes</button>
+              <button class="org-btn" id="lbl_vacuoles" onclick="selectOrganelle('vacuoles')">Vacuoles</button>
+              <button class="org-btn" id="lbl_membrane" onclick="selectOrganelle('membrane')">Plasma Membrane</button>
+            </div>
+          </div>
+
+          <!-- Description Details Drawer (Shows when an organelle is active) -->
+          <div class="organelle-drawer" id="organelleDrawer" style="display: none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom:6px;">
+              <h4 class="organelle-name" id="drawerOrgName">Organelle Name</h4>
+              <span class="info-tag" id="drawerOrgSyllabus">Grade 9 Syllabus</span>
+            </div>
+            <div class="analogy-title" id="drawerOrgAnalogy">FACTORY EQUIVALENT: POWER PLANT</div>
+            <p class="detail-text" id="drawerOrgDesc">Details about the biological pathways and structure of the organelle go here.</p>
+            <div class="detail-text" style="background:rgba(255,255,255,0.02); border-radius:6px; padding:8px; border:1px solid rgba(255,255,255,0.05);" id="drawerOrgCoop">
+              <strong>Cooperation:</strong> How this organelle depends on and works with others.
+            </div>
+            <button class="btn" style="padding: 6px 10px; font-size: 0.7rem; margin-top: 4px; border-color:rgba(255,255,255,0.15);" onclick="closeInspectorDrawer()">Close Inspector</button>
+          </div>
+        </div>
+
+        <!-- TAB 2: LIVE WORKFLOW -->
+        <div class="tab-pane" id="paneWorkflow">
+          <div class="console-container">
+            <div class="control-label" style="display:flex; justify-content:space-between; align-items:center;">
+              <span>Cell Factory Activity Logs</span>
+              <button class="btn" style="padding: 2px 6px; font-size: 0.65rem;" onclick="clearConsole()">Clear Logs</button>
+            </div>
+            <div class="console-box" id="consoleBox">
+              <!-- Logs dynamically generated -->
+            </div>
+            <div class="detail-text" style="font-size:0.75rem; background:var(--bg-card); border-radius:8px; padding:10px; border:1px solid var(--border-color);">
+              💡 <strong>Independent & Simultaneous processes</strong>:<br>
+              Watch as mRNA transcripts are coded in the nucleus, proteins fold in the RER, vesicles glide to the Golgi, lipids refine in the SER, waste is engulfed by Lysosomes, and Mitochondria generate ATP energy <em>simultaneously</em> to power these jobs!
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* ----------------------------------------------------
+       AUDIO SYSTEM (WEB AUDIO API SYNTHESIZER)
+       ---------------------------------------------------- */
+    let audioCtx = null;
+    const soundToggle = document.getElementById('soundToggle');
+
+    function getAudioCtx() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (!soundToggle.checked) return;
+      try {
+        const ctx = getAudioCtx();
+        const now = ctx.currentTime;
+
+        if (type === 'click') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.exponentialRampToValueAtTime(1000, now + 0.05);
+          gain.gain.setValueAtTime(0.008, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.05);
+        } else if (type === 'zoom') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(250, now);
+          osc.frequency.exponentialRampToValueAtTime(480, now + 0.18);
+          gain.gain.setValueAtTime(0.015, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.18);
+        } else if (type === 'atp') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, now);
+          osc.frequency.exponentialRampToValueAtTime(1400, now + 0.08);
+          gain.gain.setValueAtTime(0.005, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'fusion') {
+          // bubble pop sound
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.exponentialRampToValueAtTime(450, now + 0.12);
+          gain.gain.setValueAtTime(0.02, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        } else if (type === 'digest') {
+          // noise crackle
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.exponentialRampToValueAtTime(40, now + 0.25);
+          gain.gain.setValueAtTime(0.012, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } else if (type === 'water') {
+          // water drop
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(450, now);
+          osc.frequency.exponentialRampToValueAtTime(900, now + 0.16);
+          gain.gain.setValueAtTime(0.015, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.16);
+        }
+      } catch (e) {
+        console.warn('Audio synthesizing restrictions active.', e);
+      }
+    }
+
+    /* ----------------------------------------------------
+       SCIENTIFIC METADATA & ORGANELLES DATABASE
+       ---------------------------------------------------- */
+    const organelleDatabase = {
+      nucleus: {
+        name: "Nucleus",
+        analogy: "HEADQUARTERS / EXECUTIVE OFFICE",
+        desc: "The <strong>Nucleus</strong> serves as the control center of the cell. It houses the linear chromosomes (DNA codes) wrapping around histones. In our cell factory analogy, this represents the headquarters where original blueprints are kept safe. It transcribes work orders (mRNA strings) and sends them to the assembly lines to guide cellular activity.",
+        coop: "Creates ribosomes (in the nucleolus) and codes mRNA molecules. The ribosomes and mRNA are then shipped out to the **Rough ER** and Cytoplasm to produce proteins.",
+        syllabus: "Linear DNA & Nuclear Envelope"
+      },
+      mitochondria: {
+        name: "Mitochondria",
+        analogy: "MAIN GENERATOR / POWER PLANT",
+        desc: "The <strong>Mitochondria</strong> are double-membrane organelles that carry out aerobic cellular respiration. Using glucose and oxygen, they synthesize **ATP (Adenosine Triphosphate)** energy molecules along their folded inner cristae membranes. This acts as the factory's power plant, supplying the vital power needed by all other organelles.",
+        coop: "Supplies ATP to the **Rough/Smooth ER** and **Ribosomes** for syntheses, to the **Golgi** for packaging, and to the **Plasma Membrane** for active transport of raw materials.",
+        syllabus: "Aerobic Respiration & ATP"
+      },
+      rer: {
+        name: "Rough Endoplasmic Reticulum",
+        analogy: "PRIMARY ASSEMBLY LINE",
+        desc: "The <strong>Rough Endoplasmic Reticulum (RER)</strong> is a series of folded membranes continuous with the nuclear membrane, studded with millions of tiny **Ribosomes**. It acts as the factory's primary assembly lines, where ribosomal 'workers' translate mRNA instructions and link amino acids to assemble complex proteins.",
+        coop: "Folds and quality-checks proteins, then packages them into transport vesicles to be shipped to the **Golgi Apparatus** for sorting and distribution.",
+        syllabus: "Ribosome-Studded Folded Membranes"
+      },
+      ser: {
+        name: "Smooth Endoplasmic Reticulum",
+        analogy: "LIPID REFINERY & DETOX UNIT",
+        desc: "The <strong>Smooth Endoplasmic Reticulum (SER)</strong> is a network of tubular membranes that lacks ribosomes. It acts as the factory's lipid refinery and detoxifier, synthesizing phospholipids, cholesterol, and steroids, while detoxifying metabolic waste, alcohol, and hazardous chemicals.",
+        coop: "Supplies lipids and membrane pieces to the **Golgi** and **Plasma Membrane** for construction, and processes waste compounds so **Lysosomes** can dispose of them.",
+        syllabus: "Tubular Lipid Synthesis Structure"
+      },
+      golgi: {
+        name: "Golgi Apparatus",
+        analogy: "PACKAGING & SHIPPING DEPARTMENT",
+        desc: "The <strong>Golgi Apparatus</strong> is a stack of curved, flattened membrane sacs (cisternae). It functions as the cellular post office or shipping department. It receives protein and lipid products from the ER, modifies them (sorting, tagging), packages them into transport vesicles, and dispatches them.",
+        coop: "Receives raw transport vesicles from the **Rough/Smooth ER**, tags them chemically, and sends them to the **Plasma Membrane** for release or to become **Lysosomes**.",
+        syllabus: "Flattened Cisternae & Vesicle Sorting"
+      },
+      lysosomes: {
+        name: "Lysosomes",
+        analogy: "RECYCLING CENTER & WASTE DISPOSAL",
+        desc: "The <strong>Lysosomes</strong> are membrane-enclosed vesicles loaded with powerful hydrolytic (digestive) enzymes. Often called the factory's recycling center, they digest worn-out cell organelles, foreign pathogens (bacteria), and cellular debris, salvaging amino acids and basic raw materials.",
+        coop: "Breaks down old components (like inactive **Mitochondria** or exhausted **ER**) and returns raw building blocks back to the cytoplasm so new organelles can form.",
+        syllabus: "Digestive Hydrolytic Enzymes"
+      },
+      vacuoles: {
+        name: "Vacuoles",
+        analogy: "STORAGE WAREHOUSE",
+        desc: "In eukaryotic animal cells, **Vacuoles** are relatively small, temporary membrane sacs. They act as warehouses, storing water, nutrients, salts, and cellular wastes. (In plant cells, they merge into one giant central vacuole that regulates cell turgor pressure).",
+        coop: "Sequesters metabolic waste away from active assembly systems, protecting the cytoplasm, and stores water molecules for metabolic reactions.",
+        syllabus: "Turgor Control & Fluid Storage"
+      },
+      membrane: {
+        name: "Plasma Membrane",
+        analogy: "SECURITY WALL & GATEWAYS",
+        desc: "The **Plasma Membrane** is a selectively permeable phospholipid bilayer studded with transport proteins and carbohydrates. It represents the factory's security wall and gates, regulating exactly what raw materials enter and what products/wastes exit the cell.",
+        coop: "Provides structural boundary. Transport proteins utilize ATP from the **Mitochondria** to pump vital amino acids and glucose inside for the **ER** and **Ribosomes**.",
+        syllabus: "Selectively Permeable Bilayer"
+      }
+    };
+
+    /* ----------------------------------------------------
+       SIMULATION STATE VARIABLES
+       ---------------------------------------------------- */
+    let currentScenario = 'normal'; // 'normal', 'protein', 'crisis', 'toxic'
+    let selectedOrganelleId = null;
+    let timeTicker = 0;
+    
+    // Camera coordinates & zoom
+    let camX = 400;
+    let camY = 300;
+    let camZoom = 1.0;
+    let targetCamX = 400;
+    let targetCamY = 300;
+    let targetCamZoom = 1.0;
+    
+    let isAnalogyOverlay = false;
+    let hoveredOrganelle = null;
+
+    // Simulation metrics
+    let atpLevel = 98.0;
+    let proteinsShipped = 0;
+    let lipidsRefined = 0;
+    let wasteRecycled = 0;
+
+    // Particle systems
+    let particles = [];
+    let wasteMaterials = []; // drifting particles inside cell to be digested by lysosomes
+
+    // Canvas DOM Elements
+    const canvas = document.getElementById('viewportCanvas');
+    const ctx = canvas.getContext('2d');
+    const hudStatus = document.getElementById('hudStatus');
+    const hudScenario = document.getElementById('hudScenario');
+    const hudZoom = document.getElementById('hudZoom');
+    const hudActiveCount = document.getElementById('hudActiveCount');
+    const btnZoomOut = document.getElementById('btnZoomOut');
+
+    const drawer = document.getElementById('organelleDrawer');
+    const defaultWrapper = document.getElementById('inspectorDefaultWrapper');
+    const drawerOrgName = document.getElementById('drawerOrgName');
+    const drawerOrgSyllabus = document.getElementById('drawerOrgSyllabus');
+    const drawerOrgAnalogy = document.getElementById('drawerOrgAnalogy');
+    const drawerOrgDesc = document.getElementById('drawerOrgDesc');
+    const drawerOrgCoop = document.getElementById('drawerOrgCoop');
+
+    /* ----------------------------------------------------
+       SIMULATION CONTROLLER METHODS
+       ---------------------------------------------------- */
+    function setScenario(scen) {
+      currentScenario = scen;
+      
+      // Update UI button active states
+      document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`scen_${scen}`).classList.add('active');
+      
+      // Update HUD
+      hudScenario.textContent = scen;
+      
+      if (scen === 'normal') {
+        hudStatus.textContent = "CELL FACTORY: BALANCED METABOLISM";
+        addLog("Metabolism stabilized. Organelles running at normal speed.", "sys");
+        playSound('click');
+      } else if (scen === 'protein') {
+        hudStatus.textContent = "CELL FACTORY: HIGH PROTEIN DEMAND";
+        addLog("Signal received: High protein demand! Nucleus transcription activated.", "sys");
+        playSound('click');
+      } else if (scen === 'crisis') {
+        hudStatus.textContent = "CELL FACTORY: HYPOXIA / ENERGY CRISIS";
+        addLog("CRITICAL: Oxygen cut off! Mitochondria respiration halting. ATP levels falling!", "sys");
+        playSound('zoom');
+      } else if (scen === 'toxic') {
+        hudStatus.textContent = "CELL FACTORY: DETOXIFICATION BOOST";
+        addLog("Notice: Toxic debris detected in cytosol. Lysosomes and Smooth ER active.", "sys");
+        playSound('click');
+      }
+    }
+
+    function toggleAnalogyOverlay(checked) {
+      isAnalogyOverlay = checked;
+      playSound('click');
+      addLog(`Factory Analogy Overlays ${checked ? 'enabled' : 'disabled'}.`, "sys");
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+      
+      if (tab === 'inspector') {
+        document.getElementById('btnTabInspector').classList.add('active');
+        document.getElementById('paneInspector').classList.add('active');
+      } else {
+        document.getElementById('btnTabWorkflow').classList.add('active');
+        document.getElementById('paneWorkflow').classList.add('active');
+      }
+      playSound('click');
+    }
+
+    /* ----------------------------------------------------
+       LIVE CONSOLE SYSTEM
+       ---------------------------------------------------- */
+    function addLog(msg, type = 'sys') {
+      const box = document.getElementById('consoleBox');
+      if (!box) return;
+      
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0];
+      
+      // Limit logs
+      if (box.children.length > 50) {
+        box.removeChild(box.firstChild);
+      }
+      
+      const line = document.createElement('div');
+      line.className = `console-line ${type}`;
+      line.innerHTML = `<span class="time">[${timeStr}]</span> ${msg}`;
+      box.appendChild(line);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function clearConsole() {
+      document.getElementById('consoleBox').innerHTML = '';
+      addLog("Console log cleared.", "sys");
+      playSound('click');
+    }
+
+    /* ----------------------------------------------------
+       INSPECTOR DRAWER CONTROL
+       ---------------------------------------------------- */
+    function selectOrganelle(id) {
+      selectedOrganelleId = id;
+      
+      // Update interactive list sidebar active state
+      document.querySelectorAll('.org-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`lbl_${id}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if (id) {
+        // Load data
+        const data = organelleDatabase[id];
+        drawerOrgName.textContent = data.name;
+        drawerOrgSyllabus.textContent = data.syllabus;
+        drawerOrgAnalogy.textContent = `FACTORY ROLE: ${data.analogy}`;
+        drawerOrgDesc.innerHTML = data.desc;
+        drawerOrgCoop.innerHTML = `<strong>Cooperation:</strong> ${data.coop}`;
+        
+        // Show drawer and hide default list
+        drawer.style.display = 'flex';
+        defaultWrapper.style.display = 'none';
+
+        // Zoom camera in on the specific organelle
+        focusCameraOnOrganelle(id);
+      } else {
+        closeInspectorDrawer();
+      }
+    }
+
+    function closeInspectorDrawer() {
+      selectedOrganelleId = null;
+      document.querySelectorAll('.org-btn').forEach(btn => btn.classList.remove('active'));
+      drawer.style.display = 'none';
+      defaultWrapper.style.display = 'flex';
+      resetCamera();
+    }
+
+    /* ----------------------------------------------------
+       CAMERA TRANSLATION & COORDINATES
+       ---------------------------------------------------- */
+    function focusCameraOnOrganelle(id) {
+      playSound('zoom');
+      targetCamZoom = 2.0;
+      hudZoom.textContent = "2.0x";
+      btnZoomOut.style.display = 'block';
+
+      // Map organelles to their visual centers on screen (in world space)
+      if (id === 'nucleus') {
+        targetCamX = 350;
+        targetCamY = 270;
+        addLog("Zooming onto Headquarters (Nucleus)...", "nucleus");
+      } else if (id === 'mitochondria') {
+        targetCamX = 490;
+        targetCamY = 300;
+        addLog("Focusing Power Plant (Mitochondria) - producing ATP fuel.", "mitochondria");
+      } else if (id === 'rer') {
+        targetCamX = 380;
+        targetCamY = 210;
+        addLog("Viewing primary assembly line (Rough ER) studded with ribosomes.", "rer");
+      } else if (id === 'ser') {
+        targetCamX = 280;
+        targetCamY = 230;
+        addLog("Inspecting lipid refinery (Smooth ER).", "ser");
+      } else if (id === 'golgi') {
+        targetCamX = 530;
+        targetCamY = 310;
+        addLog("Inspecting packaging & shipping unit (Golgi Apparatus).", "golgi");
+      } else if (id === 'lysosomes') {
+        targetCamX = 300;
+        targetCamY = 390;
+        addLog("Inspecting waste recycling plant (Lysosomes).", "lysosome");
+      } else if (id === 'vacuoles') {
+        targetCamX = 240;
+        targetCamY = 330;
+        addLog("Checking storage warehouses (Vacuoles).", "sys");
+      } else if (id === 'membrane') {
+        targetCamX = 400;
+        targetCamY = 120;
+        addLog("Zooming to security wall (Plasma Membrane).", "sys");
+      }
+    }
+
+    function resetCamera() {
+      playSound('zoom');
+      targetCamX = 400;
+      targetCamY = 300;
+      targetCamZoom = 1.0;
+      hudZoom.textContent = "1.0x";
+      btnZoomOut.style.display = 'none';
+      addLog("Camera reset. Displaying whole cell factory view.", "sys");
+    }
+
+    /* ----------------------------------------------------
+       PARTICLES & SIMULATED CELL PHYSICS ENGINE
+       ---------------------------------------------------- */
+    // Helper to spawn a single particle
+    function spawnParticle(x, y, tx, ty, type, speed = 1.5, color = '#00e5ff', size = 3) {
+      particles.push({
+        x, y,
+        tx, ty,
+        type,
+        speed,
+        color,
+        size,
+        progress: 0,
+        age: 0,
+        maxAge: 400 // fail safe
+      });
+    }
+
+    function spawnATP(x, y) {
+      if (currentScenario === 'crisis' && Math.random() > 0.15) return; // heavily suppress under crisis
+      
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 30 + Math.random() * 80;
+      const tx = x + Math.cos(angle) * dist;
+      const ty = y + Math.sin(angle) * dist;
+      
+      particles.push({
+        x, y,
+        tx, ty,
+        type: 'atp',
+        speed: 0.8 + Math.random() * 0.6,
+        color: '#ffab40',
+        size: 2.5 + Math.random() * 2,
+        progress: 0,
+        age: 0,
+        maxAge: 150 + Math.random() * 100
+      });
+    }
+
+    function updateSimulation() {
+      timeTicker++;
+
+      // Adjust ATP level metric based on Scenario
+      if (currentScenario === 'crisis') {
+        atpLevel = Math.max(5.0, atpLevel - 0.22);
+      } else if (currentScenario === 'protein') {
+        // High consumption
+        atpLevel = Math.max(70.0, atpLevel + (Math.random()*0.4 - 0.45));
+      } else {
+        // Normal replenishment
+        if (atpLevel < 98.0) atpLevel = Math.min(98.0, atpLevel + 0.15);
+        else atpLevel = Math.max(95.0, atpLevel - 0.05 + Math.random()*0.1);
+      }
+      document.getElementById('val_atp').textContent = Math.round(atpLevel) + '%';
+      if (atpLevel < 35.0) {
+        document.getElementById('val_atp').style.color = 'var(--rose-accent)';
+      } else {
+        document.getElementById('val_atp').style.color = 'var(--cyan-accent)';
+      }
+
+      // Spawning loops for processes
+      
+      // 1. Mitochondria ATP Spark generation
+      if (timeTicker % 20 === 0) {
+        if (currentScenario !== 'crisis') {
+          // Mito 1 (510, 210) & Mito 2 (470, 380)
+          spawnATP(510, 210);
+          spawnATP(470, 380);
+          if (Math.random() > 0.7) playSound('atp');
+        }
+      }
+
+      // 2. Transcription (Nucleus -> mRNA)
+      let transcriptionInterval = 120; // frame ticks
+      if (currentScenario === 'protein') transcriptionInterval = 40;
+      if (currentScenario === 'crisis') transcriptionInterval = 300;
+
+      if (timeTicker % transcriptionInterval === 0) {
+        // Spawn mRNA inside nucleolus (335, 255)
+        // Target coordinates: RER or cytoplasm ribosomes
+        const targetSelection = Math.random() > 0.4 ? 'rer' : 'cytoplasm';
+        let tx = 350 + (Math.random()*100 - 50);
+        let ty = 300 + (Math.random()*100 - 50);
+        
+        if (targetSelection === 'rer') {
+          // Random point along Rough ER arcs
+          const angle = -0.5 + Math.random() * 3.0;
+          const r = 58 + Math.floor(Math.random()*3)*12;
+          tx = 350 + r * Math.cos(angle);
+          ty = 270 + r * Math.sin(angle);
+        }
+        
+        spawnParticle(335, 255, tx, ty, 'mrna', 1.2, 'var(--purple-accent)', 3.5);
+        addLog("Nucleus: Coding and shipping mRNA work order.", "nucleus");
+      }
+
+      // 3. Spawning waste debris from outside the cell
+      let wasteSpawnRate = 260;
+      if (currentScenario === 'toxic') wasteSpawnRate = 90;
+      if (timeTicker % wasteSpawnRate === 0) {
+        // Spawn drift particle on the boundary wall
+        const a = Math.random() * Math.PI * 2;
+        const wx = 390 + 175 * Math.cos(a) * 1.1;
+        const wy = 300 + 175 * Math.sin(a);
+        
+        // Target is random space in cell cytoplasm
+        const ta = Math.random() * Math.PI * 2;
+        const td = Math.random() * 110;
+        const tx = 390 + td * Math.cos(ta);
+        const ty = 300 + td * Math.sin(ta);
+
+        wasteMaterials.push({
+          x: wx, y: wy,
+          tx, ty,
+          progress: 0,
+          speed: 0.3 + Math.random() * 0.4,
+          size: 4 + Math.random() * 4,
+          color: '#8d7a6e', // dusty brown waste
+          digesting: false
+        });
+        addLog("Plasma Membrane: Foreign waste particle leaked into cytoplasm.", "sys");
+      }
+
+      // 4. Smooth ER lipid refining
+      let serInterval = 180;
+      if (currentScenario === 'toxic') serInterval = 70; // Smooth ER active in toxic surge
+      if (currentScenario === 'crisis') serInterval = 450;
+      if (timeTicker % serInterval === 0) {
+        // SER is centered (300, 240)
+        // Lipid vesicle bud -> ships to membrane or golgi
+        const tx = 530 + Math.random()*20 - 10;
+        const ty = 300 + Math.random()*20 - 10;
+        spawnParticle(300, 240, tx, ty, 'lipid', 1.1, 'var(--amber-accent)', 4);
+        addLog("Smooth ER: Finished lipid molecule refinement.", "ser");
+      }
+
+      // Update and move particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.progress += 0.005 * p.speed;
+        p.age++;
+
+        if (p.type === 'atp') {
+          // ATP floats randomly
+          p.x += Math.sin(timeTicker * 0.05 + p.size) * 0.3;
+          p.y += Math.cos(timeTicker * 0.03 + p.progress) * 0.3;
+          // Slowly move to target
+          p.x += (p.tx - p.x) * 0.01;
+          p.y += (p.ty - p.y) * 0.01;
+          
+          if (p.age >= p.maxAge) {
+            particles.splice(i, 1);
+            continue;
+          }
+        } else {
+          // Straight line gliding
+          p.x += (p.tx - p.x) * 0.012 * p.speed;
+          p.y += (p.ty - p.y) * 0.012 * p.speed;
+          
+          const d = Math.hypot(p.tx - p.x, p.ty - p.y);
+          if (d < 3 || p.age >= p.maxAge) {
+            // Particle reached target destination!
+            triggerParticleEvent(p);
+            particles.splice(i, 1);
+            continue;
+          }
+        }
+      }
+
+      // Update waste materials & lysosome homing
+      // Lysosome centers: Lys 1 (290, 215), Lys 2 (315, 395)
+      for (let i = wasteMaterials.length - 1; i >= 0; i--) {
+        const w = wasteMaterials[i];
+        
+        // Move towards target in cell
+        if (!w.digesting) {
+          w.x += (w.tx - w.x) * 0.005 * w.speed;
+          w.y += (w.ty - w.y) * 0.005 * w.speed;
+          
+          // Check if close to a lysosome
+          const d1 = Math.hypot(w.x - 290, w.y - 215);
+          const d2 = Math.hypot(w.x - 315, w.y - 395);
+          
+          let targetLys = null;
+          if (d1 < 100) targetLys = { x: 290, y: 215 };
+          else if (d2 < 100) targetLys = { x: 315, y: 395 };
+          
+          if (targetLys) {
+            // Lysosome homes in on it!
+            w.tx = targetLys.x;
+            w.ty = targetLys.y;
+            w.digesting = true;
+            w.speed = 1.8; // accelerate into lysosome
+          }
+        } else {
+          // moving directly into lysosome center
+          w.x += (w.tx - w.x) * 0.03 * w.speed;
+          w.y += (w.ty - w.y) * 0.03 * w.speed;
+          
+          const distToCenter = Math.hypot(w.x - w.tx, w.y - w.ty);
+          if (distToCenter < 4) {
+            // digested!
+            wasteRecycled++;
+            document.getElementById('val_waste').textContent = wasteRecycled;
+            playSound('digest');
+            addLog("Lysosome: Waste particle decomposed by enzymes.", "lysosome");
+            wasteMaterials.splice(i, 1);
+            continue;
+          }
+        }
+      }
+
+      // Update HUD count
+      hudActiveCount.textContent = `ATP Sparks: ${particles.filter(p=>p.type==='atp').length} | Vesicles: ${particles.filter(p=>p.type!=='atp').length}`;
+    }
+
+    function triggerParticleEvent(p) {
+      if (p.type === 'mrna') {
+        // Docked mRNA triggers Protein translation vesicle on RER
+        // Spawn RER vesicle heading to Golgi Stack (530, 300)
+        playSound('fusion');
+        spawnParticle(p.x, p.y, 515, 290, 'vesicle', 1.0, 'var(--green-accent)', 5.0);
+        addLog("Rough ER: Ribosome completed translation. Shipping vesicle to Golgi.", "rer");
+      } 
+      else if (p.type === 'vesicle') {
+        // RER vesicle reaches Golgi
+        // Golgi processes, tags, and ships it to membrane (400, 130) or lysosome
+        playSound('fusion');
+        addLog("Golgi Complex: Processing and sorting finished proteins.", "golgi");
+        
+        setTimeout(() => {
+          if (currentScenario === 'crisis') return; // halts packaging
+          
+          // Shipping destination
+          const destSelect = Math.random() > 0.35 ? 'membrane' : 'lysosome';
+          if (destSelect === 'membrane') {
+            // Ship vesicle to cell boundary exocytosis
+            spawnParticle(530, 300, 480, 150, 'export_vesicle', 1.2, 'var(--cyan-accent)', 5.5);
+            addLog("Golgi Complex: Dispatched protein shipping vesicle to Cell Membrane.", "golgi");
+          } else {
+            // Ship to lysosome
+            spawnParticle(530, 300, 315, 395, 'enzyme_vesicle', 1.1, 'var(--rose-accent)', 4.0);
+            addLog("Golgi Complex: Delivering enzymes to Lysosome recycling center.", "golgi");
+          }
+        }, 800);
+      } 
+      else if (p.type === 'export_vesicle') {
+        // Exocytosis at Plasma Membrane
+        playSound('fusion');
+        proteinsShipped++;
+        document.getElementById('val_proteins').textContent = proteinsShipped;
+        addLog("Plasma Membrane: Exocytosis successful. Protein product exported.", "sys");
+        
+        // Spawn tiny decorative fading sparks outside
+        for (let s = 0; s < 5; s++) {
+          spawnATP(p.x, p.y);
+        }
+      }
+      else if (p.type === 'enzyme_vesicle') {
+        // Reached lysosome
+        playSound('fusion');
+        addLog("Lysosome: Enzymes absorbed. Recycling capacity optimized.", "lysosome");
+      }
+      else if (p.type === 'lipid') {
+        // SER Lipid reaches Golgi or membrane
+        playSound('fusion');
+        lipidsRefined++;
+        document.getElementById('val_lipids').textContent = lipidsRefined;
+        addLog("Golgi Complex: Packaging lipids for cell membrane maintenance.", "golgi");
+      }
+    }
+
+    /* ----------------------------------------------------
+       CANVAS RENDERING LOGIC
+       ---------------------------------------------------- */
+    function drawCell() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Camera smooth follow
+      camX += (targetCamX - camX) * 0.08;
+      camY += (targetCamY - camY) * 0.08;
+      camZoom += (targetCamZoom - camZoom) * 0.08;
+
+      ctx.save();
+      // Center and scale camera
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(camZoom, camZoom);
+      ctx.translate(-camX, -camY);
+
+      // 1. DRAW CELL MEMBRANE BACKING (CYTOPLASM LIQUID FLUID)
+      ctx.save();
+      ctx.beginPath();
+      const points = 45;
+      for (let i = 0; i < points; i++) {
+        const a = (i * Math.PI * 2) / points;
+        const wave = Math.sin(a * 7 + timeTicker * 0.015) * 4 + Math.cos(a * 4) * 6;
+        const rx = 185 + wave;
+        const ry = 165 + wave;
+        const x = 390 + rx * Math.cos(a) * 1.12;
+        const y = 300 + ry * Math.sin(a);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      
+      const cytoGrad = ctx.createRadialGradient(380, 270, 50, 400, 300, 230);
+      cytoGrad.addColorStop(0, 'rgba(10, 20, 55, 0.45)');
+      cytoGrad.addColorStop(0.6, 'rgba(6, 10, 32, 0.82)');
+      cytoGrad.addColorStop(1, 'rgba(3, 4, 15, 0.98)');
+      ctx.fillStyle = cytoGrad;
+      ctx.fill();
+      
+      // Selectively Permeable Membrane Border Outline
+      ctx.strokeStyle = selectedOrganelleId === 'membrane' || hoveredOrganelle === 'membrane' ? 'var(--cyan-accent)' : 'rgba(0, 229, 255, 0.45)';
+      ctx.lineWidth = selectedOrganelleId === 'membrane' || hoveredOrganelle === 'membrane' ? 6 : 2.5;
+      
+      // Shadow glow for selected membrane
+      if (selectedOrganelleId === 'membrane') {
+        ctx.shadowColor = 'var(--cyan-accent)';
+        ctx.shadowBlur = 18;
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // Draw Cytoplasm labeling hotspot if hovered
+      if (hoveredOrganelle === 'cytoplasm') {
+        ctx.font = '10px JetBrains Mono';
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.fillText("CYTOSOL / CYTOPLASM (Fluid Medium)", 320, 120);
+      }
+
+      // 2. NUCLEUS (HEADQUARTERS)
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(350, 270, 48, 0, Math.PI * 2);
+      
+      const nucGrad = ctx.createRadialGradient(340, 260, 8, 350, 270, 48);
+      nucGrad.addColorStop(0, 'rgba(186, 49, 206, 0.7)');
+      nucGrad.addColorStop(0.85, 'rgba(110, 15, 125, 0.95)');
+      nucGrad.addColorStop(1, 'rgba(64, 5, 78, 1)');
+      ctx.fillStyle = nucGrad;
+      ctx.fill();
+
+      // Outer nuclear envelope with pores (dashed)
+      ctx.beginPath();
+      ctx.arc(350, 270, 51, 0, Math.PI * 2);
+      ctx.strokeStyle = selectedOrganelleId === 'nucleus' || hoveredOrganelle === 'nucleus' ? 'var(--purple-accent)' : 'rgba(213, 0, 249, 0.5)';
+      ctx.lineWidth = selectedOrganelleId === 'nucleus' || hoveredOrganelle === 'nucleus' ? 4 : 2;
+      ctx.setLineDash([7, 4.5]);
+      if (selectedOrganelleId === 'nucleus') {
+        ctx.shadowColor = 'var(--purple-accent)';
+        ctx.shadowBlur = 15;
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      // Draw Nucleolus (inside nucleus)
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(335, 255, 14, 0, Math.PI * 2);
+      const nucleolusGrad = ctx.createRadialGradient(332, 252, 2, 335, 255, 14);
+      nucleolusGrad.addColorStop(0, 'var(--rose-accent)');
+      nucleolusGrad.addColorStop(1, '#a3003b');
+      ctx.fillStyle = nucleolusGrad;
+      ctx.fill();
+      ctx.restore();
+
+      // Squiggly DNA/Chromatin threads
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(320, 280);
+      ctx.bezierCurveTo(325, 290, 335, 275, 345, 285);
+      ctx.bezierCurveTo(355, 295, 360, 260, 370, 275);
+      ctx.bezierCurveTo(378, 285, 382, 292, 390, 280);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(330, 240);
+      ctx.bezierCurveTo(345, 230, 355, 242, 365, 235);
+      ctx.stroke();
+      ctx.restore();
+
+      // 3. ROUGH ENDOPLASMIC RETICULUM (RER - ASSEMBLY LINE)
+      ctx.save();
+      ctx.strokeStyle = selectedOrganelleId === 'rer' || hoveredOrganelle === 'rer' ? 'var(--green-accent)' : 'rgba(0, 230, 118, 0.45)';
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      if (selectedOrganelleId === 'rer') {
+        ctx.shadowColor = 'var(--green-accent)';
+        ctx.shadowBlur = 15;
+      }
+
+      // Draw concentric folding ribbons around the nucleus
+      const rerArcs = [
+        { r: 58, start: -0.7, end: 2.8 },
+        { r: 70, start: -0.5, end: 2.5 },
+        { r: 82, start: -0.3, end: 2.1 }
+      ];
+
+      rerArcs.forEach(arc => {
+        ctx.beginPath();
+        for (let a = arc.start; a <= arc.end; a += 0.05) {
+          const wiggle = Math.sin(a * 14 + timeTicker * 0.015) * 1.8;
+          const x = 350 + (arc.r + wiggle) * Math.cos(a);
+          const y = 270 + (arc.r + wiggle) * Math.sin(a);
+          if (a === arc.start) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      });
+      ctx.restore();
+
+      // Ribosomes Studding RER (red/cyan dots along the arcs)
+      ctx.save();
+      ctx.fillStyle = selectedOrganelleId === 'rer' || hoveredOrganelle === 'rer' ? 'var(--cyan-accent)' : 'rgba(255, 82, 82, 0.9)';
+      rerArcs.forEach(arc => {
+        for (let a = arc.start + 0.1; a <= arc.end - 0.1; a += 0.28) {
+          const wiggle = Math.sin(a * 14) * 1.8;
+          const x = 350 + (arc.r + wiggle + 3.2) * Math.cos(a);
+          const y = 270 + (arc.r + wiggle + 3.2) * Math.sin(a);
+          ctx.beginPath();
+          ctx.arc(x, y, 1.6, 0, Math.PI*2);
+          ctx.fill();
+        }
+      });
+      ctx.restore();
+
+      // 4. SMOOTH ENDOPLASMIC RETICULUM (SER - LIPID REFINERY)
+      // Tubular loop structures extending from angle 2.8 to 4.2
+      ctx.save();
+      ctx.strokeStyle = selectedOrganelleId === 'ser' || hoveredOrganelle === 'ser' ? 'var(--amber-accent)' : 'rgba(255, 171, 64, 0.45)';
+      ctx.lineWidth = 6.5;
+      ctx.lineCap = 'round';
+      if (selectedOrganelleId === 'ser') {
+        ctx.shadowColor = 'var(--amber-accent)';
+        ctx.shadowBlur = 12;
+      }
+      
+      const serLoops = [
+        { r: 58, start: 2.9, end: 4.3 },
+        { r: 71, start: 3.1, end: 4.1 }
+      ];
+
+      serLoops.forEach(loop => {
+        ctx.beginPath();
+        for (let a = loop.start; a <= loop.end; a += 0.08) {
+          const w = Math.cos(a * 18 + timeTicker * 0.01) * 2.2;
+          const x = 350 + (loop.r + w) * Math.cos(a);
+          const y = 270 + (loop.r + w) * Math.sin(a);
+          if (a === loop.start) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      });
+      
+      // Individual smooth tubes looping out
+      ctx.beginPath();
+      ctx.arc(280, 240, 11, -Math.PI/2, Math.PI/2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(295, 218, 9, 0, Math.PI);
+      ctx.stroke();
+      ctx.restore();
+
+      // 5. MITOCHONDRIA (POWER PLANT)
+      // Double membrane, cristae inside. We draw 2 mitochondria.
+      drawMitochondrion(ctx, 500, 205, 0.5, 0.95);
+      drawMitochondrion(ctx, 475, 385, -0.7, 1.05);
+
+      // 6. GOLGI APPARATUS (PACKAGING & SHIPPING)
+      // Stack of curved, flattened membrane sacs centered at (530, 305)
+      ctx.save();
+      ctx.translate(530, 305);
+      ctx.rotate(-0.35);
+      ctx.strokeStyle = selectedOrganelleId === 'golgi' || hoveredOrganelle === 'golgi' ? 'var(--cyan-accent)' : 'rgba(0, 229, 255, 0.55)';
+      ctx.lineWidth = 5.2;
+      ctx.lineCap = 'round';
+      if (selectedOrganelleId === 'golgi') {
+        ctx.shadowColor = 'var(--cyan-accent)';
+        ctx.shadowBlur = 15;
+      }
+      
+      // Draw 5 stacked cisternae curves
+      for (let d = -16; d <= 16; d += 8) {
+        ctx.beginPath();
+        for (let ty = -24; ty <= 24; ty += 3) {
+          // Curved shape
+          const curveFactor = Math.cos(ty * 0.055) * 8.5 - d * 0.12;
+          const tx = d + curveFactor;
+          if (ty === -24) ctx.moveTo(tx, ty);
+          else ctx.lineTo(tx, ty);
+        }
+        ctx.stroke();
+      }
+      // Budding vesicles at edge of Golgi
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.6)';
+      ctx.beginPath();
+      ctx.arc(26, -18, 3.5, 0, Math.PI*2);
+      ctx.arc(22, 16, 4.0, 0, Math.PI*2);
+      ctx.arc(-24, 0, 3.0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+
+      // 7. LYSOSOMES (RECYCLING CENTER)
+      // Small vacuoles containing enzymes. Lys 1 (290, 215), Lys 2 (315, 395)
+      drawLysosome(ctx, 290, 215, 12.5);
+      drawLysosome(ctx, 315, 395, 14.0);
+
+      // 8. VACUOLES (STORAGE WAREHOUSE)
+      // Water-filled bubble centered at (240, 330)
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(240, 330, 21, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.06)';
+      ctx.fill();
+      ctx.strokeStyle = selectedOrganelleId === 'vacuoles' || hoveredOrganelle === 'vacuoles' ? 'var(--cyan-accent)' : 'rgba(0, 229, 255, 0.38)';
+      ctx.lineWidth = selectedOrganelleId === 'vacuoles' || hoveredOrganelle === 'vacuoles' ? 3.5 : 1.5;
+      if (selectedOrganelleId === 'vacuoles') {
+        ctx.shadowColor = 'var(--cyan-accent)';
+        ctx.shadowBlur = 10;
+      }
+      ctx.stroke();
+      
+      // Floating storage bubbles inside
+      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      ctx.beginPath();
+      ctx.arc(236, 324, 3, 0, Math.PI*2);
+      ctx.arc(244, 336, 4.5, 0, Math.PI*2);
+      ctx.arc(248, 320, 2.5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+
+      // 9. RIBOSOMES (FREE-FLOATING WORKERS)
+      // Scattered tiny dots
+      ctx.save();
+      ctx.fillStyle = selectedOrganelleId === 'rer' || hoveredOrganelle === 'rer' ? 'var(--cyan-accent)' : 'rgba(255, 255, 255, 0.45)';
+      const riboRadius = selectedOrganelleId === 'rer' || hoveredOrganelle === 'rer' ? 2.2 : 1.3;
+      
+      // Deterministic coordinates using Math.sin to avoid re-generating positions
+      for (let i = 0; i < 22; i++) {
+        const rx = 350 + Math.sin(i * 328.7) * 145;
+        const ry = 300 + Math.cos(i * 123.4) * 115;
+        
+        // Ensure they aren't inside the nucleus (distance to 350,270 > 55)
+        const dNuc = Math.hypot(rx - 350, ry - 270);
+        if (dNuc > 58) {
+          ctx.beginPath();
+          ctx.arc(rx, ry, riboRadius, 0, Math.PI*2);
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+
+      // 10. CELL FACTORY ACTIVITY PARTICLE STREAM
+      // Drawing all active cellular processes running at the same time!
+      particles.forEach(p => {
+        ctx.save();
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = p.type === 'atp' ? 6 : 10;
+        ctx.fillStyle = p.color;
+        
+        if (p.type === 'atp') {
+          // Spark star
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+          ctx.fill();
+        } else if (p.type === 'mrna') {
+          // Squiggly mRNA strand
+          ctx.strokeStyle = p.color;
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(p.x - 4, p.y);
+          ctx.quadraticCurveTo(p.x - 2, p.y + 3, p.x, p.y);
+          ctx.quadraticCurveTo(p.x + 2, p.y - 3, p.x + 4, p.y);
+          ctx.stroke();
+        } else {
+          // Vesicles (circles with outer boundaries)
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+        ctx.restore();
+      });
+
+      // Draw waste debris particles
+      wasteMaterials.forEach(w => {
+        ctx.save();
+        ctx.fillStyle = w.color;
+        ctx.beginPath();
+        // irregular waste shape (triangle/diamond)
+        ctx.moveTo(w.x, w.y - w.size);
+        ctx.lineTo(w.x + w.size, w.y);
+        ctx.lineTo(w.x, w.y + w.size);
+        ctx.lineTo(w.x - w.size, w.y);
+        ctx.closePath();
+        ctx.fill();
+        
+        if (w.digesting) {
+          // Draw connecting chemical warning line from lysosome to waste
+          ctx.strokeStyle = 'rgba(255, 42, 109, 0.28)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(w.x, w.y);
+          ctx.lineTo(w.tx, w.ty);
+          ctx.stroke();
+        }
+        ctx.restore();
+      });
+
+      // 11. FACTORY ANALOGY LABELS OVERLAYS (Toggled on/off)
+      if (isAnalogyOverlay) {
+        drawFactoryLabel("HEADQUARTERS (Nucleus)", 350, 325, 'var(--purple-accent)');
+        drawFactoryLabel("POWER PLANT (Mitochondria)", 480, 442, '#ff6e40');
+        drawFactoryLabel("ASSEMBLY LINE (Rough ER)", 465, 172, 'var(--green-accent)');
+        drawFactoryLabel("LIPID REFINERY (Smooth ER)", 232, 206, 'var(--amber-accent)');
+        drawFactoryLabel("SHIPPING & PACKAGING (Golgi)", 540, 250, 'var(--cyan-accent)');
+        drawFactoryLabel("RECYCLING PLANT (Lysosomes)", 310, 445, 'var(--rose-accent)');
+        drawFactoryLabel("STORAGE WAREHOUSE (Vacuoles)", 218, 362, 'rgba(0, 229, 255, 0.8)');
+        drawFactoryLabel("SECURITY GATES (Plasma Membrane)", 400, 100, 'rgba(0, 229, 255, 0.85)');
+      }
+
+      ctx.restore(); // restore camera transformations
+    }
+
+    function drawMitochondrion(ctx, cx, cy, angle, scale) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle);
+      ctx.scale(scale, scale);
+      
+      const isSelected = selectedOrganelleId === 'mitochondria' || hoveredOrganelle === 'mitochondria';
+      
+      // Outer membrane
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 31, 15, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 110, 64, 0.16)';
+      ctx.fill();
+      ctx.strokeStyle = isSelected ? '#ff6e40' : 'rgba(255, 110, 64, 0.6)';
+      ctx.lineWidth = isSelected ? 3.5 : 1.5;
+      if (selectedOrganelleId === 'mitochondria') {
+        ctx.shadowColor = '#ff6e40';
+        ctx.shadowBlur = 12;
+      }
+      ctx.stroke();
+      
+      // Inner cristae membrane folds
+      ctx.beginPath();
+      ctx.moveTo(-25, 0);
+      ctx.bezierCurveTo(-20, -10, -16, 10, -12, 0);
+      ctx.bezierCurveTo(-8, -10, -4, 10, 0, 0);
+      ctx.bezierCurveTo(4, -10, 8, 10, 12, 0);
+      ctx.bezierCurveTo(16, -10, 20, 10, 25, 0);
+      ctx.strokeStyle = '#ffab40';
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+      
+      ctx.restore();
+    }
+
+    function drawLysosome(ctx, cx, cy, radius) {
+      const isSelected = selectedOrganelleId === 'lysosomes' || hoveredOrganelle === 'lysosomes';
+      
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 42, 109, 0.16)';
+      ctx.fill();
+      ctx.strokeStyle = isSelected ? 'var(--rose-accent)' : 'rgba(255, 42, 109, 0.6)';
+      ctx.lineWidth = isSelected ? 3.5 : 1.5;
+      if (selectedOrganelleId === 'lysosomes') {
+        ctx.shadowColor = 'var(--rose-accent)';
+        ctx.shadowBlur = 12;
+      }
+      ctx.stroke();
+      
+      // Enzymes bubbles pulsing inside
+      ctx.fillStyle = 'rgba(255, 82, 82, 0.7)';
+      for (let i = 0; i < 3; i++) {
+        const ox = Math.sin(timeTicker * 0.04 + i * 2) * (radius * 0.4);
+        const oy = Math.cos(timeTicker * 0.03 + i * 5) * (radius * 0.4);
+        ctx.beginPath();
+        ctx.arc(cx + ox, cy + oy, 2.2, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function drawFactoryLabel(text, x, y, color) {
+      ctx.save();
+      ctx.font = '8.5px JetBrains Mono';
+      ctx.fillStyle = '#fff';
+      
+      // Label container background
+      const width = ctx.measureText(text).width + 12;
+      ctx.fillStyle = 'rgba(4, 5, 12, 0.88)';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      
+      ctx.beginPath();
+      ctx.roundRect(x - width/2, y - 9, width, 18, 4);
+      ctx.fill();
+      ctx.stroke();
+      
+      // Text
+      ctx.fillStyle = color;
+      ctx.textAlign = 'center';
+      ctx.fillText(text, x, y + 3);
+      ctx.restore();
+    }
+
+    /* ----------------------------------------------------
+       CLICK & HOVER BOUNDS TESTING
+       ---------------------------------------------------- */
+    function checkMouseOverOrganelle(e) {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+      const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+      
+      // Map to camera space coordinates (world coordinates)
+      const worldX = camX + (mouseX - canvas.width/2) / camZoom;
+      const worldY = camY + (mouseY - canvas.height/2) / camZoom;
+
+      // Distance checking helper
+      const dNuc = Math.hypot(worldX - 350, worldY - 270);
+      const dGolgi = Math.hypot(worldX - 530, worldY - 305);
+      const dMito1 = Math.hypot(worldX - 500, worldY - 205);
+      const dMito2 = Math.hypot(worldX - 475, worldY - 385);
+      const dLys1 = Math.hypot(worldX - 290, worldY - 215);
+      const dLys2 = Math.hypot(worldX - 315, worldY - 395);
+      const dVac = Math.hypot(worldX - 240, worldY - 330);
+      const dCenter = Math.hypot(worldX - 390, worldY - 300);
+
+      // 1. Nucleus
+      if (dNuc < 50) {
+        return 'nucleus';
+      }
+      // 2. Rough ER wrapping (radius 54-85, angle -1.1 to 2.8)
+      const nAngle = Math.atan2(worldY - 270, worldX - 350);
+      if (dNuc >= 50 && dNuc <= 84 && nAngle >= -1.2 && nAngle <= 2.8) {
+        return 'rer';
+      }
+      // 3. Smooth ER wrapping (radius 50-84, angle 2.8 to 4.2)
+      if (dNuc >= 50 && dNuc <= 84 && (nAngle > 2.8 || nAngle < -1.2)) {
+        return 'ser';
+      }
+      // 4. Golgi Stack
+      if (dGolgi < 38) {
+        return 'golgi';
+      }
+      // 5. Mitochondria
+      if (dMito1 < 28 || dMito2 < 28) {
+        return 'mitochondria';
+      }
+      // 6. Lysosomes
+      if (dLys1 < 14 || dLys2 < 14) {
+        return 'lysosomes';
+      }
+      // 7. Vacuole
+      if (dVac < 24) {
+        return 'vacuoles';
+      }
+      // 8. Membrane Border (thick band)
+      if (dCenter >= 170 && dCenter <= 200) {
+        return 'membrane';
+      }
+      // 9. Cytoplasm fluid
+      if (dCenter < 170) {
+        return 'cytoplasm';
+      }
+
+      return null;
+    }
+
+    function handleMouseMove(e) {
+      const hit = checkMouseOverOrganelle(e);
+      if (hit !== hoveredOrganelle) {
+        hoveredOrganelle = hit;
+        
+        // Pointer cursor change
+        if (hit && hit !== 'cytoplasm') {
+          canvas.style.cursor = 'pointer';
+        } else {
+          canvas.style.cursor = 'crosshair';
+        }
+      }
+    }
+
+    function handleCanvasClick(e) {
+      const hit = checkMouseOverOrganelle(e);
+      if (hit && hit !== 'cytoplasm') {
+        selectOrganelle(hit);
+      } else {
+        // click empty background to zoom out
+        closeInspectorDrawer();
+      }
+    }
+
+    /* ----------------------------------------------------
+       INITIALIZATION & RUNTIME LOOP
+       ---------------------------------------------------- */
+    function animate() {
+      updateSimulation();
+      drawCell();
+      requestAnimationFrame(animate);
+    }
+
+    // Attach interaction listeners
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('click', handleCanvasClick);
+    
+    // Initialize Simulation
+    setScenario('normal');
+    addLog("Eukaryotic Cell Factory initialized. All organelles running independently.", "sys");
+    addLog("Ready for student interaction. Click any part to inspect.", "sys");
+    
+    // Start loop
+    animate();
+  </script>
+</body>
+</html>
