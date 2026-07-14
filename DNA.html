@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STCpedia Lab - DNA & Gene Structure</title>
+  
+  <!-- Google Fonts for premium UI typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #020617;
+      --bg-panel: rgba(15, 23, 42, 0.75);
+      --bg-card: rgba(30, 41, 59, 0.5);
+      --border-color: rgba(16, 185, 129, 0.2);
+      --border-glow: 0 0 15px rgba(16, 185, 129, 0.15);
+      
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      
+      --green-accent: #10b981;
+      --green-glow: rgba(16, 185, 129, 0.4);
+      --cyan-accent: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.4);
+      --rose-accent: #f43f5e;
+      --rose-glow: rgba(244, 63, 94, 0.4);
+      --amber-accent: #f59e0b;
+      --amber-glow: rgba(245, 158, 11, 0.4);
+      --purple-accent: #a855f7;
+      --purple-glow: rgba(168, 85, 247, 0.4);
+      
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(6, 78, 59, 0.4) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(17, 24, 39, 0.6) 0px, transparent 50%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header Styling */
+    header {
+      background: rgba(3, 7, 18, 0.9);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      z-index: 10;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--green-accent), var(--cyan-accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #000;
+      font-size: 1.1rem;
+      box-shadow: 0 0 15px var(--green-glow);
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(to right, #fff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-badge {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--green-accent);
+      color: var(--green-accent);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: var(--border-glow);
+    }
+
+    /* Main Content Layout */
+    .main-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 310px 1fr 340px;
+      gap: 15px;
+      padding: 15px;
+      height: calc(100vh - 60px);
+    }
+
+    /* Panels Base */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--green-accent);
+      text-transform: uppercase;
+    }
+
+    .panel-content {
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Viewport Center Panel */
+    .viewport-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #010307;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.95);
+    }
+
+    #viewportCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: transparent;
+      cursor: crosshair;
+    }
+
+    /* HUD Elements */
+    .hud-element {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      padding: 6px 12px;
+      border-radius: 6px;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+    }
+
+    .hud-top-left { top: 15px; left: 15px; border-left: 3px solid var(--green-accent); color: #fff; font-weight: bold; }
+    .hud-top-right { top: 15px; right: 15px; text-align: right; }
+    .hud-bottom-left { bottom: 15px; left: 15px; }
+
+    /* Control Sections */
+    .control-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .slider-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+    }
+
+    .slider-val {
+      color: var(--green-accent);
+      font-family: var(--font-mono);
+      font-weight: bold;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #1e293b;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--green-accent);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--green-glow);
+      transition: background 0.15s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      background: #fff;
+    }
+
+    /* Mode button list */
+    .btn-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mode-btn {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mode-btn:hover {
+      background: rgba(16, 185, 129, 0.05);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .mode-btn.active {
+      background: rgba(16, 185, 129, 0.18);
+      border-color: var(--green-accent);
+      color: #fff;
+      box-shadow: var(--border-glow);
+    }
+
+    .btn-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+
+    .mode-btn.active .btn-dot {
+      background: var(--green-accent);
+      box-shadow: 0 0 8px var(--green-accent);
+    }
+
+    /* Toggles */
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .checkbox-row input {
+      display: none;
+    }
+
+    .check-custom {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 4px;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .checkbox-row input:checked + .check-custom {
+      border-color: var(--green-accent);
+      background: var(--green-accent);
+    }
+
+    .checkbox-row input:checked + .check-custom::after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 1px;
+      width: 4px;
+      height: 8px;
+      border: solid #000;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    /* Tabbed Sidebar Panel */
+    .tab-header {
+      display: flex;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+    }
+
+    .tab-btn.active {
+      color: var(--green-accent);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--green-accent);
+      box-shadow: 0 0 8px var(--green-glow);
+    }
+
+    .tab-panel {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .tab-panel.active {
+      display: flex;
+    }
+
+    /* Learn tab styling */
+    .concept-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-left: 3px solid var(--green-accent);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.85rem;
+      line-height: 1.45;
+    }
+
+    .concept-card.dna { border-left-color: var(--green-accent); }
+    .concept-card.pairing { border-left-color: var(--cyan-accent); }
+    .concept-card.gene { border-left-color: var(--amber-accent); }
+    .concept-card.packaging { border-left-color: var(--purple-accent); }
+
+    .concept-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+      color: #fff;
+    }
+
+    /* Alert / Tip card */
+    .tip-card {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.15);
+      border-left: 3px solid var(--green-accent);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+
+    .tip-title {
+      font-weight: 700;
+      color: var(--green-accent);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Quiz Tab Styling */
+    .quiz-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .quiz-score-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .quiz-progress-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .quiz-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.2s;
+    }
+
+    .quiz-dot.active {
+      border-color: var(--green-accent);
+      background: rgba(16, 185, 129, 0.2);
+      box-shadow: 0 0 5px var(--green-accent);
+    }
+
+    .quiz-dot.correct {
+      background: var(--green-accent);
+      border-color: var(--green-accent);
+      box-shadow: 0 0 5px var(--green-accent);
+    }
+
+    .quiz-dot.wrong {
+      background: #ef4444;
+      border-color: #ef4444;
+      box-shadow: 0 0 5px #ef4444;
+    }
+
+    .question-box {
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: #fff;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .option-btn {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .option-btn.correct {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: var(--green-accent);
+      color: var(--green-accent);
+      font-weight: 600;
+    }
+
+    .option-btn.wrong {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    .explanation-box {
+      background: rgba(16, 185, 129, 0.04);
+      border: 1px solid rgba(16, 185, 129, 0.08);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: var(--text-main);
+      display: none;
+    }
+
+    .explanation-box p {
+      margin-bottom: 6px;
+    }
+
+    .explanation-box strong {
+      color: var(--green-accent);
+    }
+
+    .next-quiz-btn {
+      background: linear-gradient(135deg, var(--green-accent), #059669);
+      color: #000;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      display: none;
+    }
+
+    .next-quiz-btn:hover {
+      box-shadow: 0 0 12px var(--green-glow);
+    }
+
+    /* Warning for smaller devices */
+    .mobile-warning {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #020617;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .mobile-warning p {
+      font-size: 1.1rem;
+      color: var(--amber-accent);
+      margin-top: 15px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 900px) {
+      .mobile-warning {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile warning layout -->
+  <div class="mobile-warning">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--amber-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+      <line x1="8" y1="21" x2="16" y2="21"></line>
+      <line x1="12" y1="17" x2="12" y2="21"></line>
+    </svg>
+    <p>Please rotate your device to landscape mode or use a larger screen to interact with the DNA Lab.</p>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">D</div>
+      <div>
+        <h1>STCpedia Lab - DNA Structure & Gene Map</h1>
+      </div>
+    </div>
+    <div class="nav-badge">Grade 9 CBSE / STC</div>
+  </header>
+
+  <!-- Workspace Grid -->
+  <div class="main-container">
+    
+    <!-- Controls (Left Sidebar) -->
+    <div class="glass-panel">
+      <div class="panel-header">
+        <div class="panel-title">Laboratory Controls</div>
+      </div>
+      <div class="panel-content">
+        
+        <!-- View Focus Modes -->
+        <div class="control-section">
+          <div class="control-label">View Selection</div>
+          <div class="btn-list">
+            <button class="mode-btn active" onclick="setFocusMode('overview')">
+              <span class="btn-dot"></span> Whole Strand Overview
+            </button>
+            <button class="mode-btn" onclick="setFocusMode('chromatid')">
+              <span class="btn-dot"></span> Focus: Chromatid End
+            </button>
+            <button class="mode-btn" onclick="setFocusMode('doublehelix')">
+              <span class="btn-dot"></span> Focus: DNA Double Helix
+            </button>
+          </div>
+        </div>
+
+        <!-- Interactive Gene Target List -->
+        <div class="control-section">
+          <div class="control-label">Inspect Specific Genes</div>
+          <div class="btn-list">
+            <button class="mode-btn" onclick="triggerGeneHover(0)">
+              <span class="btn-dot" style="background-color: var(--cyan-accent)"></span> Gene 1: Eye Color
+            </button>
+            <button class="mode-btn" onclick="triggerGeneHover(1)">
+              <span class="btn-dot" style="background-color: var(--amber-accent)"></span> Gene 2: Height Code
+            </button>
+            <button class="mode-btn" onclick="triggerGeneHover(2)">
+              <span class="btn-dot" style="background-color: var(--purple-accent)"></span> Gene 3: Blood Group
+            </button>
+          </div>
+        </div>
+
+        <!-- Helix Speed -->
+        <div class="control-section">
+          <div class="control-label">DNA Movement</div>
+          <div class="slider-row">
+            <div class="slider-info">
+              <span>Rotation Speed</span>
+              <span id="speedVal" class="slider-val">1.0x</span>
+            </div>
+            <input type="range" id="speedSlider" min="0" max="2" step="0.1" value="1.0" oninput="updateSpeed()">
+          </div>
+        </div>
+
+        <!-- UI Overlays toggles -->
+        <div class="control-section">
+          <div class="control-label">Visual Aids</div>
+          <label class="checkbox-row">
+            <input type="checkbox" id="toggleLabels" checked onchange="toggleLabels()">
+            <span class="check-custom"></span>
+            <span>Show Labels & Boundaries</span>
+          </label>
+          <label class="checkbox-row" style="margin-top: 6px;">
+            <input type="checkbox" id="toggleColors" checked onchange="toggleColors()">
+            <span class="check-custom"></span>
+            <span>Show Complementary Colors</span>
+          </label>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Interactive Canvas Viewport (Center) -->
+    <div class="viewport-container glass-panel">
+      <div class="hud-element hud-top-left" id="hudState">OVERVIEW ACTIVE</div>
+      <div class="hud-element hud-top-right">
+        DNA MODEL: B-DNA SHAPE<br>
+        BASE MATCH: COMPLEMENTARY
+      </div>
+      <div class="hud-element hud-bottom-left" id="bottomHUD">Hover your mouse pointer over the DNA strand to magnify its genes.</div>
+      
+      <canvas id="viewportCanvas" width="800" height="600"></canvas>
+    </div>
+
+    <!-- Educational & Quiz Panel (Right Sidebar) -->
+    <div class="glass-panel">
+      <!-- Tab Controls -->
+      <div class="tab-header">
+        <button class="tab-btn active" onclick="switchTab('learn')">Learn</button>
+        <button class="tab-btn" onclick="switchTab('quiz')">Interactive Quiz</button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="panel-content" style="padding-top: 15px;">
+        
+        <!-- LEARN TAB -->
+        <div id="tab-learn" class="tab-panel active">
+          
+          <div class="tip-card">
+            <div class="tip-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              Did You Know?
+            </div>
+            If you stretched all the DNA from a single human cell in a straight line, it would be about <strong>2 meters long</strong>! It fits in the tiny cell nucleus because it coils around histone beads into chromatin, which tightly folds into chromosomes.
+          </div>
+
+          <div class="concept-card packaging">
+            <div class="concept-title">1. Chromosomes and DNA</div>
+            A chromosome is a highly coiled package of DNA. On the left end of the simulation, you can see how a <strong>chromatid</strong> unwinds, loops around histone proteins, and stretches out into a long DNA double helix.
+          </div>
+
+          <div class="concept-card dna">
+            <div class="concept-title">2. The Double Helix Structure</div>
+            DNA is structured as a twisted ladder (a double helix). The two sides of the ladder are the <strong>sugar-phosphate backbones</strong>, and the rungs are made of <strong>nitrogenous base pairs</strong>.
+          </div>
+
+          <div class="concept-card pairing">
+            <div class="concept-title">3. Complementary Base Pairing</div>
+            Bases follow strict pairing rules:
+            <ul>
+              <li><strong style="color: var(--rose-accent)">Adenine (A)</strong> always pairs with <strong style="color: var(--amber-accent)">Thymine (T)</strong>.</li>
+              <li><strong style="color: var(--green-accent)">Guanine (G)</strong> always pairs with <strong style="color: var(--cyan-accent)">Cytosine (C)</strong>.</li>
+            </ul>
+            They are held together by weak chemical bonds called <strong>hydrogen bonds</strong>.
+          </div>
+
+          <div class="concept-card gene">
+            <div class="concept-title">4. What is a Gene?</div>
+            A <strong>gene</strong> is a specific functional segment of the DNA molecule. Each gene contains instructions (a recipe) for the cell to build a specific protein, which controls our traits (like height, blood group, or eye color).
+          </div>
+
+        </div>
+
+        <!-- QUIZ TAB -->
+        <div id="tab-quiz" class="tab-panel">
+          <div class="quiz-container">
+            <div class="quiz-score-banner">
+              <span>Question <strong id="question-num-text">1/5</strong></span>
+              <div class="quiz-progress-dots" id="quiz-dots-container">
+                <div class="quiz-dot active"></div>
+                <div class="quiz-dot"></div>
+                <div class="quiz-dot"></div>
+                <div class="quiz-dot"></div>
+                <div class="quiz-dot"></div>
+              </div>
+            </div>
+
+            <div class="question-box" id="quiz-question">
+              Loading question...
+            </div>
+
+            <div class="options-list" id="quiz-options">
+              <!-- Dynamically populated -->
+            </div>
+
+            <div class="explanation-box" id="quiz-explanation">
+              <!-- Explanation -->
+            </div>
+
+            <button class="next-quiz-btn" id="next-question-btn" onclick="nextQuestion()">Next Question</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- Canvas Setup ---
+    const canvas = document.getElementById('viewportCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Controls and options states
+    let showLabels = true;
+    let colorBases = true;
+    let rotationSpeed = 1.0;
+    let focusMode = 'overview'; // 'overview', 'chromatid', 'doublehelix'
+
+    // Camera coordinate variables
+    let currentZoom = 1.0;
+    let currentPanX = 0;
+    let currentPanY = 0;
+    let targetZoom = 1.0;
+    let targetPanX = 0;
+    let targetPanY = 0;
+
+    // Phase angle for rotating helix
+    let helixPhase = 0;
+
+    // Mouse coordinates inside canvas (to render magnifying glass)
+    const mousePos = { x: -1000, y: -1000, active: false };
+    
+    // Define the genes along the DNA strand
+    const genes = [
+      { startX: 300, endX: 430, name: "Gene 1: Eye Color", desc: "Codes for melanin production in the iris.", color: 'var(--cyan-accent)' },
+      { startX: 470, endX: 600, name: "Gene 2: Height Code", desc: "Codes for skeletal growth plate hormones.", color: 'var(--amber-accent)' },
+      { startX: 640, endX: 770, name: "Gene 3: Blood Group", desc: "Codes for antigens (A, B, O) on red cells.", color: 'var(--purple-accent)' }
+    ];
+
+    // Nucleotide base sequence along the double helix
+    // Complementary bases: A (rose/red), T (amber/orange), G (green), C (cyan/blue)
+    const basePairsSequence = [
+      { base1: 'A', base2: 'T', color1: 'var(--rose-accent)', color2: 'var(--amber-accent)' },
+      { base1: 'G', base2: 'C', color1: 'var(--green-accent)', color2: 'var(--cyan-accent)' },
+      { base1: 'T', base2: 'A', color1: 'var(--amber-accent)', color2: 'var(--rose-accent)' },
+      { base1: 'C', base2: 'G', color1: 'var(--cyan-accent)', color2: 'var(--green-accent)' },
+      { base1: 'A', base2: 'T', color1: 'var(--rose-accent)', color2: 'var(--amber-accent)' },
+      { base1: 'C', base2: 'G', color1: 'var(--cyan-accent)', color2: 'var(--green-accent)' },
+      { base1: 'G', base2: 'C', color1: 'var(--green-accent)', color2: 'var(--cyan-accent)' },
+      { base1: 'T', base2: 'A', color1: 'var(--amber-accent)', color2: 'var(--rose-accent)' },
+      { base1: 'A', base2: 'T', color1: 'var(--rose-accent)', color2: 'var(--amber-accent)' },
+      { base1: 'C', base2: 'G', color1: 'var(--cyan-accent)', color2: 'var(--green-accent)' },
+      { base1: 'G', base2: 'C', color1: 'var(--green-accent)', color2: 'var(--cyan-accent)' },
+      { base1: 'T', base2: 'A', color1: 'var(--amber-accent)', color2: 'var(--rose-accent)' },
+      { base1: 'A', base2: 'T', color1: 'var(--rose-accent)', color2: 'var(--amber-accent)' },
+      { base1: 'G', base2: 'C', color1: 'var(--green-accent)', color2: 'var(--cyan-accent)' },
+      { base1: 'T', base2: 'A', color1: 'var(--amber-accent)', color2: 'var(--rose-accent)' },
+      { base1: 'C', base2: 'G', color1: 'var(--cyan-accent)', color2: 'var(--green-accent)' },
+      { base1: 'A', base2: 'T', color1: 'var(--rose-accent)', color2: 'var(--amber-accent)' }
+    ];
+
+    // Generate random histones along the unravelling pathway
+    const packagingHistones = [
+      { x: 170, y: 360, radius: 10 },
+      { x: 215, y: 310, radius: 10 },
+      { x: 260, y: 345, radius: 10 }
+    ];
+
+    // Helper: calculate distance
+    function dist(x1, y1, x2, y2) {
+      return Math.sqrt((x2 - x1)**2 + (y2 - y1)**2);
+    }
+
+    // --- Main Animation Loop ---
+    function animate() {
+      // Helix rotates continuously based on speed slider
+      helixPhase += 0.02 * rotationSpeed;
+
+      // Smooth camera transition physics
+      currentZoom += (targetZoom - currentZoom) * 0.08;
+      currentPanX += (targetPanX - currentPanX) * 0.08;
+      currentPanY += (targetPanY - currentPanY) * 0.08;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.save();
+      // Apply Camera matrix
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(currentZoom, currentZoom);
+      ctx.translate(-canvas.width / 2 + currentPanX, -canvas.height / 2 + currentPanY);
+
+      // --- Draw Base Canvas environment ---
+      ctx.fillStyle = '#02040a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Background grid mesh
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.015)';
+      ctx.lineWidth = 1;
+      const gridSize = 40;
+      for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += gridSize) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      // --- Draw Chromatid packaging structures on the Left ---
+      drawChromatidPackaging();
+
+      // --- Draw DNA Double Helix on the Center & Right ---
+      drawHelixStrand(false); // Draw normal DNA helix strand
+
+      // --- Draw Gene brackets and tags ---
+      if (showLabels) {
+        drawGeneBoundaries();
+      }
+
+      // --- Draw Hover Magnification Glass details ---
+      if (mousePos.active) {
+        drawMagnifierBubble();
+      }
+
+      // --- Draw HUD guidelines on screen ---
+      if (showLabels) {
+        drawGuidelines();
+      }
+
+      ctx.restore(); // restore camera matrix
+
+      requestAnimationFrame(animate);
+    }
+
+    // Draw the Chromosome / Chromatid unwinding structure on the left end of the screen
+    function drawChromatidPackaging() {
+      ctx.save();
+      
+      const chrCenterX = 70;
+      const chrCenterY = 300;
+      const chrSize = 75;
+
+      // 1. Draw solid chromosome outline in the background (fading out at bottom-right arm)
+      ctx.lineWidth = 14;
+      ctx.strokeStyle = 'var(--purple-accent)';
+      ctx.shadowColor = 'var(--purple-accent)';
+      ctx.shadowBlur = 10;
+      ctx.lineCap = 'round';
+
+      // Left Chromatid
+      ctx.beginPath();
+      ctx.moveTo(chrCenterX - 20, chrCenterY - chrSize);
+      ctx.lineTo(chrCenterX, chrCenterY);
+      ctx.lineTo(chrCenterX - 20, chrCenterY + chrSize);
+      ctx.stroke();
+
+      // Right Chromatid (Top arm solid, bottom-right arm unravelling!)
+      ctx.beginPath();
+      ctx.moveTo(chrCenterX + 20, chrCenterY - chrSize);
+      ctx.lineTo(chrCenterX, chrCenterY);
+      ctx.stroke();
+
+      // Centromere connection
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(chrCenterX, chrCenterY, 8, 0, Math.PI*2);
+      ctx.fill();
+      ctx.shadowBlur = 0; // reset
+
+      // 2. Unravelling arm loop
+      // Loop emerges from right-bottom chromosome arm region
+      ctx.strokeStyle = 'var(--purple-accent)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(chrCenterX, chrCenterY);
+      ctx.quadraticCurveTo(chrCenterX + 35, chrCenterY + 45, 120, 360);
+      ctx.stroke();
+
+      // Winding looping chromatin fiber
+      ctx.strokeStyle = 'var(--amber-accent)';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(120, 360);
+      ctx.bezierCurveTo(130, 390, 160, 380, 170, 360);
+      ctx.stroke();
+
+      // 3. Wrap around histone beads (Beads-on-a-string)
+      packagingHistones.forEach((hist, idx) => {
+        // Draw DNA strand winding around
+        ctx.strokeStyle = 'var(--green-accent)';
+        ctx.lineWidth = 2.0;
+        ctx.beginPath();
+        if (idx === 0) {
+          ctx.moveTo(170, 360);
+          ctx.arc(hist.x, hist.y, hist.radius + 3, Math.PI, 0);
+        } else if (idx === 1) {
+          ctx.arc(hist.x, hist.y, hist.radius + 3, Math.PI * 0.9, -Math.PI * 0.2, true);
+        } else {
+          ctx.arc(hist.x, hist.y, hist.radius + 3, Math.PI * 0.8, 0);
+          // Bridge to DNA helix entrance point (x = 280, y = 300)
+          ctx.quadraticCurveTo(270, 300, 280, 300);
+        }
+        ctx.stroke();
+
+        // Draw Histone spheres octamers (cyan beads)
+        ctx.fillStyle = 'var(--cyan-accent)';
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.arc(hist.x - 3, hist.y - 3, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(hist.x + 3, hist.y - 3, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(hist.x - 3, hist.y + 3, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(hist.x + 3, hist.y + 3, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      });
+
+      ctx.restore();
+    }
+
+    // Draw the DNA Double Helix strand across the screen
+    // IsMagnified mode is true when drawing inside the magnifier glass bubble
+    function drawHelixStrand(isMagnified, zoomX = 0, zoomWidth = 0, scaleFactor = 1.0) {
+      ctx.save();
+
+      const helixRadius = isMagnified ? 45 : 25;
+      const startX = isMagnified ? zoomX - zoomWidth/2 : 280;
+      const endX = isMagnified ? zoomX + zoomWidth/2 : 790;
+      const centerY = 300;
+      
+      // Calculate layout details based on state
+      const sampleStep = isMagnified ? 2.5 : 4.5;
+      const angleMultiplier = isMagnified ? 0.015 : 0.035;
+
+      // Generate points for the two backbones
+      const points1 = [];
+      const points2 = [];
+      const basePairPoints = [];
+
+      for (let x = startX; x <= endX; x += sampleStep) {
+        // Project 3D rotation onto 2D canvas height coordinates
+        // angle is proportional to position along X axis + temporal phase
+        const angle = x * angleMultiplier + (isMagnified ? helixPhase * 1.5 : helixPhase);
+        
+        const y1 = centerY + Math.cos(angle) * helixRadius;
+        const z1 = Math.sin(angle) * helixRadius; // Depth coordinate (used for line thickness and layering)
+
+        const y2 = centerY + Math.cos(angle + Math.PI) * helixRadius;
+        const z2 = Math.sin(angle + Math.PI) * helixRadius;
+
+        points1.push({ x: x, y: y1, z: z1 });
+        points2.push({ x: x, y: y2, z: z2 });
+
+        // Record positions for rungs at specific intervals
+        const stepWidth = isMagnified ? 18 : 30;
+        if (Math.round(x) % stepWidth === 0) {
+          basePairPoints.push({
+            x: x,
+            y1: y1,
+            z1: z1,
+            y2: y2,
+            z2: z2,
+            angle: angle
+          });
+        }
+      }
+
+      // --- Drawing Layer 1: DNA Rungs in the Background (depth z < 0) ---
+      drawRungs(basePairPoints, isMagnified, true);
+
+      // --- Drawing Layer 2: Backbone strands ---
+      // Backbone 1
+      ctx.strokeStyle = 'var(--cyan-accent)';
+      ctx.shadowColor = 'var(--cyan-accent)';
+      ctx.lineWidth = isMagnified ? 7 : 3.5;
+      ctx.beginPath();
+      points1.forEach((pt, idx) => {
+        if (idx === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
+      });
+      ctx.stroke();
+
+      // Backbone 2
+      ctx.strokeStyle = 'rgba(99, 102, 241, 0.9)'; // Indigo
+      ctx.shadowColor = 'rgba(99, 102, 241, 0.9)';
+      ctx.beginPath();
+      points2.forEach((pt, idx) => {
+        if (idx === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
+      });
+      ctx.stroke();
+
+      // --- Drawing Layer 3: DNA Rungs in the Foreground (depth z >= 0) ---
+      drawRungs(basePairPoints, isMagnified, false);
+
+      ctx.restore();
+    }
+
+    // Helper: draw base pair connection rungs
+    function drawRungs(rungs, isMagnified, drawBackgroundOnly) {
+      rungs.forEach((rung, index) => {
+        // Decide layer sorting (z-depth)
+        const isBack = (rung.z1 < 0);
+        if (drawBackgroundOnly !== isBack) return;
+
+        // Select nucleotide pair from our sequence
+        const sequenceIndex = Math.abs(Math.floor(rung.x / (isMagnified ? 18 : 30))) % basePairsSequence.length;
+        const bp = basePairsSequence[sequenceIndex];
+
+        // Rung midpoint coordinate
+        const midY = (rung.y1 + rung.y2) / 2;
+
+        ctx.save();
+        ctx.lineCap = 'butt';
+        
+        // Handle transparency based on mouse proximity to show highlighted active gene
+        let alpha = 1.0;
+        if (!isMagnified && mousePos.active) {
+          const hoveredGene = getHoveredGene();
+          if (hoveredGene) {
+            // Faintly dim bases outside of the hovered gene
+            if (rung.x < hoveredGene.startX || rung.x > hoveredGene.endX) {
+              alpha = 0.25;
+            }
+          }
+        }
+
+        // Base 1 segment (Backbone 1 to mid)
+        ctx.strokeStyle = colorBases ? bp.color1 : '#9ca3af';
+        ctx.lineWidth = isMagnified ? 5.5 : 3.0;
+        ctx.globalAlpha = alpha;
+        ctx.beginPath();
+        ctx.moveTo(rung.x, rung.y1);
+        ctx.lineTo(rung.x, midY);
+        ctx.stroke();
+
+        // Base 2 segment (Backbone 2 to mid)
+        ctx.strokeStyle = colorBases ? bp.color2 : '#d1d5db';
+        ctx.beginPath();
+        ctx.moveTo(rung.x, rung.y2);
+        ctx.lineTo(rung.x, midY);
+        ctx.stroke();
+
+        // Draw nucleotide base name letters on the rungs if magnified or toggled
+        if (isMagnified && showLabels) {
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 8px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
+          ctx.textAlign = 'center';
+          ctx.globalAlpha = 0.9;
+          
+          // Letter 1 near backbone 1
+          const textY1 = rung.y1 + (midY - rung.y1) * 0.35 + 2;
+          ctx.fillText(bp.base1, rung.x, textY1);
+
+          // Letter 2 near backbone 2
+          const textY2 = rung.y2 + (midY - rung.y2) * 0.35 + 2;
+          ctx.fillText(bp.base2, rung.x, textY2);
+        }
+
+        ctx.restore();
+      });
+    }
+
+    // Draw gene boundary brackets and names on canvas
+    function drawGeneBoundaries() {
+      const hoveredGene = getHoveredGene();
+
+      genes.forEach((gene, idx) => {
+        ctx.save();
+        
+        // Highlight active gene on hover or selector
+        const isActive = (hoveredGene && hoveredGene.name === gene.name);
+        
+        ctx.strokeStyle = gene.color;
+        ctx.lineWidth = isActive ? 2.5 : 1.2;
+        ctx.globalAlpha = isActive ? 1.0 : 0.45;
+        
+        // Glow effect for active gene
+        if (isActive) {
+          ctx.shadowColor = gene.color;
+          ctx.shadowBlur = 10;
+        }
+
+        // Draw left and right border bracket guides
+        const bracketH = 40;
+        // Left bracket
+        ctx.beginPath();
+        ctx.moveTo(gene.startX, 300 - bracketH);
+        ctx.lineTo(gene.startX, 300 + bracketH);
+        ctx.stroke();
+
+        // Right bracket
+        ctx.beginPath();
+        ctx.moveTo(gene.endX, 300 - bracketH);
+        ctx.lineTo(gene.endX, 300 + bracketH);
+        ctx.stroke();
+
+        // Label above gene
+        ctx.fillStyle = '#ffffff';
+        ctx.font = (isActive ? 'bold 11px ' : '600 9px ') + getComputedStyle(document.body).getPropertyValue('--font-sans');
+        ctx.textAlign = 'center';
+        ctx.fillText(gene.name.toUpperCase(), (gene.startX + gene.endX)/2, 300 - bracketH - 12);
+
+        // Subtitle descriptor for active gene
+        if (isActive) {
+          ctx.fillStyle = 'var(--text-muted)';
+          ctx.font = '9px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
+          ctx.fillText(gene.desc, (gene.startX + gene.endX)/2, 300 + bracketH + 18);
+        }
+
+        ctx.restore();
+      });
+    }
+
+    // Determine which gene is currently hovered by checking mouse coordinates
+    function getHoveredGene() {
+      if (!mousePos.active) return null;
+      // Map mouse x through camera transform matrix back to original coordinates
+      const actualX = (mousePos.x - canvas.width/2) / currentZoom + canvas.width/2 - currentPanX;
+      const actualY = (mousePos.y - canvas.height/2) / currentZoom + canvas.height/2 - currentPanY;
+
+      // Only evaluate if mouse is vertically close to the DNA strand (y centered around 300)
+      if (Math.abs(actualY - 300) < 140) {
+        for(let i=0; i<genes.length; i++) {
+          const g = genes[i];
+          if (actualX >= g.startX && actualX <= g.endX) {
+            return g;
+          }
+        }
+      }
+      return null;
+    }
+
+    // Draw the Magnification Glass circular overlay showing nucleotide pairings
+    function drawMagnifierBubble() {
+      const activeGene = getHoveredGene();
+      if (!activeGene) return;
+
+      // Translate mouse coordinates to local values
+      const mX = mousePos.x;
+      const mY = mousePos.y;
+      const bubbleRadius = 100;
+
+      // Draw pointer target box on the DNA helix
+      const actualX = (mX - canvas.width/2) / currentZoom + canvas.width/2 - currentPanX;
+      const actualY = (mY - canvas.height/2) / currentZoom + canvas.height/2 - currentPanY;
+      
+      ctx.save();
+      ctx.strokeStyle = activeGene.color;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([2, 3]);
+      ctx.beginPath();
+      ctx.arc(actualX, 300, 20, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.restore();
+
+      // --- Draw floating magnifier glass bubble ---
+      // We will place the magnifier bubble above the cursor position
+      const bubbleX = mX;
+      const bubbleY = mY - 140;
+
+      ctx.save();
+      
+      // Draw connecting pointer line
+      ctx.strokeStyle = activeGene.color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(bubbleX, bubbleY + bubbleRadius);
+      ctx.lineTo(mX, mY);
+      ctx.stroke();
+
+      // Outer magnifier glass metallic ring
+      ctx.fillStyle = '#010410';
+      ctx.strokeStyle = activeGene.color;
+      ctx.lineWidth = 5;
+      ctx.shadowColor = activeGene.color;
+      ctx.shadowBlur = 20;
+      
+      ctx.beginPath();
+      ctx.arc(bubbleX, bubbleY, bubbleRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.shadowBlur = 0; // reset
+
+      // Faint target scope reticles
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(bubbleX - bubbleRadius + 10, bubbleY); ctx.lineTo(bubbleX + bubbleRadius - 10, bubbleY);
+      ctx.moveTo(bubbleX, bubbleY - bubbleRadius + 10); ctx.lineTo(bubbleX, bubbleY + bubbleRadius - 10);
+      ctx.stroke();
+
+      // Set clipping region inside magnifier bubble so helix details don't leak out
+      ctx.beginPath();
+      ctx.arc(bubbleX, bubbleY, bubbleRadius - 2.5, 0, Math.PI * 2);
+      ctx.clip();
+
+      // Inside bubble, render magnified DNA helix
+      // Map coordinate translation to center inside bubble
+      ctx.translate(bubbleX - actualX * 2.2, bubbleY - 300 * 2.2);
+      ctx.scale(2.2, 2.2); // 2.2x zoom scale
+      
+      drawHelixStrand(true, actualX, 100); // Draw zoomed strand segment
+
+      ctx.restore(); // restore clipping context
+
+      // --- Draw floating text info box below magnifier ---
+      ctx.save();
+      const infoBox = {
+        x: bubbleX - 90,
+        y: bubbleY + bubbleRadius + 22,
+        w: 180,
+        h: 46
+      };
+      
+      ctx.fillStyle = 'rgba(10, 15, 30, 0.9)';
+      ctx.strokeStyle = activeGene.color;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(infoBox.x, infoBox.y, infoBox.w, infoBox.h, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 9px ' + getComputedStyle(document.body).getPropertyValue('--font-sans');
+      ctx.fillText(activeGene.name, infoBox.x + 8, infoBox.y + 14);
+
+      ctx.fillStyle = 'var(--text-muted)';
+      ctx.font = '8px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
+      ctx.fillText("Base Pairs: A=T & G≡C", infoBox.x + 8, infoBox.y + 26);
+      ctx.fillText("Function: Coding Trait Sequence", infoBox.x + 8, infoBox.y + 36);
+
+      ctx.restore();
+    }
+
+    // Static text guidelines and arrows inside canvas
+    function drawGuidelines() {
+      // Chromatid
+      if (focusMode === 'overview' || focusMode === 'chromatid') {
+        drawLabel("REPLICATED CHROMATID", 70, 210, 'var(--purple-accent)');
+        ctx.strokeStyle = 'var(--purple-accent)';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(70, 220); ctx.lineTo(70, 240);
+        ctx.stroke();
+
+        // Packaging
+        drawLabel("Histone Beads (DNA Spooling)", 220, 240, 'var(--cyan-accent)');
+        ctx.strokeStyle = 'var(--cyan-accent)';
+        ctx.beginPath();
+        ctx.moveTo(220, 252); ctx.lineTo(215, 290);
+        ctx.stroke();
+      }
+
+      // DNA Helix
+      if (focusMode === 'overview' || focusMode === 'doublehelix') {
+        drawLabel("DNA DOUBLE HELIX STRAND", 540, 210, 'var(--green-accent)');
+        
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.font = '8px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
+        ctx.textAlign = 'center';
+        ctx.fillText("Contains Genetic Codons (A, T, G, C)", 540, 192);
+      }
+    }
+
+    // Helper to draw text with background box
+    function drawLabel(text, x, y, color) {
+      ctx.save();
+      ctx.font = 'bold 11px ' + getComputedStyle(document.body).getPropertyValue('--font-sans');
+      const textWidth = ctx.measureText(text).width;
+      
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      
+      const rectX = x - textWidth/2 - 6;
+      ctx.beginPath();
+      ctx.roundRect(rectX, y - 10, textWidth + 12, 18, 4);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.fillText(text, x, y + 3);
+      ctx.restore();
+    }
+
+    // --- Control Handlers ---
+
+    function updateSpeed() {
+      const val = parseFloat(document.getElementById('speedSlider').value);
+      rotationSpeed = val;
+      document.getElementById('speedVal').innerText = val.toFixed(1) + 'x';
+    }
+
+    function toggleLabels() {
+      showLabels = document.getElementById('toggleLabels').checked;
+    }
+
+    function toggleColors() {
+      colorBases = document.getElementById('toggleColors').checked;
+    }
+
+    // Set camera coordinates for focused views
+    function setFocusMode(mode) {
+      focusMode = mode;
+      
+      // Update sidebar buttons active state
+      const buttons = document.querySelectorAll('.mode-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      
+      let index = 0;
+      if (mode === 'chromatid') index = 1;
+      else if (mode === 'doublehelix') index = 2;
+      
+      buttons[index].classList.add('active');
+
+      const hud = document.getElementById('hudState');
+
+      // Adjust camera values (targetZoom, targetPanX, targetPanY)
+      if (mode === 'overview') {
+        targetZoom = 1.0;
+        targetPanX = 0;
+        targetPanY = 0;
+        hud.innerText = "OVERVIEW ACTIVE";
+      } else if (mode === 'chromatid') {
+        // Zoom closely into Chromatid packaging
+        targetZoom = 1.6;
+        targetPanX = canvas.width/2 - 160;
+        targetPanY = canvas.height/2 - 300;
+        hud.innerText = "FOCUS: CHROMATID ASSEMBLY";
+      } else if (mode === 'doublehelix') {
+        // Zoom into DNA Double Helix structure
+        targetZoom = 1.4;
+        targetPanX = canvas.width/2 - 550;
+        targetPanY = canvas.height/2 - 300;
+        hud.innerText = "FOCUS: DNA DOUBLE HELIX";
+      }
+    }
+
+    // Programmatically trigger a simulated gene hover view
+    function triggerGeneHover(geneIdx) {
+      setFocusMode('doublehelix');
+      
+      // Programmatically position magnifying glass coordinates over middle of targeted gene
+      const gene = genes[geneIdx];
+      const targetX = (gene.startX + gene.endX) / 2;
+
+      // Project target coordinates back to mouse position screen coordinates
+      setTimeout(() => {
+        mousePos.x = canvas.width/2 + (targetX - canvas.width/2 + currentPanX) * currentZoom;
+        mousePos.y = canvas.height/2 + (300 - canvas.height/2 + currentPanY) * currentZoom;
+        mousePos.active = true;
+
+        document.getElementById('bottomHUD').innerText = `Inspecting ${gene.name} | ${gene.desc}`;
+      }, 200);
+    }
+
+    // Mouse events inside canvas (calculate magnifying glass)
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mousePos.x = ((e.clientX - rect.left) / rect.width) * canvas.width;
+      mousePos.y = ((e.clientY - rect.top) / rect.height) * canvas.height;
+      mousePos.active = true;
+
+      // Update instructions on hover
+      const hoveredGene = getHoveredGene();
+      if (hoveredGene) {
+        document.getElementById('bottomHUD').innerText = `Inspecting ${hoveredGene.name} | ${hoveredGene.desc}`;
+      } else {
+        document.getElementById('bottomHUD').innerText = "Hover mouse pointer over the DNA strand to magnify its genes.";
+      }
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      mousePos.active = false;
+      document.getElementById('bottomHUD').innerText = "Hover mouse pointer over the DNA strand to magnify its genes.";
+    });
+
+    // Tab Switcher (Right Sidebar)
+    function switchTab(tabName) {
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      tabBtns.forEach(btn => btn.classList.remove('active'));
+      
+      const targetBtn = Array.from(tabBtns).find(btn => btn.innerText.toLowerCase().includes(tabName));
+      if (targetBtn) targetBtn.classList.add('active');
+
+      const panels = document.querySelectorAll('.tab-panel');
+      panels.forEach(p => p.classList.remove('active'));
+      
+      document.getElementById('tab-' + tabName).classList.add('active');
+    }
+
+    // --- Interactive Quiz Logic ---
+    const quizQuestions = [
+      {
+        question: "What is the structural shape of a DNA molecule?",
+        options: [
+          "Single straight line",
+          "Double helix (twisted ladder)",
+          "Three-dimensional cube",
+          "Closed ring shape"
+        ],
+        correct: 1,
+        explanation: "Correct! DNA is shaped as a <strong>double helix</strong>, which looks like a twisted ladder."
+      },
+      {
+        question: "Which nucleotide base always pairs with Cytosine (C)?",
+        options: [
+          "Adenine (A)",
+          "Thymine (T)",
+          "Guanine (G)",
+          "Uracil (U)"
+        ],
+        correct: 2,
+        explanation: "Correct! According to complementary base-pairing rules, <strong>Cytosine (C)</strong> always binds with <strong>Guanine (G)</strong>."
+      },
+      {
+        question: "Which nucleotide base pairs with Thymine (T) in DNA?",
+        options: [
+          "Adenine (A)",
+          "Cytosine (C)",
+          "Guanine (G)",
+          "Histone"
+        ],
+        correct: 0,
+        explanation: "Correct! <strong>Thymine (T)</strong> always binds with <strong>Adenine (A)</strong>."
+      },
+      {
+        question: "What is a 'gene' in relation to DNA?",
+        options: [
+          "The outer membrane of DNA",
+          "A specific functional segment of DNA coding for traits",
+          "The protein bead DNA wraps around",
+          "A type of hydrogen bond"
+        ],
+        correct: 1,
+        explanation: "Correct! A <strong>gene</strong> is a specific segment of the DNA molecule that acts as a blueprint coding for a protein or trait."
+      },
+      {
+        question: "How does 2 meters of DNA fit inside a microscopic cell nucleus?",
+        options: [
+          "It is dissolved into chemical fluids",
+          "It is cut into tiny useless fragments",
+          "It wraps around histone proteins to form chromatin, which condenses into chromosomes",
+          "It floats outside the cell"
+        ],
+        correct: 2,
+        explanation: "Correct! DNA wraps tightly around histones to form chromatin threads, which further condense into thick rod-like chromosomes during division, packing it efficiently."
+      }
+    ];
+
+    let currentQuestionIdx = 0;
+    let quizScore = 0;
+    let quizAnswered = false;
+
+    function loadQuestion() {
+      const q = quizQuestions[currentQuestionIdx];
+      quizAnswered = false;
+
+      document.getElementById('quiz-question').innerText = q.question;
+      document.getElementById('question-num-text').innerText = (currentQuestionIdx + 1) + '/' + quizQuestions.length;
+
+      const list = document.getElementById('quiz-options');
+      list.innerHTML = '';
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = opt;
+        btn.onclick = () => selectOption(idx);
+        list.appendChild(btn);
+      });
+
+      document.getElementById('quiz-explanation').style.display = 'none';
+      document.getElementById('next-question-btn').style.display = 'none';
+
+      const dots = document.getElementById('quiz-dots-container').children;
+      Array.from(dots).forEach((dot, idx) => {
+        dot.className = 'quiz-dot';
+        if (idx === currentQuestionIdx) dot.classList.add('active');
+        else if (idx < currentQuestionIdx) {
+          dot.classList.add('correct'); 
+        }
+      });
+    }
+
+    function selectOption(selectedIdx) {
+      if (quizAnswered) return;
+      quizAnswered = true;
+
+      const q = quizQuestions[currentQuestionIdx];
+      const options = document.getElementById('quiz-options').children;
+      const dots = document.getElementById('quiz-dots-container').children;
+
+      if (selectedIdx === q.correct) {
+        options[selectedIdx].classList.add('correct');
+        dots[currentQuestionIdx].className = 'quiz-dot correct';
+        quizScore++;
+      } else {
+        options[selectedIdx].classList.add('wrong');
+        options[q.correct].classList.add('correct');
+        dots[currentQuestionIdx].className = 'quiz-dot wrong';
+      }
+
+      const expBox = document.getElementById('quiz-explanation');
+      expBox.innerHTML = `<p>${q.explanation}</p>`;
+      expBox.style.display = 'block';
+
+      const nextBtn = document.getElementById('next-question-btn');
+      if (currentQuestionIdx < quizQuestions.length - 1) {
+        nextBtn.innerText = "Next Question";
+      } else {
+        nextBtn.innerText = "Finish Quiz & Restart";
+      }
+      nextBtn.style.display = 'block';
+    }
+
+    function nextQuestion() {
+      if (currentQuestionIdx < quizQuestions.length - 1) {
+        currentQuestionIdx++;
+        loadQuestion();
+      } else {
+        currentQuestionIdx = 0;
+        quizScore = 0;
+        loadQuestion();
+      }
+    }
+
+    // --- Start ---
+    loadQuestion();
+    animate();
+
+  </script>
+</body>
+</html>
