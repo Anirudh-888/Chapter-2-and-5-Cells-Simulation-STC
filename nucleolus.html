@@ -1,0 +1,1978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STCpedia Lab - Nucleolus & Ribosome Factory</title>
+  
+  <!-- Google Fonts for premium UI typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #040814;
+      --bg-panel: rgba(10, 20, 42, 0.7);
+      --bg-card: rgba(16, 30, 60, 0.5);
+      --border-color: rgba(0, 229, 255, 0.2);
+      --border-glow: 0 0 15px rgba(0, 229, 255, 0.15);
+      
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      
+      --cyan-accent: #00e5ff;
+      --cyan-glow: rgba(0, 229, 255, 0.4);
+      --magenta-accent: #d500f9;
+      --magenta-glow: rgba(213, 0, 249, 0.4);
+      --amber-accent: #ff9100;
+      --amber-glow: rgba(255, 145, 0, 0.4);
+      --green-accent: #00e676;
+      --green-glow: rgba(0, 230, 118, 0.4);
+      
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(10, 25, 50, 0.5) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(5, 15, 35, 0.5) 0px, transparent 50%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header Styling */
+    header {
+      background: rgba(4, 8, 20, 0.85);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      z-index: 10;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--magenta-accent), var(--cyan-accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #fff;
+      font-size: 1.1rem;
+      box-shadow: 0 0 15px var(--magenta-glow);
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(to right, #fff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-badge {
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid var(--cyan-accent);
+      color: var(--cyan-accent);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: var(--border-glow);
+    }
+
+    /* Main Content Layout */
+    .main-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 300px 1fr 340px;
+      gap: 15px;
+      padding: 15px;
+      height: calc(100vh - 60px);
+    }
+
+    /* Panels Base */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--cyan-accent);
+      text-transform: uppercase;
+    }
+
+    .panel-content {
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Viewport Center Panel */
+    .viewport-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #020408;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8);
+    }
+
+    #viewportCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    /* HUD Elements */
+    .hud-element {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: rgba(4, 10, 24, 0.8);
+      border: 1px solid rgba(0, 229, 255, 0.15);
+      padding: 6px 12px;
+      border-radius: 6px;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+    }
+
+    .hud-top-left { top: 15px; left: 15px; border-left: 3px solid var(--magenta-accent); color: #fff; font-weight: bold; }
+    .hud-top-right { top: 15px; right: 15px; text-align: right; }
+    .hud-bottom-left { bottom: 15px; left: 15px; }
+
+    /* Control Sections */
+    .control-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .slider-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+    }
+
+    .slider-val {
+      color: var(--cyan-accent);
+      font-family: var(--font-mono);
+      font-weight: bold;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #1e293b;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--cyan-accent);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--cyan-glow);
+      transition: background 0.15s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      background: #fff;
+    }
+
+    /* Mode button list */
+    .btn-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mode-btn {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mode-btn:hover {
+      background: rgba(0, 229, 255, 0.05);
+      border-color: rgba(0, 229, 255, 0.3);
+    }
+
+    .mode-btn.active {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--cyan-accent);
+      color: var(--cyan-accent);
+      box-shadow: var(--border-glow);
+    }
+
+    .btn-num {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      background: rgba(255, 255, 255, 0.08);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mode-btn.active .btn-num {
+      background: var(--cyan-accent);
+      color: #000;
+    }
+
+    /* Toggles */
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .checkbox-row input {
+      display: none;
+    }
+
+    .check-custom {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 4px;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .checkbox-row input:checked + .check-custom {
+      border-color: var(--cyan-accent);
+      background: var(--cyan-accent);
+    }
+
+    .checkbox-row input:checked + .check-custom::after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 1px;
+      width: 4px;
+      height: 8px;
+      border: solid #000;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    /* Playback Action Buttons */
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .action-btn {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .action-btn.primary {
+      background: linear-gradient(135deg, var(--cyan-accent), #00b0ff);
+      color: #000;
+      border: none;
+      box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+    }
+
+    .action-btn.primary:hover {
+      box-shadow: 0 0 25px rgba(0, 229, 255, 0.5);
+      transform: translateY(-1px);
+    }
+
+    /* Tabbed Sidebar Panel */
+    .tab-header {
+      display: flex;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+    }
+
+    .tab-btn.active {
+      color: var(--cyan-accent);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--cyan-accent);
+      box-shadow: 0 0 8px var(--cyan-glow);
+    }
+
+    .tab-panel {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .tab-panel.active {
+      display: flex;
+    }
+
+    /* Learn tab styling */
+    .concept-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-left: 3px solid var(--cyan-accent);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.85rem;
+      line-height: 1.45;
+    }
+
+    .concept-card.nucleolus { border-left-color: var(--magenta-accent); }
+    .concept-card.pores { border-left-color: var(--cyan-accent); }
+    .concept-card.subunits { border-left-color: var(--amber-accent); }
+    .concept-card.translation { border-left-color: var(--green-accent); }
+
+    .concept-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+      color: #fff;
+    }
+
+    /* Warning card for terminology */
+    .warning-card {
+      background: rgba(255, 145, 0, 0.08);
+      border: 1px solid rgba(255, 145, 0, 0.2);
+      border-left: 3px solid var(--amber-accent);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+
+    .warning-title {
+      font-weight: 700;
+      color: var(--amber-accent);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Quiz Tab Styling */
+    .quiz-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .quiz-score-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .quiz-progress-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .quiz-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.2s;
+    }
+
+    .quiz-dot.active {
+      border-color: var(--cyan-accent);
+      background: rgba(0, 229, 255, 0.2);
+      box-shadow: 0 0 5px var(--cyan-accent);
+    }
+
+    .quiz-dot.correct {
+      background: var(--green-accent);
+      border-color: var(--green-accent);
+      box-shadow: 0 0 5px var(--green-accent);
+    }
+
+    .quiz-dot.wrong {
+      background: #ef4444;
+      border-color: #ef4444;
+      box-shadow: 0 0 5px #ef4444;
+    }
+
+    .question-box {
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: #fff;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .option-btn {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .option-btn.correct {
+      background: rgba(0, 230, 118, 0.15);
+      border-color: var(--green-accent);
+      color: var(--green-accent);
+      font-weight: 600;
+    }
+
+    .option-btn.wrong {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    .explanation-box {
+      background: rgba(0, 229, 255, 0.04);
+      border: 1px solid rgba(0, 229, 255, 0.1);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: var(--text-main);
+      display: none;
+    }
+
+    .explanation-box p {
+      margin-bottom: 6px;
+    }
+
+    .explanation-box strong {
+      color: var(--cyan-accent);
+    }
+
+    .next-quiz-btn {
+      background: linear-gradient(135deg, var(--cyan-accent), #00b0ff);
+      color: #000;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      display: none;
+    }
+
+    .next-quiz-btn:hover {
+      box-shadow: 0 0 12px var(--cyan-glow);
+    }
+
+    /* Warning for smaller devices */
+    .mobile-warning {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #040814;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .mobile-warning p {
+      font-size: 1.1rem;
+      color: var(--amber-accent);
+      margin-top: 15px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 900px) {
+      .mobile-warning {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile warning layout -->
+  <div class="mobile-warning">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--amber-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+      <line x1="8" y1="21" x2="16" y2="21"></line>
+      <line x1="12" y1="17" x2="12" y2="21"></line>
+    </svg>
+    <p>Please rotate your device to landscape mode or use a larger screen to interact with the Ribosome Factory lab.</p>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">R</div>
+      <div>
+        <h1>STCpedia Lab - Nucleolus & Ribosome Synthesis</h1>
+      </div>
+    </div>
+    <div class="nav-badge">Grade 9 CBSE / STC</div>
+  </header>
+
+  <!-- Workspace Grid -->
+  <div class="main-container">
+    
+    <!-- Controls (Left Sidebar) -->
+    <div class="glass-panel">
+      <div class="panel-header">
+        <div class="panel-title">Laboratory Controls</div>
+      </div>
+      <div class="panel-content">
+        
+        <!-- View Focus Modes -->
+        <div class="control-section">
+          <div class="control-label">Simulation Focus</div>
+          <div class="btn-list">
+            <button class="mode-btn active" onclick="setFocusMode('full')">
+              <span class="btn-num">0</span> Full Cycle Overview
+            </button>
+            <button class="mode-btn" onclick="setFocusMode('assembly')">
+              <span class="btn-num">1</span> Step 1: Subunit Assembly
+            </button>
+            <button class="mode-btn" onclick="setFocusMode('export')">
+              <span class="btn-num">2</span> Step 2: Nuclear Pore Export
+            </button>
+            <button class="mode-btn" onclick="setFocusMode('translation')">
+              <span class="btn-num">3</span> Step 3: Cytoplasm Translation
+            </button>
+          </div>
+        </div>
+
+        <!-- Animation Variables -->
+        <div class="control-section">
+          <div class="control-label">Speed & Output</div>
+          
+          <div class="slider-row">
+            <div class="slider-info">
+              <span>Simulation Speed</span>
+              <span id="speedVal" class="slider-val">1.0x</span>
+            </div>
+            <input type="range" id="speedSlider" min="0.1" max="2" step="0.1" value="1.0" oninput="updateSpeed()">
+          </div>
+
+          <div class="slider-row" style="margin-top: 8px;">
+            <div class="slider-info">
+              <span>Subunit Assembly Rate</span>
+              <span id="rateVal" class="slider-val">Normal</span>
+            </div>
+            <input type="range" id="rateSlider" min="1" max="3" step="1" value="2" oninput="updateRate()">
+          </div>
+        </div>
+
+        <!-- UI Overlays toggles -->
+        <div class="control-section">
+          <div class="control-label">Visual Aids</div>
+          <label class="checkbox-row">
+            <input type="checkbox" id="toggleLabels" checked onchange="toggleOverlay('labels')">
+            <span class="check-custom"></span>
+            <span>Show Labels & Guidelines</span>
+          </label>
+          <label class="checkbox-row" style="margin-top: 6px;">
+            <input type="checkbox" id="togglePaths" checked onchange="toggleOverlay('paths')">
+            <span class="check-custom"></span>
+            <span>Highlight Subunit Trajectory</span>
+          </label>
+        </div>
+
+        <!-- Simulation state buttons -->
+        <div class="action-row">
+          <button class="action-btn" id="playPauseBtn" onclick="togglePlayPause()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg> Pause
+          </button>
+          <button class="action-btn primary" onclick="resetSimulation()">
+            Reset Lab
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Interactive Canvas Viewport (Center) -->
+    <div class="viewport-container glass-panel">
+      <div class="hud-element hud-top-left">NUCLEUS ENVIRONMENT ACTIVE</div>
+      <div class="hud-element hud-top-right">
+        CELL PHASE: G1 INTERPHASE<br>
+        TEMPORARY RATIO: 1:1 SUBUNITS
+      </div>
+      <div class="hud-element hud-bottom-left" id="scaleBar">Scale: 1 nm = 0.5 px | Click canvas to drop marker</div>
+      
+      <canvas id="viewportCanvas" width="800" height="600"></canvas>
+    </div>
+
+    <!-- Educational & Quiz Panel (Right Sidebar) -->
+    <div class="glass-panel">
+      <!-- Tab Controls -->
+      <div class="tab-header">
+        <button class="tab-btn active" onclick="switchTab('learn')">Learn</button>
+        <button class="tab-btn" onclick="switchTab('quiz')">Interactive Quiz</button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="panel-content" style="padding-top: 15px;">
+        
+        <!-- LEARN TAB -->
+        <div id="tab-learn" class="tab-panel active">
+          
+          <div class="warning-card">
+            <div class="warning-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Terminology Alert for Class 9
+            </div>
+            In exams, do not confuse <strong>Nucleolus</strong> with <strong>Nucleoid</strong>!
+            <ul>
+              <li><strong>Nucleolus:</strong> The dense round factory inside a true, membrane-bound nucleus (found in complex <strong>Eukaryotes</strong> like plants and animals).</li>
+              <li><strong>Nucleoid:</strong> An open, membrane-free region where genetic material floats in simple <strong>Prokaryotes</strong> (like bacteria).</li>
+            </ul>
+          </div>
+
+          <div class="concept-card nucleolus">
+            <div class="concept-title">1. The Nucleolus (Dense Round Body)</div>
+            Located inside the nucleus, the nucleolus is a dense, round structure. It has no membrane of its own. It serves as a biological factory designed specifically to synthesize ribosomes.
+          </div>
+
+          <div class="concept-card subunits">
+            <div class="concept-title">2. Synthesis of Ribosomal Subunits</div>
+            The nucleolus transcribes Ribosomal RNA (rRNA) and combines it with ribosomal proteins imported from the cytoplasm. It builds two separate halves: the <strong>Small Subunit</strong> and the <strong>Large Subunit</strong>.
+          </div>
+
+          <div class="concept-card pores">
+            <div class="concept-title">3. Export through Nuclear Pores</div>
+            Once constructed, the subunits exit the nucleus. They pass through small gates in the double-layered nuclear envelope called <strong>Nuclear Pores</strong>.
+          </div>
+
+          <div class="concept-card translation">
+            <div class="concept-title">4. Cytoplasmic Assembly & Function</div>
+            Once in the cytoplasm, the large and small subunits combine on a messenger RNA (mRNA) strand to build functional <strong>ribosomes</strong>. These ribosomes read code to synthesize essential proteins.
+          </div>
+
+        </div>
+
+        <!-- QUIZ TAB -->
+        <div id="tab-quiz" class="tab-panel">
+          <div class="quiz-container">
+            <div class="quiz-score-banner">
+              <span>Question <strong id="question-num-text">1/4</strong></span>
+              <div class="quiz-progress-dots" id="quiz-dots-container">
+                <div class="quiz-dot active"></div>
+                <div class="quiz-dot"></div>
+                <div class="quiz-dot"></div>
+                <div class="quiz-dot"></div>
+              </div>
+            </div>
+
+            <div class="question-box" id="quiz-question">
+              Loading question...
+            </div>
+
+            <div class="options-list" id="quiz-options">
+              <!-- Dynamically populated -->
+            </div>
+
+            <div class="explanation-box" id="quiz-explanation">
+              <!-- Explanation -->
+            </div>
+
+            <button class="next-quiz-btn" id="next-question-btn" onclick="nextQuestion()">Next Question</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- Canvas Setup ---
+    const canvas = document.getElementById('viewportCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Simulation variables
+    let isPlaying = true;
+    let simSpeed = 1.0;
+    let synthesisRate = 2; // 1: Low, 2: Normal, 3: High
+    let showLabels = true;
+    let showPaths = true;
+    let focusMode = 'full'; // 'full', 'assembly', 'export', 'translation'
+    
+    // Zoom/pan system for focus modes
+    let currentZoom = 1.0;
+    let currentPanX = 0;
+    let currentPanY = 0;
+    let targetZoom = 1.0;
+    let targetPanX = 0;
+    let targetPanY = 0;
+
+    // Simulation entities
+    let proteins = []; // imported ribosomal proteins
+    let rRnas = [];     // rRNA strands inside nucleolus
+    let subunits = [];  // Small and large subunits
+    let completedRibosomes = []; // Combined ribosomes translating mRNA in cytoplasm
+    let mrnaStrands = []; // mRNA templates in the cytoplasm
+    
+    // Structure constants
+    const nucleusCenter = { x: 300, y: 300 };
+    const nucleusRadius = 190;
+    const nucleolusRadius = 75;
+    const nuclearPores = []; // Array of pores along the boundary
+
+    // Set up nuclear pores along the right section of the nuclear envelope (closer to cytoplasm)
+    // Angles in radians around the circle, mostly facing right (cytoplasm side)
+    const poreAngles = [
+      -Math.PI / 3.2,
+      -Math.PI / 5,
+      -Math.PI / 10,
+      0,
+      Math.PI / 10,
+      Math.PI / 5,
+      Math.PI / 3.2
+    ];
+
+    poreAngles.forEach(angle => {
+      nuclearPores.push({
+        x: nucleusCenter.x + Math.cos(angle) * nucleusRadius,
+        y: nucleusCenter.y + Math.sin(angle) * nucleusRadius,
+        angle: angle
+      });
+    });
+
+    // Helper: calculate distance
+    function dist(x1, y1, x2, y2) {
+      return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    }
+
+    // --- Entity Classes ---
+    
+    // rRNA strand
+    class RRNA {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.originX = x;
+        this.originY = y;
+        this.length = 15 + Math.random() * 15;
+        this.points = [];
+        this.phase = Math.random() * Math.PI * 2;
+        this.speed = 0.05 + Math.random() * 0.05;
+        this.color = 'rgba(213, 0, 249, 0.7)'; // Magenta
+        this.life = 1.0; // Fades out when combining
+        this.isAssembled = false;
+
+        // Generate wave points
+        for(let i=0; i<6; i++) {
+          this.points.push({ x: (i/5) * this.length, y: 0 });
+        }
+      }
+
+      update() {
+        this.phase += this.speed * simSpeed;
+        // Float slightly around origin
+        this.x = this.originX + Math.sin(this.phase) * 5;
+        this.y = this.originY + Math.cos(this.phase) * 5;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < this.points.length; i++) {
+          const pt = this.points[i];
+          const offsetY = Math.sin(this.phase + i * 0.8) * 3;
+          if (i === 0) ctx.moveTo(pt.x, offsetY);
+          else ctx.lineTo(pt.x, offsetY);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // Ribosomal Protein
+    class ProteinParticle {
+      constructor(x, y, targetX, targetY) {
+        this.x = x;
+        this.y = y;
+        this.targetX = targetX;
+        this.targetY = targetY;
+        this.speed = 1.2 + Math.random() * 0.8;
+        this.radius = 3.5;
+        this.color = '#00e676'; // Bright green
+        this.state = 'entering'; // 'entering', 'assembling'
+      }
+
+      update() {
+        // Move towards target in nucleolus
+        const dx = this.targetX - this.x;
+        const dy = this.targetY - this.y;
+        const d = Math.sqrt(dx*dx + dy*dy);
+        
+        if (d > 2) {
+          this.x += (dx / d) * this.speed * simSpeed;
+          this.y += (dy / d) * this.speed * simSpeed;
+        } else {
+          this.state = 'assembling';
+        }
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.shadowColor = 'rgba(0, 230, 118, 0.4)';
+        ctx.shadowBlur = 4;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    // Ribosomal Subunit (Large or Small)
+    class RibosomalSubunit {
+      constructor(type, x, y) {
+        this.type = type; // 'small' or 'large'
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.2) * 0.5; // Drift slightly rightwards
+        this.vy = (Math.random() - 0.5) * 0.5;
+        this.state = 'nucleoplasm'; // 'nucleoplasm', 'targeted', 'exporting', 'cytoplasm', 'translating'
+        this.targetPore = null;
+        this.poreProgress = 0; // 0 to 1 during passage
+        this.color = type === 'small' ? '#ff9100' : '#ff4f00'; // Amber vs Orange-Red
+        this.size = type === 'small' ? 7 : 10;
+        this.angle = Math.random() * Math.PI * 2;
+        this.pathHighlight = Math.random() < 0.15; // Only highlight some for path tracking
+      }
+
+      update() {
+        if (this.state === 'nucleoplasm') {
+          // Brownian drift within nucleus boundary
+          this.x += this.vx * simSpeed;
+          this.y += this.vy * simSpeed;
+
+          // Boundary checks - keep inside nucleus or direct to pores
+          const d = dist(this.x, this.y, nucleusCenter.x, nucleusCenter.y);
+          
+          if (d > nucleusRadius - 20) {
+            // If near edge, look for closest pore
+            let closestPore = null;
+            let minDist = 120;
+            
+            nuclearPores.forEach(pore => {
+              const dp = dist(this.x, this.y, pore.x, pore.y);
+              if (dp < minDist) {
+                minDist = dp;
+                closestPore = pore;
+              }
+            });
+
+            if (closestPore && this.x > nucleusCenter.x - 30) {
+              // Capture by pore
+              this.state = 'targeted';
+              this.targetPore = closestPore;
+            } else {
+              // Bounce back inside nucleus
+              const angle = Math.atan2(this.y - nucleusCenter.y, this.x - nucleusCenter.x);
+              this.x = nucleusCenter.x + Math.cos(angle) * (nucleusRadius - 22);
+              this.y = nucleusCenter.y + Math.sin(angle) * (nucleusRadius - 22);
+              this.vx = -this.vx * 0.8 + (Math.random() - 0.5) * 0.2;
+              this.vy = -this.vy * 0.8 + (Math.random() - 0.5) * 0.2;
+            }
+          }
+        } 
+        
+        else if (this.state === 'targeted') {
+          // Steer directly into nuclear pore entry point
+          const dx = this.targetPore.x - this.x;
+          const dy = this.targetPore.y - this.y;
+          const d = Math.sqrt(dx*dx + dy*dy);
+          
+          if (d > 3) {
+            this.x += (dx / d) * 0.8 * simSpeed;
+            this.y += (dy / d) * 0.8 * simSpeed;
+            
+            // Align angle smoothly to pore's exit path
+            const diffAngle = this.targetPore.angle - this.angle;
+            this.angle += diffAngle * 0.1 * simSpeed;
+          } else {
+            // Trigger pore export transit
+            this.state = 'exporting';
+            this.poreProgress = 0;
+          }
+        } 
+        
+        else if (this.state === 'exporting') {
+          // Animate transit through pore: slide along the pore angle
+          this.poreProgress += 0.015 * simSpeed;
+          
+          // Squeeze shape deformation factor (stretches along exit path)
+          const exitDistance = 30; // transit span
+          const startX = this.targetPore.x - Math.cos(this.targetPore.angle) * 8;
+          const startY = this.targetPore.y - Math.sin(this.targetPore.angle) * 8;
+          
+          this.x = startX + Math.cos(this.targetPore.angle) * exitDistance * this.poreProgress;
+          this.y = startY + Math.sin(this.targetPore.angle) * exitDistance * this.poreProgress;
+          this.angle = this.targetPore.angle;
+
+          if (this.poreProgress >= 1) {
+            this.state = 'cytoplasm';
+            this.vx = Math.cos(this.angle) * (0.3 + Math.random() * 0.4);
+            this.vy = Math.sin(this.angle) * (0.3 + Math.random() * 0.4) + (Math.random() - 0.5) * 0.3;
+          }
+        } 
+        
+        else if (this.state === 'cytoplasm') {
+          // Drift inside cytoplasm (the right section of the screen)
+          this.x += this.vx * simSpeed;
+          this.y += this.vy * simSpeed;
+
+          // Stay within cytoplasm area
+          if (this.x < nucleusCenter.x + Math.sqrt(nucleusRadius*nucleusRadius - (this.y - nucleusCenter.y)*(this.y - nucleusCenter.y)) + 5) {
+            this.vx = Math.abs(this.vx) * 0.8; // bounce away from envelope outer wall
+          }
+          if (this.x > 790) this.vx = -Math.abs(this.vx) * 0.8;
+          if (this.y < 10 || this.y > 590) this.vy = -this.vy;
+
+          // Attempt to find translation match
+          this.lookForPartner();
+        }
+      }
+
+      lookForPartner() {
+        if (this.type !== 'small') return; // Let Small Subunit initiate assembly
+
+        // Search for a Large Subunit nearby in cytoplasm
+        for (let i = 0; i < subunits.length; i++) {
+          const other = subunits[i];
+          if (other.type === 'large' && other.state === 'cytoplasm') {
+            const distance = dist(this.x, this.y, other.x, other.y);
+            if (distance < 25) {
+              // Find nearest mRNA strand with space
+              const mrna = findAvailableMRNA(this.x, this.y);
+              if (mrna) {
+                // Combine into fully functioning ribosome
+                completedRibosomes.push(new RibosomeComplex(mrna, this, other));
+                
+                // Remove the raw subunits from main list
+                subunits.splice(subunits.indexOf(this), 1);
+                subunits.splice(subunits.indexOf(other), 1);
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1;
+
+        // Custom glow effect
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = this.state === 'exporting' ? 10 : 4;
+
+        if (this.state === 'exporting') {
+          // Deform (stretch) subunit as it squeezes through pore channel
+          ctx.scale(1.4, 0.7);
+        }
+
+        if (this.type === 'small') {
+          // Draw small subunit (dome cap)
+          ctx.beginPath();
+          ctx.arc(0, 0, this.size, Math.PI, 0, false);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        } else {
+          // Draw large subunit (crown-like or grooved sphere)
+          ctx.beginPath();
+          ctx.moveTo(-this.size, 0);
+          ctx.quadraticCurveTo(-this.size, -this.size, 0, -this.size);
+          ctx.quadraticCurveTo(this.size, -this.size, this.size, 0);
+          ctx.lineTo(this.size * 0.6, this.size * 0.4);
+          ctx.quadraticCurveTo(0, this.size * 0.1, -this.size * 0.6, this.size * 0.4);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        }
+
+        ctx.restore();
+
+        // Draw dotted path from origin (nucleolus) if requested
+        if (showPaths && showLabels && this.pathHighlight && this.state !== 'cytoplasm' && this.state !== 'translating') {
+          ctx.save();
+          ctx.strokeStyle = 'rgba(255, 145, 0, 0.25)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([3, 4]);
+          ctx.beginPath();
+          ctx.moveTo(nucleusCenter.x, nucleusCenter.y);
+          if (this.state === 'targeted' || this.state === 'exporting') {
+            ctx.quadraticCurveTo(
+              (nucleusCenter.x + this.targetPore.x)/2 - 30, 
+              (nucleusCenter.y + this.targetPore.y)/2 + 20, 
+              this.targetPore.x, this.targetPore.y
+            );
+          } else {
+            ctx.lineTo(this.x, this.y);
+          }
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }
+
+    // mRNA Strand in cytoplasm
+    class mRNAStrand {
+      constructor(x, y, length) {
+        this.x = x;
+        this.y = y;
+        this.length = length;
+        this.activeRibosomes = 0;
+      }
+
+      draw() {
+        // Draw mRNA backbone
+        ctx.save();
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.45)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x, this.y + this.length);
+        ctx.stroke();
+
+        // Draw nucleotide codons (colored teeth along backbone)
+        ctx.lineWidth = 2;
+        for (let offset = 8; offset < this.length; offset += 10) {
+          const toothColor = ['#ef4444', '#3b82f6', '#facc15', '#00e676'][Math.floor((offset/10) % 4)];
+          ctx.strokeStyle = toothColor;
+          ctx.beginPath();
+          ctx.moveTo(this.x, this.y + offset);
+          ctx.lineTo(this.x + 6, this.y + offset);
+          ctx.stroke();
+        }
+        
+        if (showLabels && focusMode === 'translation') {
+          ctx.fillStyle = 'rgba(0, 229, 255, 0.7)';
+          ctx.font = '9px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
+          ctx.fillText("mRNA STRAND", this.x - 20, this.y - 10);
+        }
+        ctx.restore();
+      }
+    }
+
+    // Assembled Ribosome translating protein along mRNA
+    class RibosomeComplex {
+      constructor(mrna, smallSub, largeSub) {
+        this.mrna = mrna;
+        this.x = mrna.x;
+        this.progress = 0; // progress ratio along mRNA length (0 to 1)
+        this.y = mrna.y;
+        this.peptideChain = []; // Growing array of amino acids
+        this.speed = 0.001 + Math.random() * 0.001;
+        
+        mrna.activeRibosomes++;
+        
+        // Populate initial peptide circles
+        this.peptideTimer = 0;
+      }
+
+      update() {
+        this.progress += this.speed * simSpeed;
+        this.y = this.mrna.y + this.mrna.length * this.progress;
+
+        // Generate growing peptide chain
+        this.peptideTimer += simSpeed;
+        if (this.peptideTimer > 40) {
+          this.peptideTimer = 0;
+          if (this.peptideChain.length < 12) {
+            this.peptideChain.push({
+              x: -12 - Math.random() * 8,
+              y: -5 + (Math.random() - 0.5) * 5,
+              color: ['#00e676', '#ff9100', '#d500f9', '#00e5ff'][Math.floor(Math.random() * 4)]
+            });
+          }
+        }
+
+        // Translation complete! Release ribosome and protein
+        if (this.progress >= 0.95) {
+          this.release();
+        }
+      }
+
+      release() {
+        this.mrna.activeRibosomes--;
+        
+        // Spawn subunits back as independent drifting entities in Cytoplasm
+        const sSub = new RibosomalSubunit('small', this.x + 10, this.y - 5);
+        sSub.state = 'cytoplasm';
+        sSub.vx = 0.5 + Math.random() * 0.5;
+        sSub.vy = (Math.random() - 0.5) * 0.5;
+
+        const lSub = new RibosomalSubunit('large', this.x + 10, this.y + 5);
+        lSub.state = 'cytoplasm';
+        lSub.vx = 0.5 + Math.random() * 0.5;
+        lSub.vy = (Math.random() - 0.5) * 0.5;
+
+        subunits.push(sSub, lSub);
+        
+        // Drop protein chain to drift away
+        let proteinBlobY = this.y;
+        let proteinBlobX = this.x - 20;
+        
+        // Filter out of active list
+        completedRibosomes.splice(completedRibosomes.indexOf(this), 1);
+      }
+
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        // Draw Peptide/Protein Chain tail
+        ctx.strokeStyle = 'rgba(0, 230, 118, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        this.peptideChain.forEach((aa, idx) => {
+          ctx.lineTo(aa.x, aa.y);
+        });
+        ctx.stroke();
+
+        this.peptideChain.forEach((aa) => {
+          ctx.fillStyle = aa.color;
+          ctx.beginPath();
+          ctx.arc(aa.x, aa.y, 3, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Draw Ribosome Complex (combined large and small subunits)
+        // Small Subunit (bottom/side)
+        ctx.fillStyle = '#ff9100'; // Amber
+        ctx.shadowColor = '#ff9100';
+        ctx.shadowBlur = 4;
+        ctx.beginPath();
+        ctx.arc(6, -6, 7, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Large Subunit (top/side)
+        ctx.fillStyle = '#ff4f00'; // Red-Orange
+        ctx.shadowColor = '#ff4f00';
+        ctx.shadowBlur = 4;
+        ctx.beginPath();
+        ctx.arc(10, 4, 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (showLabels && focusMode === 'translation') {
+          ctx.fillStyle = '#fff';
+          ctx.font = '9px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
+          ctx.fillText("Active Ribosome", 22, 5);
+          
+          ctx.fillStyle = '#00e676';
+          ctx.fillText("Growing Protein Chain", -110, -10);
+        }
+
+        ctx.restore();
+      }
+    }
+
+    // Find mRNA strand with space for translations
+    function findAvailableMRNA(x, y) {
+      let bestStrand = null;
+      let minDist = 9999;
+      
+      mrnaStrands.forEach(mrna => {
+        if (mrna.activeRibosomes < 2) {
+          const distance = dist(x, y, mrna.x, mrna.y + mrna.length/2);
+          if (distance < minDist) {
+            minDist = distance;
+            bestStrand = mrna;
+          }
+        }
+      });
+      return bestStrand;
+    }
+
+    // Initialize Simulation variables
+    function initSimulation() {
+      proteins = [];
+      rRnas = [];
+      subunits = [];
+      completedRibosomes = [];
+      mrnaStrands = [];
+
+      // Create stable mRNA strands in the Cytoplasm region (right border)
+      mrnaStrands.push(new mRNAStrand(600, 100, 160));
+      mrnaStrands.push(new mRNAStrand(700, 220, 180));
+      mrnaStrands.push(new mRNAStrand(630, 360, 150));
+
+      // Create starting nucleolus rRnas
+      for(let i=0; i<15; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.random() * (nucleolusRadius - 20);
+        rRnas.push(new RRNA(
+          nucleusCenter.x + Math.cos(angle) * radius,
+          nucleusCenter.y + Math.sin(angle) * radius
+        ));
+      }
+
+      // Create few initial subunits inside nucleus
+      for(let i=0; i<8; i++) {
+        const type = i % 2 === 0 ? 'small' : 'large';
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 60 + Math.random() * 80;
+        const sub = new RibosomalSubunit(type, 
+          nucleusCenter.x + Math.cos(angle) * radius, 
+          nucleusCenter.y + Math.sin(angle) * radius
+        );
+        subunits.push(sub);
+      }
+    }
+
+    // --- Production & synthesis engine ---
+    let tickCount = 0;
+    
+    function handleSpawning() {
+      tickCount += simSpeed;
+      
+      // Control rates based on slider selection
+      // Normal: spawn check every 40 ticks, Low: 90 ticks, High: 20 ticks
+      const spawnThreshold = [120, 55, 25][synthesisRate - 1];
+
+      if (tickCount >= spawnThreshold) {
+        tickCount = 0;
+
+        // 1. Synthesize new rRNA strand in nucleolus if count is low
+        if (rRnas.length < 25) {
+          const angle = Math.random() * Math.PI * 2;
+          const radius = Math.random() * (nucleolusRadius - 15);
+          rRnas.push(new RRNA(
+            nucleusCenter.x + Math.cos(angle) * radius,
+            nucleusCenter.y + Math.sin(angle) * radius
+          ));
+        }
+
+        // 2. Bring in ribosomal proteins from cytoplasm to Nucleolus
+        // Pick random point inside cytoplasm to start protein particle
+        const cytX = 580 + Math.random() * 150;
+        const cytY = 50 + Math.random() * 500;
+        
+        // Direct it to a target spot in the Nucleolus
+        const targetAngle = Math.random() * Math.PI * 2;
+        const targetRadius = Math.random() * (nucleolusRadius - 10);
+        const targetX = nucleusCenter.x + Math.cos(targetAngle) * targetRadius;
+        const targetY = nucleusCenter.y + Math.sin(targetAngle) * targetRadius;
+
+        proteins.push(new ProteinParticle(cytX, cytY, targetX, targetY));
+      }
+
+      // Process protein particles assembling inside the Nucleolus
+      for (let i = proteins.length - 1; i >= 0; i--) {
+        const p = proteins[i];
+        p.update();
+        if (p.state === 'assembling') {
+          // Combined protein + rRNA triggers the creation of a ribosomal subunit!
+          // Remove protein
+          proteins.splice(i, 1);
+
+          // Find an rRNA that isn't assembled and dissolve/use it
+          if (rRnas.length > 0) {
+            rRnas.pop(); // Consume RNA
+          }
+
+          // Spawn new subunit (alternating Large and Small)
+          const newType = Math.random() < 0.5 ? 'small' : 'large';
+          // Start at target location (within nucleolus)
+          const sub = new RibosomalSubunit(newType, p.x, p.y);
+          subunits.push(sub);
+        }
+      }
+    }
+
+    // --- Main Render / Animation Loop ---
+    function animate() {
+      if (isPlaying) {
+        handleSpawning();
+        
+        // Update entities
+        rRnas.forEach(r => r.update());
+        subunits.forEach(s => s.update());
+        completedRibosomes.forEach(cr => cr.update());
+      }
+
+      // Handle Camera Zoom/Pan smoothing
+      currentZoom += (targetZoom - currentZoom) * 0.08;
+      currentPanX += (targetPanX - currentPanX) * 0.08;
+      currentPanY += (targetPanY - currentPanY) * 0.08;
+
+      // Clear Canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.save();
+      // Apply Focus Zoom & Pan
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(currentZoom, currentZoom);
+      ctx.translate(-canvas.width / 2 + currentPanX, -canvas.height / 2 + currentPanY);
+
+      // --- Draw Background Structures ---
+
+      // 1. Draw Cytoplasm Region (Outer glow and background grid)
+      ctx.fillStyle = '#060a18';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw faint background grid
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.015)';
+      ctx.lineWidth = 1;
+      const gridSize = 30;
+      for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += gridSize) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      // 2. Draw Nucleoplasm (Inside Nucleus circle)
+      ctx.beginPath();
+      ctx.arc(nucleusCenter.x, nucleusCenter.y, nucleusRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#050c1f';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.08)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 3. Draw Chromatin Fibers (wavy background lines inside nucleoplasm)
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.04)';
+      ctx.lineWidth = 1.5;
+      
+      // Random wavy lines connecting chromatin
+      ctx.beginPath();
+      ctx.moveTo(150, 180); ctx.bezierCurveTo(200, 120, 220, 240, 300, 180);
+      ctx.moveTo(140, 360); ctx.bezierCurveTo(180, 420, 240, 320, 290, 430);
+      ctx.moveTo(350, 150); ctx.bezierCurveTo(420, 180, 440, 280, 460, 200);
+      ctx.moveTo(320, 440); ctx.bezierCurveTo(400, 410, 440, 480, 460, 380);
+      ctx.stroke();
+
+      // 4. Draw Nucleolus Core (The dense round body)
+      const grad = ctx.createRadialGradient(
+        nucleusCenter.x, nucleusCenter.y, 5,
+        nucleusCenter.x, nucleusCenter.y, nucleolusRadius
+      );
+      grad.addColorStop(0, '#51006a');
+      grad.addColorStop(0.5, '#2b003a');
+      grad.addColorStop(1, '#07000d');
+      
+      ctx.beginPath();
+      ctx.arc(nucleusCenter.x, nucleusCenter.y, nucleolusRadius, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Draw Nucleolus boundary glow
+      ctx.strokeStyle = 'rgba(213, 0, 249, 0.4)';
+      ctx.lineWidth = 3;
+      ctx.shadowColor = 'rgba(213, 0, 249, 0.6)';
+      ctx.shadowBlur = 15;
+      ctx.stroke();
+      ctx.shadowBlur = 0; // reset shadow
+
+      // 5. Draw Nuclear Envelope (Double membrane wall with gaps for pores)
+      ctx.save();
+      ctx.strokeStyle = '#005b82'; // Darker blue double wall
+      ctx.lineWidth = 2.5;
+
+      // Draw multiple segments between pores to leave physical gaps
+      const sortedPores = [...nuclearPores].sort((a,b) => a.angle - b.angle);
+      
+      // We will trace the circle, skipping sections that have pores
+      const numSegments = 30;
+      for (let i = 0; i < numSegments; i++) {
+        const startAng = (i / numSegments) * Math.PI * 2;
+        const endAng = ((i + 0.85) / numSegments) * Math.PI * 2;
+
+        // Check if this segment overlaps with any nuclear pore
+        let overlapsPore = false;
+        nuclearPores.forEach(pore => {
+          let diff = Math.abs(startAng - pore.angle);
+          if (diff > Math.PI) diff = Math.PI * 2 - diff;
+          if (diff < 0.15) overlapsPore = true;
+        });
+
+        if (!overlapsPore) {
+          // Draw inner and outer nuclear membranes
+          ctx.beginPath();
+          ctx.arc(nucleusCenter.x, nucleusCenter.y, nucleusRadius - 3, startAng, endAng);
+          ctx.stroke();
+          
+          ctx.beginPath();
+          ctx.arc(nucleusCenter.x, nucleusCenter.y, nucleusRadius + 3, startAng, endAng);
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
+
+      // 6. Draw Nuclear Pore Complexes
+      nuclearPores.forEach(pore => {
+        ctx.save();
+        ctx.translate(pore.x, pore.y);
+        ctx.rotate(pore.angle);
+
+        // Draw structural pore gates (cyan blocks/rings bridging membrane)
+        ctx.fillStyle = 'rgba(0, 229, 255, 0.85)';
+        ctx.shadowColor = 'rgba(0, 229, 255, 0.8)';
+        ctx.shadowBlur = 6;
+
+        // Top ring piece
+        ctx.fillRect(-6, -14, 12, 4);
+        // Bottom ring piece
+        ctx.fillRect(-6, 10, 12, 4);
+        
+        // Inner receptor gate guide lines (faint cyan lines)
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(-4, -10);
+        ctx.lineTo(8, -4);
+        ctx.moveTo(-4, 10);
+        ctx.lineTo(8, 4);
+        ctx.stroke();
+
+        ctx.restore();
+      });
+
+      // --- Draw Dynamic Entities ---
+      
+      // rRNA strands inside nucleolus
+      rRnas.forEach(r => r.draw());
+
+      // Proteins entering from cytoplasm
+      proteins.forEach(p => p.draw());
+
+      // Ribosomal subunits
+      subunits.forEach(s => s.draw());
+
+      // mRNA Strands in cytoplasm
+      mrnaStrands.forEach(mrna => mrna.draw());
+
+      // Assembled translation complexes
+      completedRibosomes.forEach(cr => cr.draw());
+
+      // --- Draw Labels & Explanations overlay ---
+      if (showLabels) {
+        drawGuidelinesAndLabels();
+      }
+
+      ctx.restore(); // restore zoom transform
+
+      requestAnimationFrame(animate);
+    }
+
+    // Helper to draw text with background box
+    function drawLabel(text, x, y, color, alignment = 'center') {
+      ctx.save();
+      ctx.font = 'bold 11px ' + getComputedStyle(document.body).getPropertyValue('--font-sans');
+      const textWidth = ctx.measureText(text).width;
+      
+      ctx.fillStyle = 'rgba(4, 10, 24, 0.85)';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      
+      let rectX = x - textWidth/2 - 6;
+      if (alignment === 'left') rectX = x - 6;
+      if (alignment === 'right') rectX = x - textWidth - 6;
+
+      ctx.beginPath();
+      ctx.roundRect(rectX, y - 10, textWidth + 12, 18, 4);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = alignment;
+      ctx.fillText(text, x, y + 3);
+      ctx.restore();
+    }
+
+    // Draw static arrows and descriptions inside canvas
+    function drawGuidelinesAndLabels() {
+      // 1. Nucleolus (Dense round body)
+      if (focusMode === 'full' || focusMode === 'assembly') {
+        drawLabel("NUCLEOLUS: Dense Round Body", nucleusCenter.x, nucleusCenter.y - 95, 'var(--magenta-accent)');
+        ctx.strokeStyle = 'var(--magenta-accent)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(nucleusCenter.x, nucleusCenter.y - 83);
+        ctx.lineTo(nucleusCenter.x, nucleusCenter.y - 45);
+        ctx.stroke();
+        
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.font = '9px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
+        ctx.textAlign = 'center';
+        ctx.fillText("Function: Synthesis of Ribosomal Subunits", nucleusCenter.x, nucleusCenter.y - 110);
+      }
+
+      // 2. Chromatin
+      if (focusMode === 'full') {
+        drawLabel("Chromatin DNA", 160, 130, 'rgba(0, 229, 255, 0.4)');
+      }
+
+      // 3. Nucleus / Nuclear Envelope
+      if (focusMode === 'full' || focusMode === 'export') {
+        drawLabel("Nuclear Envelope (Double Membrane)", 180, 480, '#005b82');
+        ctx.strokeStyle = '#005b82';
+        ctx.beginPath();
+        ctx.moveTo(200, 468);
+        ctx.lineTo(220, 440);
+        ctx.stroke();
+      }
+
+      // 4. Nuclear Pores
+      if (focusMode === 'full' || focusMode === 'export') {
+        // Draw label pointing to one of the pores
+        const samplePore = nuclearPores[2]; // middle pore
+        drawLabel("Nuclear Pore", samplePore.x - 70, samplePore.y - 30, 'var(--cyan-accent)', 'right');
+        
+        ctx.strokeStyle = 'var(--cyan-accent)';
+        ctx.beginPath();
+        ctx.moveTo(samplePore.x - 75, samplePore.y - 30);
+        ctx.lineTo(samplePore.x - 15, samplePore.y - 10);
+        ctx.stroke();
+        
+        ctx.fillStyle = 'rgba(0, 229, 255, 0.6)';
+        ctx.font = '9px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
+        ctx.fillText("Exit gates for subunits", samplePore.x - 75, samplePore.y - 18);
+      }
+
+      // 5. Cytoplasm
+      if (focusMode === 'full' || focusMode === 'translation') {
+        drawLabel("Cytoplasm (Outer Cell)", 680, 50, 'var(--green-accent)');
+      }
+    }
+
+    // --- Control Handlers ---
+
+    function togglePlayPause() {
+      isPlaying = !isPlaying;
+      const btn = document.getElementById('playPauseBtn');
+      if (isPlaying) {
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg> Pause`;
+      } else {
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Resume`;
+      }
+    }
+
+    function resetSimulation() {
+      initSimulation();
+    }
+
+    // Interactive sliders
+    function updateSpeed() {
+      const val = parseFloat(document.getElementById('speedSlider').value);
+      simSpeed = val;
+      document.getElementById('speedVal').innerText = val.toFixed(1) + 'x';
+    }
+
+    function updateRate() {
+      const val = parseInt(document.getElementById('rateSlider').value);
+      synthesisRate = val;
+      const rateLabel = ['Low', 'Normal', 'High'][val - 1];
+      document.getElementById('rateVal').innerText = rateLabel;
+    }
+
+    function toggleOverlay(type) {
+      if (type === 'labels') {
+        showLabels = document.getElementById('toggleLabels').checked;
+      }
+      if (type === 'paths') {
+        showPaths = document.getElementById('togglePaths').checked;
+      }
+    }
+
+    // Camera focused views
+    function setFocusMode(mode) {
+      focusMode = mode;
+      
+      const buttons = document.querySelectorAll('.mode-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      
+      let index = 0;
+      if (mode === 'assembly') index = 1;
+      else if (mode === 'export') index = 2;
+      else if (mode === 'translation') index = 3;
+      buttons[index].classList.add('active');
+
+      if (mode === 'full') {
+        targetZoom = 1.0;
+        targetPanX = 0;
+        targetPanY = 0;
+      } else if (mode === 'assembly') {
+        targetZoom = 1.8;
+        targetPanX = canvas.width/2 - nucleusCenter.x;
+        targetPanY = canvas.height/2 - nucleusCenter.y;
+      } else if (mode === 'export') {
+        targetZoom = 1.8;
+        targetPanX = canvas.width/2 - (nucleusCenter.x + 130);
+        targetPanY = canvas.height/2 - nucleusCenter.y;
+      } else if (mode === 'translation') {
+        targetZoom = 1.7;
+        targetPanX = canvas.width/2 - 650;
+        targetPanY = canvas.height/2 - 300;
+      }
+    }
+
+    // Tab switcher
+    function switchTab(tabName) {
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      tabBtns.forEach(btn => btn.classList.remove('active'));
+      
+      const targetBtn = Array.from(tabBtns).find(btn => btn.innerText.toLowerCase().includes(tabName));
+      if (targetBtn) targetBtn.classList.add('active');
+
+      const panels = document.querySelectorAll('.tab-panel');
+      panels.forEach(p => p.classList.remove('active'));
+      
+      document.getElementById('tab-' + tabName).classList.add('active');
+    }
+
+    // Quiz Questions
+    const quizQuestions = [
+      {
+        question: "What is the dense round body located inside the nucleus called?",
+        options: [
+          "Nucleoid",
+          "Nucleolus",
+          "Mitochondria",
+          "Ribosome"
+        ],
+        correct: 1,
+        explanation: "Correct! The <strong>Nucleolus</strong> is the dense round body located inside the nucleus. A nucleoid is only in bacteria (prokaryotes) that lack a nucleus."
+      },
+      {
+        question: "What is the primary function of the nucleolus?",
+        options: [
+          "Generating cellular energy (ATP)",
+          "Controlling transport into the cell",
+          "Synthesizing ribosomal subunits",
+          "Replicating genetic DNA"
+        ],
+        correct: 2,
+        explanation: "Correct! The nucleolus acts as a factory, synthesizing ribosomal RNA (rRNA) and joining it with proteins to construct the large and small ribosomal subunits."
+      },
+      {
+        question: "How do these ribosomal subunits travel from the nucleus to the cytoplasm?",
+        options: [
+          "Through gates called Nuclear Pores",
+          "By squeezing directly through the lipids",
+          "They are transported by vesicles",
+          "They never leave the nucleus"
+        ],
+        correct: 0,
+        explanation: "Correct! The nuclear envelope has selective gates called <strong>Nuclear Pores</strong>. The subunits exit through these pores to carry out their functions in the cytoplasm."
+      },
+      {
+        question: "Why do ribosomal subunits enter the cytoplasm?",
+        options: [
+          "To be broken down and digested",
+          "To join together on mRNA and translate proteins",
+          "To protect the cell membrane",
+          "To undergo photosynthesis"
+        ],
+        correct: 1,
+        explanation: "Correct! Once in the cytoplasm, the large and small subunits attach to mRNA strands, forming complete ribosomes that synthesize proteins essential for the cell's survival."
+      }
+    ];
+
+    let currentQuestionIdx = 0;
+    let quizScore = 0;
+    let quizAnswered = false;
+
+    function loadQuestion() {
+      const q = quizQuestions[currentQuestionIdx];
+      quizAnswered = false;
+
+      document.getElementById('quiz-question').innerText = q.question;
+      document.getElementById('question-num-text').innerText = (currentQuestionIdx + 1) + '/' + quizQuestions.length;
+
+      const list = document.getElementById('quiz-options');
+      list.innerHTML = '';
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = opt;
+        btn.onclick = () => selectOption(idx);
+        list.appendChild(btn);
+      });
+
+      document.getElementById('quiz-explanation').style.display = 'none';
+      document.getElementById('next-question-btn').style.display = 'none';
+
+      const dots = document.getElementById('quiz-dots-container').children;
+      Array.from(dots).forEach((dot, idx) => {
+        dot.className = 'quiz-dot';
+        if (idx === currentQuestionIdx) dot.classList.add('active');
+        else if (idx < currentQuestionIdx) {
+          dot.classList.add('correct'); 
+        }
+      });
+    }
+
+    function selectOption(selectedIdx) {
+      if (quizAnswered) return;
+      quizAnswered = true;
+
+      const q = quizQuestions[currentQuestionIdx];
+      const options = document.getElementById('quiz-options').children;
+      const dots = document.getElementById('quiz-dots-container').children;
+
+      if (selectedIdx === q.correct) {
+        options[selectedIdx].classList.add('correct');
+        dots[currentQuestionIdx].className = 'quiz-dot correct';
+        quizScore++;
+        spawnQuizCelebration();
+      } else {
+        options[selectedIdx].classList.add('wrong');
+        options[q.correct].classList.add('correct');
+        dots[currentQuestionIdx].className = 'quiz-dot wrong';
+      }
+
+      const expBox = document.getElementById('quiz-explanation');
+      expBox.innerHTML = `<p>${q.explanation}</p>`;
+      expBox.style.display = 'block';
+
+      const nextBtn = document.getElementById('next-question-btn');
+      if (currentQuestionIdx < quizQuestions.length - 1) {
+        nextBtn.innerText = "Next Question";
+      } else {
+        nextBtn.innerText = "Finish Quiz & Restart";
+      }
+      nextBtn.style.display = 'block';
+    }
+
+    function nextQuestion() {
+      if (currentQuestionIdx < quizQuestions.length - 1) {
+        currentQuestionIdx++;
+        loadQuestion();
+      } else {
+        currentQuestionIdx = 0;
+        quizScore = 0;
+        loadQuestion();
+      }
+    }
+
+    function spawnQuizCelebration() {
+      for(let i=0; i<30; i++) {
+        const randAngle = Math.random() * Math.PI * 2;
+        const randSpeed = 1 + Math.random() * 3;
+        proteins.push({
+          x: canvas.width/2,
+          y: canvas.height/2,
+          targetX: canvas.width/2 + Math.cos(randAngle) * 300,
+          targetY: canvas.height/2 + Math.sin(randAngle) * 300,
+          speed: randSpeed,
+          radius: 4,
+          color: 'var(--green-accent)',
+          state: 'entering',
+          update: function() {
+            this.x += Math.cos(randAngle) * this.speed * simSpeed;
+            this.y += Math.sin(randAngle) * this.speed * simSpeed;
+            this.speed *= 0.96;
+          },
+          draw: function() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+          }
+        });
+      }
+    }
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = ((e.clientX - rect.left) / rect.width) * canvas.width;
+      const clickY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+
+      const actualX = (clickX - canvas.width/2) / currentZoom + canvas.width/2 - currentPanX;
+      const actualY = (clickY - canvas.height/2) / currentZoom + canvas.height/2 - currentPanY;
+
+      proteins.push({
+        x: actualX,
+        y: actualY,
+        radius: 2,
+        maxRadius: 40,
+        color: 'var(--cyan-accent)',
+        update: function() {
+          this.radius += 1.5 * simSpeed;
+        },
+        draw: function() {
+          ctx.strokeStyle = this.color;
+          ctx.lineWidth = 2 * (1 - this.radius/this.maxRadius);
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+          ctx.stroke();
+        },
+        get state() {
+          return this.radius < this.maxRadius ? 'entering' : 'assembling';
+        }
+      });
+    });
+
+    initSimulation();
+    loadQuestion();
+    animate();
+
+  </script>
+</body>
+</html>
