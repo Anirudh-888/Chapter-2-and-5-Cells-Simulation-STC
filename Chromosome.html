@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STCpedia Lab - Chromatin & Chromosome Structure</title>
+  
+  <!-- Google Fonts for premium UI typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-panel: rgba(15, 23, 42, 0.75);
+      --bg-card: rgba(30, 41, 59, 0.5);
+      --border-color: rgba(99, 102, 241, 0.2);
+      --border-glow: 0 0 15px rgba(99, 102, 241, 0.15);
+      
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      
+      --indigo-accent: #6366f1;
+      --indigo-glow: rgba(99, 102, 241, 0.4);
+      --amber-accent: #f59e0b;
+      --amber-glow: rgba(245, 158, 11, 0.4);
+      --rose-accent: #f43f5e;
+      --rose-glow: rgba(244, 63, 94, 0.4);
+      --green-accent: #10b981;
+      --green-glow: rgba(16, 185, 129, 0.4);
+      --cyan-accent: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.4);
+      
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(30, 27, 75, 0.4) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.6) 0px, transparent 50%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header Styling */
+    header {
+      background: rgba(3, 7, 18, 0.9);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      z-index: 10;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--amber-accent), var(--rose-accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #000;
+      font-size: 1.1rem;
+      box-shadow: 0 0 15px var(--amber-glow);
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(to right, #fff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-badge {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid var(--indigo-accent);
+      color: var(--indigo-accent);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: var(--border-glow);
+    }
+
+    /* Main Content Layout */
+    .main-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 310px 1fr 340px;
+      gap: 15px;
+      padding: 15px;
+      height: calc(100vh - 60px);
+    }
+
+    /* Panels Base */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--indigo-accent);
+      text-transform: uppercase;
+    }
+
+    .panel-content {
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Viewport Center Panel */
+    .viewport-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #020308;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.95);
+    }
+
+    #viewportCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: transparent;
+      cursor: crosshair;
+    }
+
+    /* HUD Elements */
+    .hud-element {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      padding: 6px 12px;
+      border-radius: 6px;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+    }
+
+    .hud-top-left { top: 15px; left: 15px; border-left: 3px solid var(--indigo-accent); color: #fff; font-weight: bold; }
+    .hud-top-right { top: 15px; right: 15px; text-align: right; }
+    .hud-bottom-left { bottom: 15px; left: 15px; }
+
+    /* Control Sections */
+    .control-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .slider-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+    }
+
+    .slider-val {
+      color: var(--indigo-accent);
+      font-family: var(--font-mono);
+      font-weight: bold;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #1e293b;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--indigo-accent);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--indigo-glow);
+      transition: background 0.15s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      background: #fff;
+    }
+
+    /* Mode button list */
+    .btn-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mode-btn {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mode-btn:hover {
+      background: rgba(99, 102, 241, 0.05);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .mode-btn.active {
+      background: rgba(99, 102, 241, 0.18);
+      border-color: var(--indigo-accent);
+      color: #fff;
+      box-shadow: var(--border-glow);
+    }
+
+    .btn-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+
+    .mode-btn.active .btn-dot {
+      background: var(--indigo-accent);
+      box-shadow: 0 0 8px var(--indigo-accent);
+    }
+
+    .mode-btn.cell-a-btn .btn-dot { background-color: var(--amber-accent); }
+    .mode-btn.cell-a-btn.active .btn-dot { box-shadow: 0 0 8px var(--amber-accent); }
+    .mode-btn.cell-b-btn .btn-dot { background-color: var(--rose-accent); }
+    .mode-btn.cell-b-btn.active .btn-dot { box-shadow: 0 0 8px var(--rose-accent); }
+
+    /* Interactive state toggles */
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .checkbox-row input {
+      display: none;
+    }
+
+    .check-custom {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 4px;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .checkbox-row input:checked + .check-custom {
+      border-color: var(--indigo-accent);
+      background: var(--indigo-accent);
+    }
+
+    .checkbox-row input:checked + .check-custom::after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 1px;
+      width: 4px;
+      height: 8px;
+      border: solid #000;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    /* Playback Action Buttons */
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .action-btn {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .action-btn.primary {
+      background: linear-gradient(135deg, var(--indigo-accent), #4f46e5);
+      color: #fff;
+      border: none;
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .action-btn.primary:hover {
+      box-shadow: 0 0 25px rgba(99, 102, 241, 0.55);
+      transform: translateY(-1px);
+    }
+
+    /* Tabbed Sidebar Panel */
+    .tab-header {
+      display: flex;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+    }
+
+    .tab-btn.active {
+      color: var(--indigo-accent);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--indigo-accent);
+      box-shadow: 0 0 8px var(--indigo-glow);
+    }
+
+    .tab-panel {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .tab-panel.active {
+      display: flex;
+    }
+
+    /* Learn tab styling */
+    .concept-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-left: 3px solid var(--indigo-accent);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.85rem;
+      line-height: 1.45;
+    }
+
+    .concept-card.chromatin { border-left-color: var(--amber-accent); }
+    .concept-card.chromosome { border-left-color: var(--rose-accent); }
+    .concept-card.dna { border-left-color: var(--green-accent); }
+    .concept-card.nucleosome { border-left-color: var(--cyan-accent); }
+
+    .concept-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+      color: #fff;
+    }
+
+    /* Alert / Tip card */
+    .tip-card {
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+      border-left: 3px solid var(--indigo-accent);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+
+    .tip-title {
+      font-weight: 700;
+      color: var(--indigo-accent);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Quiz Tab Styling */
+    .quiz-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .quiz-score-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .quiz-progress-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .quiz-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.2s;
+    }
+
+    .quiz-dot.active {
+      border-color: var(--indigo-accent);
+      background: rgba(99, 102, 241, 0.2);
+      box-shadow: 0 0 5px var(--indigo-accent);
+    }
+
+    .quiz-dot.correct {
+      background: var(--green-accent);
+      border-color: var(--green-accent);
+      box-shadow: 0 0 5px var(--green-accent);
+    }
+
+    .quiz-dot.wrong {
+      background: #ef4444;
+      border-color: #ef4444;
+      box-shadow: 0 0 5px #ef4444;
+    }
+
+    .question-box {
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: #fff;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .option-btn {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .option-btn.correct {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: var(--green-accent);
+      color: var(--green-accent);
+      font-weight: 600;
+    }
+
+    .option-btn.wrong {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    .explanation-box {
+      background: rgba(99, 102, 241, 0.04);
+      border: 1px solid rgba(99, 102, 241, 0.08);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: var(--text-main);
+      display: none;
+    }
+
+    .explanation-box p {
+      margin-bottom: 6px;
+    }
+
+    .explanation-box strong {
+      color: var(--indigo-accent);
+    }
+
+    .next-quiz-btn {
+      background: linear-gradient(135deg, var(--indigo-accent), #4f46e5);
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      display: none;
+    }
+
+    .next-quiz-btn:hover {
+      box-shadow: 0 0 12px var(--indigo-glow);
+    }
+
+    /* Warning for smaller devices */
+    .mobile-warning {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #030712;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .mobile-warning p {
+      font-size: 1.1rem;
+      color: var(--amber-accent);
+      margin-top: 15px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 900px) {
+      .mobile-warning {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile warning layout -->
+  <div class="mobile-warning">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--amber-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+      <line x1="8" y1="21" x2="16" y2="21"></line>
+      <line x1="12" y1="17" x2="12" y2="21"></line>
+    </svg>
+    <p>Please rotate your device to landscape mode or use a larger screen to interact with the Chromosome Lab.</p>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">C</div>
+      <div>
+        <h1>STCpedia Lab - Chromosome & Chromatin Packaging</h1>
+      </div>
+    </div>
+    <div class="nav-badge">Grade 9 CBSE / STC</div>
+  </header>
+
+  <!-- Workspace Grid -->
+  <div class="main-container">
+    
+    <!-- Controls (Left Sidebar) -->
+    <div class="glass-panel">
+      <div class="panel-header">
+        <div class="panel-title">Laboratory Controls</div>
+      </div>
+      <div class="panel-content">
+        
+        <!-- View Focus Modes -->
+        <div class="control-section">
+          <div class="control-label">View Selection</div>
+          <div class="btn-list">
+            <button class="mode-btn active" onclick="setFocusMode('overview')">
+              <span class="btn-dot"></span> Side-by-Side Overview
+            </button>
+            <button class="mode-btn cell-a-btn" onclick="setFocusMode('cellA')">
+              <span class="btn-dot"></span> Focus: Non-Dividing Cell
+            </button>
+            <button class="mode-btn cell-b-btn" onclick="setFocusMode('cellB')">
+              <span class="btn-dot"></span> Focus: Dividing Cell
+            </button>
+          </div>
+        </div>
+
+        <!-- Condensation Slider (DNA winding) -->
+        <div class="control-section">
+          <div class="control-label">Chromatin Condensation</div>
+          <div class="slider-row">
+            <div class="slider-info">
+              <span>Packing State</span>
+              <span id="condensationVal" class="slider-val">Decondensed</span>
+            </div>
+            <input type="range" id="condensationSlider" min="0" max="1" step="0.01" value="0.0" oninput="updateCondensation()">
+          </div>
+          <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.35; padding: 0 4px;">
+            Slide to wrap loose DNA threads into highly organized, rod-like chromosome structures.
+          </p>
+        </div>
+
+        <!-- UI Overlays toggles -->
+        <div class="control-section">
+          <div class="control-label">Visual Aids</div>
+          <label class="checkbox-row">
+            <input type="checkbox" id="toggleLabels" checked onchange="toggleLabels()">
+            <span class="check-custom"></span>
+            <span>Show Structure Labels</span>
+          </label>
+          <label class="checkbox-row" style="margin-top: 6px;">
+            <input type="checkbox" id="toggleMagnifier" checked onchange="toggleMagnifier()">
+            <span class="check-custom"></span>
+            <span>Show Magnified Structures</span>
+          </label>
+        </div>
+
+        <!-- Action Button -->
+        <div class="action-row">
+          <button class="action-btn primary" onclick="resetCondensation()">
+            Reset Condensation
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Interactive Canvas Viewport (Center) -->
+    <div class="viewport-container glass-panel">
+      <div class="hud-element hud-top-left" id="hudState">OVERVIEW ACTIVE</div>
+      <div class="hud-element hud-top-right">
+        CELL DIVISION LAB<br>
+        DNA STATE: MUTABLE
+      </div>
+      <div class="hud-element hud-bottom-left">Click either Cell to zoom and inspect nuclear contents.</div>
+      
+      <canvas id="viewportCanvas" width="800" height="600"></canvas>
+    </div>
+
+    <!-- Educational & Quiz Panel (Right Sidebar) -->
+    <div class="glass-panel">
+      <!-- Tab Controls -->
+      <div class="tab-header">
+        <button class="tab-btn active" onclick="switchTab('learn')">Learn</button>
+        <button class="tab-btn" onclick="switchTab('quiz')">Interactive Quiz</button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="panel-content" style="padding-top: 15px;">
+        
+        <!-- LEARN TAB -->
+        <div id="tab-learn" class="tab-panel active">
+          
+          <div class="tip-card">
+            <div class="tip-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              Key Biological Fact
+            </div>
+            Chromatin and Chromosomes are made of the <strong>exact same material</strong> (DNA and proteins). The only difference is how tightly packed (coiled) they are inside the cell!
+          </div>
+
+          <div class="concept-card chromatin">
+            <div class="concept-title">1. Chromatin (Non-Dividing)</div>
+            In a cell that is not dividing, the DNA is loose and spread out. It appears as a tangled network of <strong>long thread-like structures</strong> called chromatin. This allows the cell to read genetic codes easily.
+          </div>
+
+          <div class="concept-card nucleosome">
+            <div class="concept-title">2. Nucleosomes (Beads-on-a-string)</div>
+            If you zoom close into chromatin, you see the DNA double helix wrapping around clusters of 8 spherical <strong>histone proteins</strong>. These are called nucleosomes and look like beads on a string.
+          </div>
+
+          <div class="concept-card chromosome">
+            <div class="concept-title">3. Chromosomes (Dividing)</div>
+            When a cell prepares to divide, the chromatin thread coils up extremely tightly (condenses) into thick, <strong>rod-like structures</strong> called chromosomes. This prevents DNA from tangling or breaking during division.
+          </div>
+
+          <div class="concept-card dna">
+            <div class="concept-title">4. Chromatids, Centromeres & Genes</div>
+            <ul>
+              <li><strong>Sister Chromatids:</strong> The two arms of a replicated chromosome.</li>
+              <li><strong>Centromere:</strong> The central junction point holding chromatids together.</li>
+              <li><strong>Genes:</strong> Functional sections of DNA that code for proteins, visible as stripes (gene bands) on chromosome arms.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- QUIZ TAB -->
+        <div id="tab-quiz" class="tab-panel">
+          <div class="quiz-container">
+            <div class="quiz-score-banner">
+              <span>Question <strong id="question-num-text">1/4</strong></span>
+              <div class="quiz-progress-dots" id="quiz-dots-container">
+                <div class="quiz-dot active"></div>
+                <div class="quiz-dot"></div>
+                <div class="quiz-dot"></div>
+                <div class="quiz-dot"></div>
+              </div>
+            </div>
+
+            <div class="question-box" id="quiz-question">
+              Loading question...
+            </div>
+
+            <div class="options-list" id="quiz-options">
+              <!-- Dynamically populated -->
+            </div>
+
+            <div class="explanation-box" id="quiz-explanation">
+              <!-- Explanation -->
+            </div>
+
+            <button class="next-quiz-btn" id="next-question-btn" onclick="nextQuestion()">Next Question</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- Canvas Setup ---
+    const canvas = document.getElementById('viewportCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // UI & Control states
+    let showStructureLabels = true;
+    let showMagnifiedViews = true;
+    let focusMode = 'overview'; // 'overview', 'cellA', 'cellB'
+    let condensationRatio = 0.0; // 0.0 = chromatin threads, 1.0 = condensed rods
+
+    // Camera values for smooth transitions
+    let currentZoom = 1.0;
+    let currentPanX = 0;
+    let currentPanY = 0;
+    let targetZoom = 1.0;
+    let targetPanX = 0;
+    let targetPanY = 0;
+
+    // Define cell positions
+    const cellA = {
+      x: 230,
+      y: 300,
+      radius: 120,
+      nucleusX: 230,
+      nucleusY: 300,
+      nucleusRadius: 65,
+      label: "CELL A (Non-Dividing State)"
+    };
+
+    const cellB = {
+      x: 570,
+      y: 300,
+      radius: 120,
+      nucleusX: 570,
+      nucleusY: 300,
+      nucleusRadius: 65,
+      label: "CELL B (Dividing State)"
+    };
+
+    // --- Generate Chromatin Threads (Cell A) ---
+    const chromatinThreads = [];
+    const numThreads = 14;
+    for(let i=0; i<numThreads; i++) {
+      const threadPoints = [];
+      const steps = 15;
+      const angleOffset = Math.random() * Math.PI * 2;
+      
+      // Start in a random location inside cell A's nucleus
+      const centerR = Math.random() * 30;
+      const startX = cellA.nucleusX + Math.cos(angleOffset) * centerR;
+      const startY = cellA.nucleusY + Math.sin(angleOffset) * centerR;
+      
+      threadPoints.push({ x: startX, y: startY });
+
+      // Generate a winding random walk path constrained by nucleus boundaries
+      let cx = startX;
+      let cy = startY;
+      for (let j = 0; j < steps; j++) {
+        const angle = angleOffset + (j * 0.4) + (Math.random() - 0.5) * 1.5;
+        const length = 12 + Math.random() * 8;
+        let nx = cx + Math.cos(angle) * length;
+        let ny = cy + Math.sin(angle) * length;
+        
+        // Bounce back if extending past nuclear radius
+        const distToCenter = Math.sqrt((nx - cellA.nucleusX)**2 + (ny - cellA.nucleusY)**2);
+        if (distToCenter > cellA.nucleusRadius - 12) {
+          const normalAngle = Math.atan2(ny - cellA.nucleusY, nx - cellA.nucleusX);
+          nx = cellA.nucleusX + Math.cos(normalAngle) * (cellA.nucleusRadius - 15);
+          ny = cellA.nucleusY + Math.sin(normalAngle) * (cellA.nucleusRadius - 15);
+        }
+        
+        threadPoints.push({ x: nx, y: ny });
+        cx = nx;
+        cy = ny;
+      }
+      
+      chromatinThreads.push({
+        points: threadPoints,
+        wobblePhase: Math.random() * Math.PI * 2,
+        wobbleSpeed: 0.02 + Math.random() * 0.02
+      });
+    }
+
+    // --- Generate Condensed Chromosomes (Cell B) ---
+    // In a dividing eukaryotic cell, chromosomes are duplicated rod-like structures (X-shaped chromatid pairs)
+    const chromosomes = [
+      { x: cellB.nucleusX - 22, y: cellB.nucleusY - 20, size: 24, angle: 0.2, label: "Chr 1" },
+      { x: cellB.nucleusX + 22, y: cellB.nucleusY - 15, size: 20, angle: -0.3, label: "Chr 2" },
+      { x: cellB.nucleusX - 15, y: cellB.nucleusY + 22, size: 18, angle: -0.8, label: "Chr 3" },
+      { x: cellB.nucleusX + 18, y: cellB.nucleusY + 20, size: 22, angle: 0.5, label: "Chr 4" }
+    ];
+
+    // --- Main Animation Loop ---
+    let timeTick = 0;
+
+    function animate() {
+      timeTick += 0.05;
+
+      // Handle smooth camera zoom/pan interpolation
+      currentZoom += (targetZoom - currentZoom) * 0.08;
+      currentPanX += (targetPanX - currentPanX) * 0.08;
+      currentPanY += (targetPanY - currentPanY) * 0.08;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.save();
+      // Apply Camera Transforms
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(currentZoom, currentZoom);
+      ctx.translate(-canvas.width / 2 + currentPanX, -canvas.height / 2 + currentPanY);
+
+      // --- Draw Environment background ---
+      ctx.fillStyle = '#02040a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Faint sci-fi hexagonal/grid mesh
+      ctx.strokeStyle = 'rgba(99, 102, 241, 0.015)';
+      ctx.lineWidth = 1;
+      const gridSize = 40;
+      for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += gridSize) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      // --- Draw Cell A (Non-Dividing) ---
+      drawCellOutline(cellA, 'rgba(245, 158, 11, 0.1)', 'var(--amber-accent)');
+      drawNucleus(cellA.nucleusX, cellA.nucleusY, cellA.nucleusRadius, 'var(--amber-accent)', false);
+      
+      // Draw Chromatin inside Cell A nucleus (thread-like network)
+      ctx.save();
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.7)';
+      ctx.lineWidth = 1.4;
+      ctx.shadowColor = 'var(--amber-accent)';
+      ctx.shadowBlur = 4;
+      
+      chromatinThreads.forEach(thread => {
+        thread.wobblePhase += thread.wobbleSpeed;
+        ctx.beginPath();
+        thread.points.forEach((pt, idx) => {
+          // Add a subtle wobble motion to threads to show they are active living networks
+          const wobbleX = Math.sin(thread.wobblePhase + idx * 0.5) * 1.5;
+          const wobbleY = Math.cos(thread.wobblePhase + idx * 0.5) * 1.5;
+          if (idx === 0) ctx.moveTo(pt.x + wobbleX, pt.y + wobbleY);
+          else ctx.lineTo(pt.x + wobbleX, pt.y + wobbleY);
+        });
+        ctx.stroke();
+      });
+      ctx.restore();
+
+      // --- Draw Cell B (Dividing) ---
+      drawCellOutline(cellB, 'rgba(244, 63, 94, 0.1)', 'var(--rose-accent)');
+      
+      // Dividing cells have a dissolving nuclear envelope (Prophase/Metaphase)
+      drawNucleus(cellB.nucleusX, cellB.nucleusY, cellB.nucleusRadius, 'var(--rose-accent)', true);
+
+      // Draw condensed rod-like chromosomes inside Cell B
+      chromosomes.forEach(chr => {
+        drawChromosomeStructure(chr.x, chr.y, chr.size, chr.angle);
+      });
+
+      // --- Dynamic Condensation Demo (Overlay on overview) ---
+      // If condensationRatio > 0, draw condensation morph elements inside a central bubble or transitioning
+      if (condensationRatio > 0) {
+        drawCondensationEffect();
+      }
+
+      // --- Draw Magnification Zoom Details ---
+      if (showMagnifiedViews) {
+        if (focusMode === 'cellA') {
+          drawChromatinSubstructure();
+        } else if (focusMode === 'cellB') {
+          drawChromosomeSubstructure();
+        }
+      }
+
+      // --- Draw Text Guidelines & Labels ---
+      if (showStructureLabels) {
+        drawHUDLabels();
+      }
+
+      ctx.restore(); // restore camera transforms
+
+      requestAnimationFrame(animate);
+    }
+
+    // Helper: draw outer cell boundary
+    function drawCellOutline(cell, fillColor, strokeColor) {
+      ctx.save();
+      // Cell cytoplasm gradient
+      const grad = ctx.createRadialGradient(cell.x, cell.y, 10, cell.x, cell.y, cell.radius);
+      grad.addColorStop(0, fillColor);
+      grad.addColorStop(1, 'rgba(15, 23, 42, 0.15)');
+
+      ctx.beginPath();
+      ctx.arc(cell.x, cell.y, cell.radius, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Ripple-style membrane stroke
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = strokeColor;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(cell.x, cell.y, cell.radius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Helper: draw nucleus boundary (intact vs dissolving)
+    function drawNucleus(x, y, radius, color, isDissolving) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 8;
+
+      if (!isDissolving) {
+        // Intact nuclear envelope: solid circle
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.stroke();
+      } else {
+        // Dissolving membrane: dashed/fragmented circle representing late prophase
+        ctx.setLineDash([8, 14]);
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // Faint fragment blobs drifting away
+        ctx.strokeStyle = 'rgba(244, 63, 94, 0.4)';
+        ctx.setLineDash([]);
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(x - 5, y - 5, radius + 4, -0.2, 0.4);
+        ctx.arc(x + 5, y + 5, radius + 4, Math.PI - 0.2, Math.PI + 0.4);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // Helper: draw a single chromosome rod (X-shaped chromatid pair)
+    function drawChromosomeStructure(x, y, size, angle) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+
+      ctx.lineWidth = 4.5;
+      ctx.strokeStyle = 'var(--rose-accent)';
+      ctx.shadowColor = 'var(--rose-accent)';
+      ctx.shadowBlur = 6;
+      ctx.lineCap = 'round';
+
+      // Sister Chromatid Arm 1 (diagonal left-top to right-bottom)
+      ctx.beginPath();
+      ctx.moveTo(-size * 0.4, -size * 0.9);
+      ctx.quadraticCurveTo(-2, -2, 0, 0);
+      ctx.quadraticCurveTo(2, 2, size * 0.4, size * 0.9);
+      ctx.stroke();
+
+      // Sister Chromatid Arm 2 (diagonal right-top to left-bottom)
+      ctx.beginPath();
+      ctx.moveTo(size * 0.4, -size * 0.9);
+      ctx.quadraticCurveTo(2, -2, 0, 0);
+      ctx.quadraticCurveTo(-2, 2, -size * 0.4, size * 0.9);
+      ctx.stroke();
+
+      // Draw gene bands (colored horizontal stripes along chromatin arms)
+      ctx.shadowBlur = 0;
+      ctx.lineWidth = 2.5;
+      
+      const drawGeneBand = (offsetY) => {
+        // Band across arm 1
+        ctx.strokeStyle = 'var(--green-accent)';
+        ctx.beginPath();
+        ctx.moveTo(-size * 0.4 * Math.abs(offsetY) - 1.5, offsetY);
+        ctx.lineTo(-size * 0.4 * Math.abs(offsetY) + 1.5, offsetY);
+        ctx.stroke();
+
+        // Band across arm 2
+        ctx.strokeStyle = 'var(--cyan-accent)';
+        ctx.beginPath();
+        ctx.moveTo(size * 0.4 * Math.abs(offsetY) - 1.5, offsetY);
+        ctx.lineTo(size * 0.4 * Math.abs(offsetY) + 1.5, offsetY);
+        ctx.stroke();
+      };
+      
+      drawGeneBand(-size * 0.5);
+      drawGeneBand(size * 0.5);
+
+      // Centromere connection dot in the middle
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // Dynamic condensation morph details
+    function drawCondensationEffect() {
+      // Draw intermediate visual state in the center when slider is active
+      if (focusMode !== 'overview') return;
+
+      ctx.save();
+      // Draw transition box
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+      ctx.strokeStyle = 'var(--indigo-accent)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(310, 480, 180, 50, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      // Text inside box
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 10px ' + getComputedStyle(document.body).getPropertyValue('--font-sans');
+      ctx.textAlign = 'center';
+      
+      let morphText = "Condensing Chromatin...";
+      if (condensationRatio > 0.8) morphText = "Chromosomes Fully Packed!";
+      ctx.fillText(morphText, 400, 498);
+
+      // Draw progress bar
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.fillRect(330, 510, 140, 8);
+      
+      // Progress fill
+      const grad = ctx.createLinearGradient(330, 0, 470, 0);
+      grad.addColorStop(0, 'var(--amber-accent)');
+      grad.addColorStop(1, 'var(--rose-accent)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(330, 510, 140 * condensationRatio, 8);
+
+      ctx.restore();
+    }
+
+    // Zoom detail for chromatin (Beads-on-a-string)
+    function drawChromatinSubstructure() {
+      const zoomBubble = {
+        x: cellA.x + 160,
+        y: cellA.y - 10,
+        radius: 100
+      };
+
+      ctx.save();
+      // 1. Draw connecting line from nucleus to magnification glass
+      ctx.strokeStyle = 'var(--amber-accent)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cellA.nucleusX + 25, cellA.nucleusY - 15);
+      ctx.lineTo(zoomBubble.x - zoomBubble.radius + 15, zoomBubble.y + 40);
+      ctx.stroke();
+
+      // 2. Draw Magnification Glass Outer Ring
+      ctx.fillStyle = '#060f24';
+      ctx.strokeStyle = 'var(--amber-accent)';
+      ctx.lineWidth = 4;
+      ctx.shadowColor = 'var(--amber-accent)';
+      ctx.shadowBlur = 15;
+      
+      ctx.beginPath();
+      ctx.arc(zoomBubble.x, zoomBubble.y, zoomBubble.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.shadowBlur = 0; // reset
+
+      // Faint concentric alignment circles
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.15)';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.arc(zoomBubble.x, zoomBubble.y, zoomBubble.radius - 10, 0, Math.PI*2);
+      ctx.arc(zoomBubble.x, zoomBubble.y, zoomBubble.radius - 20, 0, Math.PI*2);
+      ctx.stroke();
+
+      // 3. Draw beads-on-a-string nucleosome complexes
+      // Draw histone proteins (octamers)
+      const histones = [
+        { x: zoomBubble.x - 50, y: zoomBubble.y + 25 },
+        { x: zoomBubble.x, y: zoomBubble.y - 20 },
+        { x: zoomBubble.x + 50, y: zoomBubble.y + 20 }
+      ];
+
+      // Draw loose DNA wrapping around histones
+      ctx.strokeStyle = 'var(--green-accent)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      // DNA entry
+      ctx.moveTo(zoomBubble.x - 90, zoomBubble.y + 50);
+      // Wrap around histone 1
+      ctx.arc(histones[0].x, histones[0].y, 14, Math.PI * 0.9, -Math.PI * 0.1);
+      // Bridge to histone 2
+      ctx.arc(histones[1].x, histones[1].y, 14, Math.PI * 0.9, -Math.PI * 0.3, true);
+      // Bridge to histone 3
+      ctx.arc(histones[2].x, histones[2].y, 14, Math.PI * 0.8, -Math.PI * 0.2);
+      // DNA exit
+      ctx.lineTo(zoomBubble.x + 90, zoomBubble.y - 10);
+      ctx.stroke();
+
+      // Draw DNA double helix details (intertwined second thin strand)
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(zoomBubble.x - 90, zoomBubble.y + 52);
+      ctx.arc(histones[0].x, histones[0].y, 18, Math.PI * 0.9, -Math.PI * 0.1);
+      ctx.arc(histones[1].x, histones[1].y, 18, Math.PI * 0.9, -Math.PI * 0.3, true);
+      ctx.arc(histones[2].x, histones[2].y, 18, Math.PI * 0.8, -Math.PI * 0.2);
+      ctx.lineTo(zoomBubble.x + 90, zoomBubble.y - 8);
+      ctx.stroke();
+
+      // Draw histone protein balls
+      histones.forEach((hist, i) => {
+        // Draw spheres
+        ctx.fillStyle = 'var(--cyan-accent)';
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 0.8;
+        
+        // Histone octamer represented by a cluster of spheres
+        ctx.beginPath(); ctx.arc(hist.x - 5, hist.y - 5, 7, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(hist.x + 5, hist.y - 5, 7, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(hist.x - 4, hist.y + 5, 7, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(hist.x + 4, hist.y + 5, 7, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      });
+
+      // 4. Draw Substructure Labels
+      if (showStructureLabels) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.strokeStyle = 'var(--cyan-accent)';
+        ctx.lineWidth = 0.8;
+        
+        // Label for Histones
+        ctx.beginPath(); ctx.roundRect(zoomBubble.x - 30, zoomBubble.y + 70, 70, 16, 3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff';
+        ctx.font = '8px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
+        ctx.fillText("HISTONE BEADS", zoomBubble.x - 24, zoomBubble.y + 81);
+        
+        ctx.strokeStyle = 'var(--cyan-accent)';
+        ctx.beginPath(); ctx.moveTo(zoomBubble.x - 2, zoomBubble.y + 35); ctx.lineTo(zoomBubble.x - 2, zoomBubble.y + 70); ctx.stroke();
+
+        // Label for DNA
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.strokeStyle = 'var(--green-accent)';
+        ctx.beginPath(); ctx.roundRect(zoomBubble.x - 70, zoomBubble.y - 70, 60, 16, 3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff';
+        ctx.fillText("DNA STRAND", zoomBubble.x - 63, zoomBubble.y - 59);
+        
+        ctx.strokeStyle = 'var(--green-accent)';
+        ctx.beginPath(); ctx.moveTo(zoomBubble.x - 20, zoomBubble.y - 34); ctx.lineTo(zoomBubble.x - 30, zoomBubble.y - 54); ctx.stroke();
+
+        // Title text at bottom of bubble
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 9px ' + getComputedStyle(document.body).getPropertyValue('--font-sans');
+        ctx.textAlign = 'center';
+        ctx.fillText("CHROMATIN FINE STRUCTURE", zoomBubble.x, zoomBubble.y - 82);
+      }
+
+      ctx.restore();
+    }
+
+    // Zoom detail for chromosome anatomy
+    function drawChromosomeSubstructure() {
+      const zoomBubble = {
+        x: cellB.x - 160,
+        y: cellB.y - 10,
+        radius: 100
+      };
+
+      ctx.save();
+      // 1. Draw connecting line from nucleus to magnification glass
+      ctx.strokeStyle = 'var(--rose-accent)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cellB.nucleusX - 25, cellB.nucleusY + 15);
+      ctx.lineTo(zoomBubble.x + zoomBubble.radius - 15, zoomBubble.y + 40);
+      ctx.stroke();
+
+      // 2. Draw Magnification Glass Outer Ring
+      ctx.fillStyle = '#060412';
+      ctx.strokeStyle = 'var(--rose-accent)';
+      ctx.lineWidth = 4;
+      ctx.shadowColor = 'var(--rose-accent)';
+      ctx.shadowBlur = 15;
+      
+      ctx.beginPath();
+      ctx.arc(zoomBubble.x, zoomBubble.y, zoomBubble.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.shadowBlur = 0; // reset
+
+      // Faint concentric alignment circles
+      ctx.strokeStyle = 'rgba(244, 63, 94, 0.15)';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.arc(zoomBubble.x, zoomBubble.y, zoomBubble.radius - 10, 0, Math.PI*2);
+      ctx.arc(zoomBubble.x, zoomBubble.y, zoomBubble.radius - 20, 0, Math.PI*2);
+      ctx.stroke();
+
+      // 3. Draw single metaphase chromosome close-up
+      const chrX = zoomBubble.x;
+      const chrY = zoomBubble.y + 5;
+      const len = 65;
+
+      ctx.lineWidth = 12;
+      ctx.strokeStyle = 'var(--rose-accent)';
+      ctx.shadowColor = 'var(--rose-accent)';
+      ctx.shadowBlur = 8;
+      ctx.lineCap = 'round';
+
+      // Sister Chromatid 1 (Arm A)
+      ctx.beginPath();
+      ctx.moveTo(chrX - 25, chrY - len);
+      ctx.lineTo(chrX, chrY);
+      ctx.lineTo(chrX - 25, chrY + len);
+      ctx.stroke();
+
+      // Sister Chromatid 2 (Arm B)
+      ctx.beginPath();
+      ctx.moveTo(chrX + 25, chrY - len);
+      ctx.lineTo(chrX, chrY);
+      ctx.lineTo(chrX + 25, chrY + len);
+      ctx.stroke();
+
+      // Draw gene bands (detailed bands of colored markers along arms)
+      ctx.shadowBlur = 0;
+      ctx.lineWidth = 7;
+
+      const drawDetailedGene = (yVal, color) => {
+        ctx.strokeStyle = color;
+        // left arm
+        ctx.beginPath();
+        const leftX = chrX - 25 * (Math.abs(yVal)/len);
+        ctx.moveTo(leftX - 4, chrY + yVal);
+        ctx.lineTo(leftX + 4, chrY + yVal);
+        ctx.stroke();
+
+        // right arm
+        ctx.beginPath();
+        const rightX = chrX + 25 * (Math.abs(yVal)/len);
+        ctx.moveTo(rightX - 4, chrY + yVal);
+        ctx.lineTo(rightX + 4, chrY + yVal);
+        ctx.stroke();
+      };
+
+      drawDetailedGene(-40, 'var(--green-accent)'); // green gene band
+      drawDetailedGene(-20, 'var(--cyan-accent)');  // cyan gene band
+      drawDetailedGene(35, 'var(--amber-accent)');  // amber gene band
+
+      // Centromere connector
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(chrX, chrY, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 4. Draw Labels
+      if (showStructureLabels) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 0.8;
+
+        // Centromere Label
+        ctx.beginPath(); ctx.roundRect(zoomBubble.x + 35, zoomBubble.y - 12, 60, 16, 3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff';
+        ctx.font = '8px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
+        ctx.fillText("CENTROMERE", zoomBubble.x + 39, zoomBubble.y - 1);
+        ctx.strokeStyle = '#ffffff';
+        ctx.beginPath(); ctx.moveTo(chrX + 6, chrY); ctx.lineTo(zoomBubble.x + 35, chrY); ctx.stroke();
+
+        // Sister Chromatid Label
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.strokeStyle = 'var(--rose-accent)';
+        ctx.beginPath(); ctx.roundRect(zoomBubble.x + 20, zoomBubble.y - 75, 75, 16, 3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff';
+        ctx.fillText("SISTER CHROMATID", zoomBubble.x + 24, zoomBubble.y - 64);
+        ctx.strokeStyle = 'var(--rose-accent)';
+        ctx.beginPath(); ctx.moveTo(chrX + 16, chrY - 40); ctx.lineTo(zoomBubble.x + 35, chrY - 60); ctx.stroke();
+
+        // Gene bands label
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.strokeStyle = 'var(--green-accent)';
+        ctx.beginPath(); ctx.roundRect(zoomBubble.x - 92, zoomBubble.y - 75, 70, 24, 3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff';
+        ctx.fillText("GENES (Stripes", zoomBubble.x - 88, zoomBubble.y - 64);
+        ctx.fillText("on chromosomes)", zoomBubble.x - 88, zoomBubble.y - 54);
+        ctx.strokeStyle = 'var(--green-accent)';
+        ctx.beginPath(); ctx.moveTo(chrX - 20, chrY - 40); ctx.lineTo(zoomBubble.x - 45, chrY - 55); ctx.stroke();
+
+        // Title at bottom of bubble
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 9px ' + getComputedStyle(document.body).getPropertyValue('--font-sans');
+        ctx.textAlign = 'center';
+        ctx.fillText("CHROMOSOME ANATOMY", zoomBubble.x, zoomBubble.y - 82);
+      }
+
+      ctx.restore();
+    }
+
+    // Static text labels on the canvas
+    function drawHUDLabels() {
+      ctx.save();
+      ctx.font = 'bold 12px ' + getComputedStyle(document.body).getPropertyValue('--font-sans');
+      ctx.textAlign = 'center';
+
+      // Draw Main headers for the Cells
+      if (focusMode === 'overview') {
+        drawLabel("CELL A: Non-Dividing State", cellA.x, cellA.y - 145, 'var(--amber-accent)');
+        drawLabel("CELL B: Dividing State", cellB.x, cellB.y - 145, 'var(--rose-accent)');
+        
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.font = '9px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
+        ctx.fillText("Has tangled thread-like CHROMATIN", cellA.x, cellA.y - 165);
+        ctx.fillText("Has thick condensed rod-like CHROMOSOMES", cellB.x, cellB.y - 165);
+      }
+
+      // If zoomed inside Cell A
+      if (focusMode === 'cellA') {
+        drawLabel("Cell A: Chromatin (Uncoiled Threads)", cellA.x, cellA.y - 88, 'var(--amber-accent)');
+        
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.font = '9px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
+        ctx.fillText("Nuclear Membrane: INTACT", cellA.x, cellA.y - 118);
+        ctx.fillText("DNA is spread out so it can be read", cellA.x, cellA.y - 105);
+      }
+
+      // If zoomed inside Cell B
+      if (focusMode === 'cellB') {
+        drawLabel("Cell B: Chromosomes (Condensed Rods)", cellB.x, cellB.y - 88, 'var(--rose-accent)');
+        
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.font = '9px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
+        ctx.fillText("Nuclear Membrane: DISSOLVING", cellB.x, cellB.y - 118);
+        ctx.fillText("DNA is tightly wound to survive division", cellB.x, cellB.y - 105);
+      }
+
+      ctx.restore();
+    }
+
+    // Helper: draw text with background box
+    function drawLabel(text, x, y, color) {
+      ctx.save();
+      ctx.font = 'bold 11px ' + getComputedStyle(document.body).getPropertyValue('--font-sans');
+      const textWidth = ctx.measureText(text).width;
+      
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      
+      const rectX = x - textWidth/2 - 6;
+      ctx.beginPath();
+      ctx.roundRect(rectX, y - 10, textWidth + 12, 18, 4);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.fillText(text, x, y + 3);
+      ctx.restore();
+    }
+
+    // --- Control Handlers ---
+
+    // Toggle Labels overlay
+    function toggleLabels() {
+      showStructureLabels = document.getElementById('toggleLabels').checked;
+    }
+
+    // Toggle Zoom Magnifier Glass
+    function toggleMagnifier() {
+      showMagnifiedViews = document.getElementById('toggleMagnifier').checked;
+    }
+
+    // Update chromatin condensation morph value
+    function updateCondensation() {
+      const val = parseFloat(document.getElementById('condensationSlider').value);
+      condensationRatio = val;
+
+      const infoSpan = document.getElementById('condensationVal');
+      if (val < 0.2) infoSpan.innerText = "Loose Threads";
+      else if (val < 0.5) infoSpan.innerText = "Coiling up...";
+      else if (val < 0.85) infoSpan.innerText = "Condensing into Rods...";
+      else infoSpan.innerText = "Fully Packed Chromosomes!";
+
+      // Dynamically morph chromatin threads (Cell A) closer into chromosome structures (X shapes) if slider goes to 1.0!
+      // This is a premium visual guide showing students the exact translation between the two states.
+      if (val > 0.05) {
+        // Adjust threads layout dynamically
+        chromatinThreads.forEach((thread, threadIdx) => {
+          thread.points.forEach((pt, ptIdx) => {
+            // Push points closer to nucleus center as condensation ratio increases
+            const targetX = cellA.nucleusX + (Math.random() - 0.5) * 20;
+            const targetY = cellA.nucleusY + (Math.random() - 0.5) * 20;
+            // Linear interpolate between original layout and condensed center
+            pt.x = pt.x * (1 - val*0.1) + targetX * (val*0.1);
+          });
+        });
+      }
+    }
+
+    function resetCondensation() {
+      document.getElementById('condensationSlider').value = 0.0;
+      updateCondensation();
+    }
+
+    // Handle view settings
+    function setFocusMode(mode) {
+      focusMode = mode;
+
+      const buttons = document.querySelectorAll('.mode-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      const hud = document.getElementById('hudState');
+
+      let btnIdx = 0;
+      if (mode === 'overview') {
+        targetZoom = 1.0;
+        targetPanX = 0;
+        targetPanY = 0;
+        hud.innerText = "OVERVIEW ACTIVE";
+        btnIdx = 0;
+      } else if (mode === 'cellA') {
+        // Focus on Cell A (Loose chromatin)
+        targetZoom = 1.6;
+        targetPanX = canvas.width/2 - (cellA.x + 35);
+        targetPanY = canvas.height/2 - cellA.y;
+        hud.innerText = "INSPECTING CHROMATIN";
+        btnIdx = 1;
+      } else if (mode === 'cellB') {
+        // Focus on Cell B (Condensed chromosomes)
+        targetZoom = 1.6;
+        targetPanX = canvas.width/2 - (cellB.x - 35);
+        targetPanY = canvas.height/2 - cellB.y;
+        hud.innerText = "INSPECTING CHROMOSOMES";
+        btnIdx = 2;
+      }
+
+      buttons[btnIdx].classList.add('active');
+    }
+
+    // Canvas click to select cell focus
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = ((e.clientX - rect.left) / rect.width) * canvas.width;
+      const clickY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+
+      // Un-translate coordinate
+      const actualX = (clickX - canvas.width/2) / currentZoom + canvas.width/2 - currentPanX;
+      const actualY = (clickY - canvas.height/2) / currentZoom + canvas.height/2 - currentPanY;
+
+      // Check click proximity to cells
+      if (dist(actualX, actualY, cellA.x, cellA.y) < cellA.radius) {
+        setFocusMode('cellA');
+      } else if (dist(actualX, actualY, cellB.x, cellB.y) < cellB.radius) {
+        setFocusMode('cellB');
+      } else {
+        setFocusMode('overview');
+      }
+    });
+
+    // Tab Switcher
+    function switchTab(tabName) {
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      tabBtns.forEach(btn => btn.classList.remove('active'));
+      
+      const targetBtn = Array.from(tabBtns).find(btn => btn.innerText.toLowerCase().includes(tabName));
+      if (targetBtn) targetBtn.classList.add('active');
+
+      const panels = document.querySelectorAll('.tab-panel');
+      panels.forEach(p => p.classList.remove('active'));
+      
+      document.getElementById('tab-' + tabName).classList.add('active');
+    }
+
+    // Helper: calculate distance
+    function dist(x1, y1, x2, y2) {
+      return Math.sqrt((x2 - x1)**2 + (y2 - y1)**2);
+    }
+
+    // --- Interactive Quiz Logic ---
+    const quizQuestions = [
+      {
+        question: "In which state does DNA exist in a cell that is NOT dividing?",
+        options: [
+          "Centromeres",
+          "Chromosomes",
+          "Chromatin threads",
+          "Amino acids"
+        ],
+        correct: 2,
+        explanation: "Correct! In a non-dividing cell, DNA looks like a tangled, thin network of <strong>chromatin threads</strong>. This keeps DNA accessible for the cell's daily tasks."
+      },
+      {
+        question: "Why does chromatin condense into thick rod-like chromosomes during division?",
+        options: [
+          "To allow the cell to photosynthesize",
+          "To prevent DNA from tangling, breaking, and dividing unequally",
+          "To dissolve the cell membrane",
+          "To generate extra energy (ATP)"
+        ],
+        correct: 1,
+        explanation: "Correct! Coiling loose chromatin threads into solid, rod-like <strong>chromosomes</strong> ensures DNA can be divided equally and safely without breaking."
+      },
+      {
+        question: "What is the central junction point holding two sister chromatids together?",
+        options: [
+          "Centromere",
+          "Histone octamer",
+          "Ribosome",
+          "Nucleosome"
+        ],
+        correct: 0,
+        explanation: "Correct! The <strong>Centromere</strong> is the central structural connection that links sister chromatids (the duplicated arms) together."
+      },
+      {
+        question: "What is a 'gene' in scientific terms?",
+        options: [
+          "A protein ball that DNA wraps around",
+          "The outer cover of the cell nucleus",
+          "A functional segment of DNA that codes for a specific trait",
+          "A type of cell division process"
+        ],
+        correct: 2,
+        explanation: "Correct! <strong>Genes</strong> are specific functional regions along the DNA strand. In chromosomes, they are shown as bands/stripes coding for specific traits."
+      }
+    ];
+
+    let currentQuestionIdx = 0;
+    let quizScore = 0;
+    let quizAnswered = false;
+
+    function loadQuestion() {
+      const q = quizQuestions[currentQuestionIdx];
+      quizAnswered = false;
+
+      document.getElementById('quiz-question').innerText = q.question;
+      document.getElementById('question-num-text').innerText = (currentQuestionIdx + 1) + '/' + quizQuestions.length;
+
+      const list = document.getElementById('quiz-options');
+      list.innerHTML = '';
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = opt;
+        btn.onclick = () => selectOption(idx);
+        list.appendChild(btn);
+      });
+
+      document.getElementById('quiz-explanation').style.display = 'none';
+      document.getElementById('next-question-btn').style.display = 'none';
+
+      const dots = document.getElementById('quiz-dots-container').children;
+      Array.from(dots).forEach((dot, idx) => {
+        dot.className = 'quiz-dot';
+        if (idx === currentQuestionIdx) dot.classList.add('active');
+        else if (idx < currentQuestionIdx) {
+          dot.classList.add('correct'); 
+        }
+      });
+    }
+
+    function selectOption(selectedIdx) {
+      if (quizAnswered) return;
+      quizAnswered = true;
+
+      const q = quizQuestions[currentQuestionIdx];
+      const options = document.getElementById('quiz-options').children;
+      const dots = document.getElementById('quiz-dots-container').children;
+
+      if (selectedIdx === q.correct) {
+        options[selectedIdx].classList.add('correct');
+        dots[currentQuestionIdx].className = 'quiz-dot correct';
+        quizScore++;
+      } else {
+        options[selectedIdx].classList.add('wrong');
+        options[q.correct].classList.add('correct');
+        dots[currentQuestionIdx].className = 'quiz-dot wrong';
+      }
+
+      const expBox = document.getElementById('quiz-explanation');
+      expBox.innerHTML = `<p>${q.explanation}</p>`;
+      expBox.style.display = 'block';
+
+      const nextBtn = document.getElementById('next-question-btn');
+      if (currentQuestionIdx < quizQuestions.length - 1) {
+        nextBtn.innerText = "Next Question";
+      } else {
+        nextBtn.innerText = "Finish Quiz & Restart";
+      }
+      nextBtn.style.display = 'block';
+    }
+
+    function nextQuestion() {
+      if (currentQuestionIdx < quizQuestions.length - 1) {
+        currentQuestionIdx++;
+        loadQuestion();
+      } else {
+        currentQuestionIdx = 0;
+        quizScore = 0;
+        loadQuestion();
+      }
+    }
+
+    // --- Init ---
+    loadQuestion();
+    animate();
+
+  </script>
+</body>
+</html>
