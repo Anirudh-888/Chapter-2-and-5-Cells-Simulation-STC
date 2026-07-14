@@ -815,31 +815,31 @@
     
     // Define the genes along the DNA strand
     const genes = [
-      { startX: 300, endX: 430, name: "Gene 1: Eye Color", desc: "Codes for melanin production in the iris.", color: 'var(--cyan-accent)' },
-      { startX: 470, endX: 600, name: "Gene 2: Height Code", desc: "Codes for skeletal growth plate hormones.", color: 'var(--amber-accent)' },
-      { startX: 640, endX: 770, name: "Gene 3: Blood Group", desc: "Codes for antigens (A, B, O) on red cells.", color: 'var(--purple-accent)' }
+      { startX: 300, endX: 430, name: "Gene 1: Eye Color", desc: "Codes for melanin production in the iris.", color: '#06b6d4' },
+      { startX: 470, endX: 600, name: "Gene 2: Height Code", desc: "Codes for skeletal growth plate hormones.", color: '#f59e0b' },
+      { startX: 640, endX: 770, name: "Gene 3: Blood Group", desc: "Codes for antigens (A, B, O) on red cells.", color: '#a855f7' }
     ];
 
     // Nucleotide base sequence along the double helix
     // Complementary bases: A (rose/red), T (amber/orange), G (green), C (cyan/blue)
     const basePairsSequence = [
-      { base1: 'A', base2: 'T', color1: 'var(--rose-accent)', color2: 'var(--amber-accent)' },
-      { base1: 'G', base2: 'C', color1: 'var(--green-accent)', color2: 'var(--cyan-accent)' },
-      { base1: 'T', base2: 'A', color1: 'var(--amber-accent)', color2: 'var(--rose-accent)' },
-      { base1: 'C', base2: 'G', color1: 'var(--cyan-accent)', color2: 'var(--green-accent)' },
-      { base1: 'A', base2: 'T', color1: 'var(--rose-accent)', color2: 'var(--amber-accent)' },
-      { base1: 'C', base2: 'G', color1: 'var(--cyan-accent)', color2: 'var(--green-accent)' },
-      { base1: 'G', base2: 'C', color1: 'var(--green-accent)', color2: 'var(--cyan-accent)' },
-      { base1: 'T', base2: 'A', color1: 'var(--amber-accent)', color2: 'var(--rose-accent)' },
-      { base1: 'A', base2: 'T', color1: 'var(--rose-accent)', color2: 'var(--amber-accent)' },
-      { base1: 'C', base2: 'G', color1: 'var(--cyan-accent)', color2: 'var(--green-accent)' },
-      { base1: 'G', base2: 'C', color1: 'var(--green-accent)', color2: 'var(--cyan-accent)' },
-      { base1: 'T', base2: 'A', color1: 'var(--amber-accent)', color2: 'var(--rose-accent)' },
-      { base1: 'A', base2: 'T', color1: 'var(--rose-accent)', color2: 'var(--amber-accent)' },
-      { base1: 'G', base2: 'C', color1: 'var(--green-accent)', color2: 'var(--cyan-accent)' },
-      { base1: 'T', base2: 'A', color1: 'var(--amber-accent)', color2: 'var(--rose-accent)' },
-      { base1: 'C', base2: 'G', color1: 'var(--cyan-accent)', color2: 'var(--green-accent)' },
-      { base1: 'A', base2: 'T', color1: 'var(--rose-accent)', color2: 'var(--amber-accent)' }
+      { base1: 'A', base2: 'T', color1: '#f43f5e', color2: '#f59e0b' },
+      { base1: 'G', base2: 'C', color1: '#10b981', color2: '#06b6d4' },
+      { base1: 'T', base2: 'A', color1: '#f59e0b', color2: '#f43f5e' },
+      { base1: 'C', base2: 'G', color1: '#06b6d4', color2: '#10b981' },
+      { base1: 'A', base2: 'T', color1: '#f43f5e', color2: '#f59e0b' },
+      { base1: 'C', base2: 'G', color1: '#06b6d4', color2: '#10b981' },
+      { base1: 'G', base2: 'C', color1: '#10b981', color2: '#06b6d4' },
+      { base1: 'T', base2: 'A', color1: '#f59e0b', color2: '#f43f5e' },
+      { base1: 'A', base2: 'T', color1: '#f43f5e', color2: '#f59e0b' },
+      { base1: 'C', base2: 'G', color1: '#06b6d4', color2: '#10b981' },
+      { base1: 'G', base2: 'C', color1: '#10b981', color2: '#06b6d4' },
+      { base1: 'T', base2: 'A', color1: '#f59e0b', color2: '#f43f5e' },
+      { base1: 'A', base2: 'T', color1: '#f43f5e', color2: '#f59e0b' },
+      { base1: 'G', base2: 'C', color1: '#10b981', color2: '#06b6d4' },
+      { base1: 'T', base2: 'A', color1: '#f59e0b', color2: '#f43f5e' },
+      { base1: 'C', base2: 'G', color1: '#06b6d4', color2: '#10b981' },
+      { base1: 'A', base2: 'T', color1: '#f43f5e', color2: '#f59e0b' }
     ];
 
     // Generate random histones along the unravelling pathway
@@ -923,8 +923,8 @@
 
       // 1. Draw solid chromosome outline in the background (fading out at bottom-right arm)
       ctx.lineWidth = 14;
-      ctx.strokeStyle = 'var(--purple-accent)';
-      ctx.shadowColor = 'var(--purple-accent)';
+      ctx.strokeStyle = '#a855f7';
+      ctx.shadowColor = '#a855f7';
       ctx.shadowBlur = 10;
       ctx.lineCap = 'round';
 
@@ -952,7 +952,7 @@
 
       // 2. Unravelling arm loop
       // Loop emerges from right-bottom chromosome arm region
-      ctx.strokeStyle = 'var(--purple-accent)';
+      ctx.strokeStyle = '#a855f7';
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.moveTo(chrCenterX, chrCenterY);
@@ -960,7 +960,7 @@
       ctx.stroke();
 
       // Winding looping chromatin fiber
-      ctx.strokeStyle = 'var(--amber-accent)';
+      ctx.strokeStyle = '#f59e0b';
       ctx.lineWidth = 1.8;
       ctx.beginPath();
       ctx.moveTo(120, 360);
@@ -970,7 +970,7 @@
       // 3. Wrap around histone beads (Beads-on-a-string)
       packagingHistones.forEach((hist, idx) => {
         // Draw DNA strand winding around
-        ctx.strokeStyle = 'var(--green-accent)';
+        ctx.strokeStyle = '#10b981';
         ctx.lineWidth = 2.0;
         ctx.beginPath();
         if (idx === 0) {
@@ -986,7 +986,7 @@
         ctx.stroke();
 
         // Draw Histone spheres octamers (cyan beads)
-        ctx.fillStyle = 'var(--cyan-accent)';
+        ctx.fillStyle = '#06b6d4';
         ctx.strokeStyle = '#fff';
         ctx.lineWidth = 0.8;
         ctx.beginPath(); ctx.arc(hist.x - 3, hist.y - 3, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
@@ -1053,8 +1053,8 @@
 
       // --- Drawing Layer 2: Backbone strands ---
       // Backbone 1 (Cyan)
-      ctx.strokeStyle = 'var(--cyan-accent)';
-      ctx.shadowColor = 'var(--cyan-accent)';
+      ctx.strokeStyle = '#00e5ff';
+      ctx.shadowColor = '#00e5ff';
       ctx.shadowBlur = 6;
       ctx.lineWidth = isMagnified ? 7 : 3.8;
       ctx.beginPath();
@@ -1065,8 +1065,8 @@
       ctx.stroke();
 
       // Backbone 2 (Rose/Pink - highly visible and colorful!)
-      ctx.strokeStyle = 'var(--rose-accent)';
-      ctx.shadowColor = 'var(--rose-accent)';
+      ctx.strokeStyle = '#ff2a85';
+      ctx.shadowColor = '#ff2a85';
       ctx.lineWidth = isMagnified ? 7 : 3.8;
       ctx.beginPath();
       points2.forEach((pt, idx) => {
@@ -1364,16 +1364,16 @@
     function drawGuidelines() {
       // Chromatid
       if (focusMode === 'overview' || focusMode === 'chromatid') {
-        drawLabel("REPLICATED CHROMATID", 70, 210, 'var(--purple-accent)');
-        ctx.strokeStyle = 'var(--purple-accent)';
+        drawLabel("REPLICATED CHROMATID", 70, 210, '#a855f7');
+        ctx.strokeStyle = '#a855f7';
         ctx.lineWidth = 1.0;
         ctx.beginPath();
         ctx.moveTo(70, 220); ctx.lineTo(70, 240);
         ctx.stroke();
 
         // Packaging
-        drawLabel("Histone Beads (DNA Spooling)", 220, 240, 'var(--cyan-accent)');
-        ctx.strokeStyle = 'var(--cyan-accent)';
+        drawLabel("Histone Beads (DNA Spooling)", 220, 240, '#06b6d4');
+        ctx.strokeStyle = '#06b6d4';
         ctx.beginPath();
         ctx.moveTo(220, 252); ctx.lineTo(215, 290);
         ctx.stroke();
@@ -1381,7 +1381,7 @@
 
       // DNA Helix
       if (focusMode === 'overview' || focusMode === 'doublehelix') {
-        drawLabel("DNA DOUBLE HELIX STRAND", 540, 210, 'var(--green-accent)');
+        drawLabel("DNA DOUBLE HELIX STRAND", 540, 210, '#10b981');
         
         ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
         ctx.font = '8px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');

@@ -953,14 +953,14 @@
       }
 
       // --- Draw Cell A (Non-Dividing) ---
-      drawCellOutline(cellA, 'rgba(245, 158, 11, 0.1)', 'var(--amber-accent)');
-      drawNucleus(cellA.nucleusX, cellA.nucleusY, cellA.nucleusRadius, 'var(--amber-accent)', false);
+      drawCellOutline(cellA, 'rgba(245, 158, 11, 0.1)', '#f59e0b');
+      drawNucleus(cellA.nucleusX, cellA.nucleusY, cellA.nucleusRadius, '#f59e0b', false);
       
       // Draw Chromatin inside Cell A nucleus (thread-like network)
       ctx.save();
       ctx.strokeStyle = 'rgba(245, 158, 11, 0.7)';
       ctx.lineWidth = 1.4;
-      ctx.shadowColor = 'var(--amber-accent)';
+      ctx.shadowColor = '#f59e0b';
       ctx.shadowBlur = 4;
       
       chromatinThreads.forEach(thread => {
@@ -978,10 +978,10 @@
       ctx.restore();
 
       // --- Draw Cell B (Dividing) ---
-      drawCellOutline(cellB, 'rgba(244, 63, 94, 0.1)', 'var(--rose-accent)');
+      drawCellOutline(cellB, 'rgba(244, 63, 94, 0.1)', '#f43f5e');
       
       // Dividing cells have a dissolving nuclear envelope (Prophase/Metaphase)
-      drawNucleus(cellB.nucleusX, cellB.nucleusY, cellB.nucleusRadius, 'var(--rose-accent)', true);
+      drawNucleus(cellB.nucleusX, cellB.nucleusY, cellB.nucleusRadius, '#f43f5e', true);
 
       // Draw condensed rod-like chromosomes inside Cell B
       chromosomes.forEach(chr => {
@@ -1081,8 +1081,8 @@
       ctx.rotate(angle);
 
       ctx.lineWidth = 4.5;
-      ctx.strokeStyle = 'var(--rose-accent)';
-      ctx.shadowColor = 'var(--rose-accent)';
+      ctx.strokeStyle = '#f43f5e';
+      ctx.shadowColor = '#f43f5e';
       ctx.shadowBlur = 6;
       ctx.lineCap = 'round';
 
@@ -1106,14 +1106,14 @@
       
       const drawGeneBand = (offsetY) => {
         // Band across arm 1
-        ctx.strokeStyle = 'var(--green-accent)';
+        ctx.strokeStyle = '#10b981';
         ctx.beginPath();
         ctx.moveTo(-size * 0.4 * Math.abs(offsetY) - 1.5, offsetY);
         ctx.lineTo(-size * 0.4 * Math.abs(offsetY) + 1.5, offsetY);
         ctx.stroke();
 
         // Band across arm 2
-        ctx.strokeStyle = 'var(--cyan-accent)';
+        ctx.strokeStyle = '#06b6d4';
         ctx.beginPath();
         ctx.moveTo(size * 0.4 * Math.abs(offsetY) - 1.5, offsetY);
         ctx.lineTo(size * 0.4 * Math.abs(offsetY) + 1.5, offsetY);
@@ -1142,7 +1142,7 @@
       ctx.save();
       // Draw transition box
       ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
-      ctx.strokeStyle = 'var(--indigo-accent)';
+      ctx.strokeStyle = '#6366f1';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.roundRect(310, 480, 180, 50, 8);
@@ -1164,8 +1164,8 @@
       
       // Progress fill
       const grad = ctx.createLinearGradient(330, 0, 470, 0);
-      grad.addColorStop(0, 'var(--amber-accent)');
-      grad.addColorStop(1, 'var(--rose-accent)');
+      grad.addColorStop(0, '#f59e0b');
+      grad.addColorStop(1, '#f43f5e');
       ctx.fillStyle = grad;
       ctx.fillRect(330, 510, 140 * condensationRatio, 8);
 
@@ -1182,7 +1182,7 @@
 
       ctx.save();
       // 1. Draw connecting line from nucleus to magnification glass
-      ctx.strokeStyle = 'var(--amber-accent)';
+      ctx.strokeStyle = '#f59e0b';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(cellA.nucleusX + 25, cellA.nucleusY - 15);
@@ -1191,9 +1191,9 @@
 
       // 2. Draw Magnification Glass Outer Ring
       ctx.fillStyle = '#060f24';
-      ctx.strokeStyle = 'var(--amber-accent)';
+      ctx.strokeStyle = '#f59e0b';
       ctx.lineWidth = 4;
-      ctx.shadowColor = 'var(--amber-accent)';
+      ctx.shadowColor = '#f59e0b';
       ctx.shadowBlur = 15;
       
       ctx.beginPath();
@@ -1219,7 +1219,7 @@
       ];
 
       // Draw loose DNA wrapping around histones
-      ctx.strokeStyle = 'var(--green-accent)';
+      ctx.strokeStyle = '#10b981';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
       // DNA entry
@@ -1248,7 +1248,7 @@
       // Draw histone protein balls
       histones.forEach((hist, i) => {
         // Draw spheres
-        ctx.fillStyle = 'var(--cyan-accent)';
+        ctx.fillStyle = '#06b6d4';
         ctx.strokeStyle = '#fff';
         ctx.lineWidth = 0.8;
         
@@ -1262,7 +1262,7 @@
       // 4. Draw Substructure Labels
       if (showStructureLabels) {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-        ctx.strokeStyle = 'var(--cyan-accent)';
+        ctx.strokeStyle = '#06b6d4';
         ctx.lineWidth = 0.8;
         
         // Label for Histones
@@ -1271,17 +1271,17 @@
         ctx.font = '8px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
         ctx.fillText("HISTONE BEADS", zoomBubble.x - 24, zoomBubble.y + 81);
         
-        ctx.strokeStyle = 'var(--cyan-accent)';
+        ctx.strokeStyle = '#06b6d4';
         ctx.beginPath(); ctx.moveTo(zoomBubble.x - 2, zoomBubble.y + 35); ctx.lineTo(zoomBubble.x - 2, zoomBubble.y + 70); ctx.stroke();
 
         // Label for DNA
         ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-        ctx.strokeStyle = 'var(--green-accent)';
+        ctx.strokeStyle = '#10b981';
         ctx.beginPath(); ctx.roundRect(zoomBubble.x - 70, zoomBubble.y - 70, 60, 16, 3); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#fff';
         ctx.fillText("DNA STRAND", zoomBubble.x - 63, zoomBubble.y - 59);
         
-        ctx.strokeStyle = 'var(--green-accent)';
+        ctx.strokeStyle = '#10b981';
         ctx.beginPath(); ctx.moveTo(zoomBubble.x - 20, zoomBubble.y - 34); ctx.lineTo(zoomBubble.x - 30, zoomBubble.y - 54); ctx.stroke();
 
         // Title text at bottom of bubble
@@ -1304,7 +1304,7 @@
 
       ctx.save();
       // 1. Draw connecting line from nucleus to magnification glass
-      ctx.strokeStyle = 'var(--rose-accent)';
+      ctx.strokeStyle = '#f43f5e';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(cellB.nucleusX - 25, cellB.nucleusY + 15);
@@ -1313,9 +1313,9 @@
 
       // 2. Draw Magnification Glass Outer Ring
       ctx.fillStyle = '#060412';
-      ctx.strokeStyle = 'var(--rose-accent)';
+      ctx.strokeStyle = '#f43f5e';
       ctx.lineWidth = 4;
-      ctx.shadowColor = 'var(--rose-accent)';
+      ctx.shadowColor = '#f43f5e';
       ctx.shadowBlur = 15;
       
       ctx.beginPath();
@@ -1338,8 +1338,8 @@
       const len = 65;
 
       ctx.lineWidth = 12;
-      ctx.strokeStyle = 'var(--rose-accent)';
-      ctx.shadowColor = 'var(--rose-accent)';
+      ctx.strokeStyle = '#f43f5e';
+      ctx.shadowColor = '#f43f5e';
       ctx.shadowBlur = 8;
       ctx.lineCap = 'round';
 
@@ -1378,9 +1378,9 @@
         ctx.stroke();
       };
 
-      drawDetailedGene(-40, 'var(--green-accent)'); // green gene band
-      drawDetailedGene(-20, 'var(--cyan-accent)');  // cyan gene band
-      drawDetailedGene(35, 'var(--amber-accent)');  // amber gene band
+      drawDetailedGene(-40, '#10b981'); // green gene band
+      drawDetailedGene(-20, '#06b6d4');  // cyan gene band
+      drawDetailedGene(35, '#f59e0b');  // amber gene band
 
       // Centromere connector
       ctx.fillStyle = '#ffffff';
@@ -1406,21 +1406,21 @@
 
         // Sister Chromatid Label
         ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-        ctx.strokeStyle = 'var(--rose-accent)';
+        ctx.strokeStyle = '#f43f5e';
         ctx.beginPath(); ctx.roundRect(zoomBubble.x + 20, zoomBubble.y - 75, 75, 16, 3); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#fff';
         ctx.fillText("SISTER CHROMATID", zoomBubble.x + 24, zoomBubble.y - 64);
-        ctx.strokeStyle = 'var(--rose-accent)';
+        ctx.strokeStyle = '#f43f5e';
         ctx.beginPath(); ctx.moveTo(chrX + 16, chrY - 40); ctx.lineTo(zoomBubble.x + 35, chrY - 60); ctx.stroke();
 
         // Gene bands label
         ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-        ctx.strokeStyle = 'var(--green-accent)';
+        ctx.strokeStyle = '#10b981';
         ctx.beginPath(); ctx.roundRect(zoomBubble.x - 92, zoomBubble.y - 75, 70, 24, 3); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#fff';
         ctx.fillText("GENES (Stripes", zoomBubble.x - 88, zoomBubble.y - 64);
         ctx.fillText("on chromosomes)", zoomBubble.x - 88, zoomBubble.y - 54);
-        ctx.strokeStyle = 'var(--green-accent)';
+        ctx.strokeStyle = '#10b981';
         ctx.beginPath(); ctx.moveTo(chrX - 20, chrY - 40); ctx.lineTo(zoomBubble.x - 45, chrY - 55); ctx.stroke();
 
         // Title at bottom of bubble
@@ -1441,8 +1441,8 @@
 
       // Draw Main headers for the Cells
       if (focusMode === 'overview') {
-        drawLabel("CELL A: Non-Dividing State", cellA.x, cellA.y - 145, 'var(--amber-accent)');
-        drawLabel("CELL B: Dividing State", cellB.x, cellB.y - 145, 'var(--rose-accent)');
+        drawLabel("CELL A: Non-Dividing State", cellA.x, cellA.y - 145, '#f59e0b');
+        drawLabel("CELL B: Dividing State", cellB.x, cellB.y - 145, '#f43f5e');
         
         ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
         ctx.font = '9px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
@@ -1452,7 +1452,7 @@
 
       // If zoomed inside Cell A
       if (focusMode === 'cellA') {
-        drawLabel("Cell A: Chromatin (Uncoiled Threads)", cellA.x, cellA.y - 88, 'var(--amber-accent)');
+        drawLabel("Cell A: Chromatin (Uncoiled Threads)", cellA.x, cellA.y - 88, '#f59e0b');
         
         ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.font = '9px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
@@ -1462,7 +1462,7 @@
 
       // If zoomed inside Cell B
       if (focusMode === 'cellB') {
-        drawLabel("Cell B: Chromosomes (Condensed Rods)", cellB.x, cellB.y - 88, 'var(--rose-accent)');
+        drawLabel("Cell B: Chromosomes (Condensed Rods)", cellB.x, cellB.y - 88, '#f43f5e');
         
         ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.font = '9px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
