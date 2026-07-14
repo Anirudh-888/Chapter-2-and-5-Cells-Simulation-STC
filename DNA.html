@@ -1017,6 +1017,9 @@
       const points2 = [];
       const basePairPoints = [];
 
+      let lastRungX = -999;
+      const stepWidth = isMagnified ? 13 : 26; // Consistent spacing between base-pair rungs
+
       for (let x = startX; x <= endX; x += sampleStep) {
         // Project 3D rotation onto 2D canvas height coordinates
         // angle is proportional to position along X axis + temporal phase
@@ -1032,8 +1035,7 @@
         points2.push({ x: x, y: y2, z: z2 });
 
         // Record positions for rungs at specific intervals
-        const stepWidth = isMagnified ? 18 : 30;
-        if (Math.round(x) % stepWidth === 0) {
+        if (x - lastRungX >= stepWidth) {
           basePairPoints.push({
             x: x,
             y1: y1,
@@ -1042,6 +1044,7 @@
             z2: z2,
             angle: angle
           });
+          lastRungX = x;
         }
       }
 
@@ -1049,10 +1052,11 @@
       drawRungs(basePairPoints, isMagnified, true);
 
       // --- Drawing Layer 2: Backbone strands ---
-      // Backbone 1
+      // Backbone 1 (Cyan)
       ctx.strokeStyle = 'var(--cyan-accent)';
       ctx.shadowColor = 'var(--cyan-accent)';
-      ctx.lineWidth = isMagnified ? 7 : 3.5;
+      ctx.shadowBlur = 6;
+      ctx.lineWidth = isMagnified ? 7 : 3.8;
       ctx.beginPath();
       points1.forEach((pt, idx) => {
         if (idx === 0) ctx.moveTo(pt.x, pt.y);
@@ -1060,9 +1064,10 @@
       });
       ctx.stroke();
 
-      // Backbone 2
-      ctx.strokeStyle = 'rgba(99, 102, 241, 0.9)'; // Indigo
-      ctx.shadowColor = 'rgba(99, 102, 241, 0.9)';
+      // Backbone 2 (Rose/Pink - highly visible and colorful!)
+      ctx.strokeStyle = 'var(--rose-accent)';
+      ctx.shadowColor = 'var(--rose-accent)';
+      ctx.lineWidth = isMagnified ? 7 : 3.8;
       ctx.beginPath();
       points2.forEach((pt, idx) => {
         if (idx === 0) ctx.moveTo(pt.x, pt.y);
@@ -1084,14 +1089,14 @@
         if (drawBackgroundOnly !== isBack) return;
 
         // Select nucleotide pair from our sequence
-        const sequenceIndex = Math.abs(Math.floor(rung.x / (isMagnified ? 18 : 30))) % basePairsSequence.length;
-        const bp = basePairsSequence[sequenceIndex];
+        const bp = basePairsSequence[index % basePairsSequence.length];
 
         // Rung midpoint coordinate
         const midY = (rung.y1 + rung.y2) / 2;
+        const distY = rung.y2 - rung.y1;
 
         ctx.save();
-        ctx.lineCap = 'butt';
+        ctx.lineCap = 'round';
         
         // Handle transparency based on mouse proximity to show highlighted active gene
         let alpha = 1.0;
@@ -1105,23 +1110,65 @@
           }
         }
 
-        // Base 1 segment (Backbone 1 to mid)
-        ctx.strokeStyle = colorBases ? bp.color1 : '#9ca3af';
-        ctx.lineWidth = isMagnified ? 5.5 : 3.0;
         ctx.globalAlpha = alpha;
+
+        // Base 1 segment (Backbone 1 to 42% of the way)
+        ctx.strokeStyle = colorBases ? bp.color1 : '#9ca3af';
+        ctx.lineWidth = isMagnified ? 6.0 : 3.2;
         ctx.beginPath();
         ctx.moveTo(rung.x, rung.y1);
-        ctx.lineTo(rung.x, midY);
+        ctx.lineTo(rung.x, rung.y1 + distY * 0.42);
         ctx.stroke();
 
-        // Base 2 segment (Backbone 2 to mid)
+        // Base 2 segment (Backbone 2 to 42% of the way)
         ctx.strokeStyle = colorBases ? bp.color2 : '#d1d5db';
         ctx.beginPath();
         ctx.moveTo(rung.x, rung.y2);
-        ctx.lineTo(rung.x, midY);
+        ctx.lineTo(rung.x, rung.y2 - distY * 0.42);
         ctx.stroke();
 
-        // Draw nucleotide base name letters on the rungs if magnified or toggled
+        // Draw Hydrogen Bonds in the center 16% gap (2 lines for A-T, 3 lines for G-C)
+        const hBondStartY = rung.y1 + distY * 0.42;
+        const hBondEndY = rung.y2 - distY * 0.42;
+        
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; // Glowing white lines for bonds
+        ctx.lineWidth = isMagnified ? 1.5 : 1.0;
+
+        const isAT = (bp.base1 === 'A' || bp.base1 === 'T');
+        if (isAT) {
+          // 2 Hydrogen Bonds for A-T
+          const spacing = isMagnified ? 3.0 : 1.5;
+          // Bond 1
+          ctx.beginPath();
+          ctx.moveTo(rung.x - spacing, hBondStartY);
+          ctx.lineTo(rung.x - spacing, hBondEndY);
+          ctx.stroke();
+          // Bond 2
+          ctx.beginPath();
+          ctx.moveTo(rung.x + spacing, hBondStartY);
+          ctx.lineTo(rung.x + spacing, hBondEndY);
+          ctx.stroke();
+        } else {
+          // 3 Hydrogen Bonds for G-C
+          const spacing = isMagnified ? 4.0 : 2.2;
+          // Bond 1
+          ctx.beginPath();
+          ctx.moveTo(rung.x - spacing, hBondStartY);
+          ctx.lineTo(rung.x - spacing, hBondEndY);
+          ctx.stroke();
+          // Bond 2
+          ctx.beginPath();
+          ctx.moveTo(rung.x, hBondStartY);
+          ctx.lineTo(rung.x, hBondEndY);
+          ctx.stroke();
+          // Bond 3
+          ctx.beginPath();
+          ctx.moveTo(rung.x + spacing, hBondStartY);
+          ctx.lineTo(rung.x + spacing, hBondEndY);
+          ctx.stroke();
+        }
+
+        // Draw nucleotide base name letters on the rungs if magnified
         if (isMagnified && showLabels) {
           ctx.fillStyle = '#ffffff';
           ctx.font = 'bold 8px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
