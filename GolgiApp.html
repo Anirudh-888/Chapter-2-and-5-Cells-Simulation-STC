@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Golgi Apparatus – Cell Biology Simulation</title>
+  <meta name="description" content="Interactive Class 9 Biology simulation of the Golgi Apparatus with clear Cis and Trans face distinction."/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#06101e;--panel:#0b1a30;--border:rgba(100,180,255,.14);
+      --cyan:#00e5ff;--gold:#ffd54f;
+      --cis:#7c4dff;--med:#00acc1;--trans:#ff6d00;
+      --lyso:#e53935;--secr:#43a047;--membr:#1e88e5;
+      --text:#e8f4fd;--dim:#7aadcc;
+    }
+    body{background:var(--bg);font-family:'Outfit',sans-serif;color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+    header{width:100%;padding:20px 40px 13px;background:linear-gradient(135deg,#08152a,#0d2040);border-bottom:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:5px}
+    .badge{font-size:.67rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--cyan);background:rgba(0,229,255,.09);border:1px solid rgba(0,229,255,.3);padding:3px 14px;border-radius:20px}
+    h1{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800;background:linear-gradient(90deg,#7c4dff,#00e5ff,#ff6d00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center}
+    header p{font-size:.85rem;color:var(--dim);text-align:center}
+    .wrap{display:flex;gap:18px;padding:20px 20px 0;width:100%;max-width:1300px;align-items:flex-start;flex-wrap:wrap}
+    .cvs-card{flex:1 1 630px;background:var(--panel);border:1px solid var(--border);border-radius:20px;overflow:hidden;position:relative;box-shadow:0 0 60px rgba(0,140,255,.07)}
+    canvas{display:block;width:100%;height:auto}
+    .ctrl-bar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:9px;z-index:10}
+    .btn{font-family:'Outfit',sans-serif;font-size:.76rem;font-weight:700;padding:6px 16px;border-radius:28px;border:1px solid rgba(100,200,255,.28);background:rgba(11,26,48,.87);color:var(--cyan);cursor:pointer;backdrop-filter:blur(8px);transition:all .22s;white-space:nowrap}
+    .btn:hover{background:rgba(63,169,245,.22);border-color:var(--cyan)}
+    .btn.on{background:rgba(0,229,255,.18);border-color:var(--cyan);color:#fff}
+    .side{flex:0 0 272px;display:flex;flex-direction:column;gap:14px}
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:15px;padding:15px 17px}
+    .ctitle{font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);margin-bottom:12px}
+    .region{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:9px;border:1px solid;margin-bottom:8px}
+    .region.cis{border-color:rgba(124,77,255,.5);background:rgba(124,77,255,.1)}
+    .region.med{border-color:rgba(0,172,193,.5);background:rgba(0,172,193,.08)}
+    .region.tra{border-color:rgba(255,109,0,.5);background:rgba(255,109,0,.09)}
+    .rbar{width:10px;height:38px;border-radius:4px;flex-shrink:0}
+    .rbar.cis{background:linear-gradient(#9c6dff,#7c4dff)}
+    .rbar.med{background:linear-gradient(#26c6da,#00acc1)}
+    .rbar.tra{background:linear-gradient(#ff8c42,#ff6d00)}
+    .rl{font-size:.81rem;font-weight:700}
+    .rs{font-size:.68rem;color:var(--dim);line-height:1.4;margin-top:2px}
+    .li{display:flex;align-items:flex-start;gap:10px;margin-bottom:9px;cursor:pointer;padding:5px 7px;border-radius:7px;transition:background .18s}
+    .li:hover{background:rgba(63,169,245,.07)}
+    .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:2px}
+    .ll{font-size:.79rem;color:var(--text)}
+    .ls{font-size:.67rem;color:var(--dim);line-height:1.4}
+    .fn-item{border-radius:10px;padding:10px 12px;border:1px solid;margin-bottom:8px}
+    .fn-item.mo{border-color:rgba(124,77,255,.4);background:rgba(124,77,255,.08)}
+    .fn-item.so{border-color:rgba(0,229,255,.35);background:rgba(0,229,255,.06)}
+    .fn-item.pa{border-color:rgba(255,109,0,.4);background:rgba(255,109,0,.07)}
+    .fn-head{font-size:.81rem;font-weight:700;display:flex;align-items:center;gap:7px;margin-bottom:4px}
+    .fn-body{font-size:.71rem;color:var(--dim);line-height:1.5}
+    .fn-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+    .tag{font-size:.63rem;font-weight:700;padding:2px 8px;border-radius:10px}
+    .tag.tr{background:rgba(67,160,71,.2);color:#81c784;border:1px solid rgba(67,160,71,.35)}
+    .tag.se{background:rgba(30,136,229,.2);color:#64b5f6;border:1px solid rgba(30,136,229,.35)}
+    .tag.ly{background:rgba(229,57,53,.2);color:#ef9a9a;border:1px solid rgba(229,57,53,.35)}
+    #tip{position:fixed;pointer-events:none;background:rgba(8,16,38,.96);border:1px solid var(--cyan);border-radius:10px;padding:10px 14px;font-size:.77rem;color:var(--text);max-width:240px;line-height:1.5;z-index:9999;opacity:0;transition:opacity .18s;backdrop-filter:blur(12px)}
+    #tip.on{opacity:1}
+    .tt{font-weight:700;color:var(--cyan);margin-bottom:3px;font-size:.83rem}
+    .tck-wrap{width:100%;max-width:1300px;padding:12px 20px 24px}
+    .tck{background:rgba(63,169,245,.05);border:1px solid var(--border);border-radius:11px;padding:9px 18px;font-size:.77rem;color:var(--dim);overflow:hidden;white-space:nowrap}
+    .tck-inner{display:inline-block;animation:scroll 36s linear infinite}
+    @keyframes scroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="badge">Class 9 · Cell Biology · Interactive Simulation</div>
+  <h1>Golgi Apparatus – The Cell's Postal System</h1>
+  <p>Flat stacked cisternae · <span style="color:#b39ddb">Cis face receives</span> · <span style="color:#ffb74d">Trans face dispatches</span> · Modifies, Sorts &amp; Packages</p>
+</header>
+
+<div class="wrap">
+  <div class="cvs-card">
+    <canvas id="c"></canvas>
+    <div class="ctrl-bar">
+      <button class="btn on" id="bAnim"  onclick="toggleAnim()">&#9646;&#9646; Pause</button>
+      <button class="btn on" id="bLabel" onclick="toggleLabel()">Labels: ON</button>
+      <button class="btn"    onclick="zi()">+ Zoom</button>
+      <button class="btn"    onclick="zo()">- Zoom</button>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="card">
+      <div class="ctitle">Golgi Regions</div>
+      <div class="region tra">
+        <div class="rbar tra"></div>
+        <div>
+          <div class="rl" style="color:#ffb74d">&#x25B2; Trans Face (Shipping)</div>
+          <div class="rs">Top of stack · Faces plasma membrane · Dispatches vesicles for transport, secretion &amp; lysosome formation</div>
+        </div>
+      </div>
+      <div class="region med">
+        <div class="rbar med"></div>
+        <div>
+          <div class="rl" style="color:#4dd0e1">Medial Golgi (Middle)</div>
+          <div class="rs">Central cisternae · Where glycosylation &amp; phosphorylation modifications occur</div>
+        </div>
+      </div>
+      <div class="region cis">
+        <div class="rbar cis"></div>
+        <div>
+          <div class="rl" style="color:#b39ddb">&#x25BC; Cis Face (Receiving)</div>
+          <div class="rs">Bottom of stack · Faces ER &amp; nucleus · Receives incoming vesicles from Rough ER</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle">Vesicle Types</div>
+      <div class="li" onmouseenter="hl('er')" onmouseleave="hl(null)">
+        <div class="dot" style="background:#ff7043;box-shadow:0 0 6px #ff7043"></div>
+        <div><div class="ll">From Rough ER &#x2192; Cis</div><div class="ls">Incoming vesicles carrying newly synthesised proteins &amp; lipids</div></div>
+      </div>
+      <div class="li" onmouseenter="hl('lyso')" onmouseleave="hl(null)">
+        <div class="dot" style="background:#e53935;box-shadow:0 0 6px #e53935"></div>
+        <div><div class="ll">Lysosome Vesicles</div><div class="ls">Leave trans face carrying digestive enzymes to form lysosomes</div></div>
+      </div>
+      <div class="li" onmouseenter="hl('secr')" onmouseleave="hl(null)">
+        <div class="dot" style="background:#43a047;box-shadow:0 0 6px #43a047"></div>
+        <div><div class="ll">Secretory Vesicles</div><div class="ls">Release cargo outside cell by exocytosis at plasma membrane</div></div>
+      </div>
+      <div class="li" onmouseenter="hl('membr')" onmouseleave="hl(null)">
+        <div class="dot" style="background:#1e88e5;box-shadow:0 0 6px #1e88e5"></div>
+        <div><div class="ll">Membrane Transport</div><div class="ls">Deliver lipids &amp; proteins to the plasma membrane</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle">Functions</div>
+      <div class="fn-item mo">
+        <div class="fn-head" style="color:#b39ddb"><span>&#x270F;&#xFE0F;</span> Modifies</div>
+        <div class="fn-body">Adds sugar chains (glycosylation) &amp; phosphate groups to proteins &amp; lipids as they pass through cisternae.</div>
+      </div>
+      <div class="fn-item so">
+        <div class="fn-head" style="color:var(--cyan)"><span>&#x1F5C2;&#xFE0F;</span> Sorts</div>
+        <div class="fn-body">Reads molecular address tags and routes each cargo to its correct destination.</div>
+      </div>
+      <div class="fn-item pa">
+        <div class="fn-head" style="color:#ffb74d"><span>&#x1F4E6;</span> Packages into Vesicles</div>
+        <div class="fn-body">Wraps sorted cargo into membrane vesicles for delivery to:</div>
+        <div class="fn-tags">
+          <span class="tag tr">Transport</span>
+          <span class="tag se">Secretion</span>
+          <span class="tag ly">Lysosome Formation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tck-wrap">
+  <div class="tck">
+    <span class="tck-inner">
+      &nbsp;&nbsp;Golgi discovered by Camillo Golgi in 1898 &nbsp;|&nbsp; Called the "Post Office of the Cell" &nbsp;|&nbsp; A Golgi stack has 5-8 cisternae &nbsp;|&nbsp; Cis face is closest to the ER and nucleus; Trans face faces the plasma membrane &nbsp;|&nbsp; Glycosylation occurs mainly in medial Golgi &nbsp;|&nbsp; Lysosomes are formed by budding from the trans face &nbsp;|&nbsp; Secretory cells like goblet cells have a very large Golgi apparatus &nbsp;&nbsp;
+    </span>
+  </div>
+</div>
+
+<div id="tip"><div class="tt" id="ttitle"></div><div id="tbody"></div></div>
+
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=860,H=610;c.width=W;c.height=H;
+let anim=true,labels=true,zoom=1.0,hlPart=null,t=0;
+const GX=420,GY=315;
+const NX=142,NY=218,NR=64;
+const CEX=430,CEY=308,CERX=393,CERY=268;
+const N=7,SLAB_H=14,GAP=23,MAX_W=205;
+
+function cistData(i){
+  const ratio=i/(N-1);
+  const cy=GY+(i-(N-1)/2)*GAP;
+  const mid=(N-1)/2;
+  const distM=Math.abs(i-mid)/mid;
+  const hw=MAX_W*(1-distM*0.17);
+  const curvePull=i<N/2?-(16*(1-i/(N/2))):(16*((i-N/2)/(N/2)));
+  let r,g,b;
+  if(i===0){r=255;g=109;b=0;}
+  else if(i===1){r=255;g=152;b=30;}
+  else if(i===2){r=180;g=195;b=20;}
+  else if(i===3){r=0;g=172;b=193;}
+  else if(i===4){r=70;g=120;b=255;}
+  else if(i===5){r=130;g=80;b=255;}
+  else{r=124;g=77;b=255;}
+  return{cy,hw,curvePull,r,g,b};
+}
+
+function cisCY(){return cistData(N-1).cy;}
+function transCY(){return cistData(0).cy;}
+
+const inVes=[],outVes=[];
+let inTmr=0,outTmr=0;
+
+function spawnIn(){
+  const {hw}=cistData(N-1);
+  inVes.push({
+    x:GX-MAX_W*0.5-55+Math.random()*40,
+    y:GY+GAP*(N-1)/2+52+Math.random()*28,
+    tx:GX-hw*0.45+Math.random()*hw*0.8,
+    ty:cisCY()+SLAB_H*0.65,
+    cx:0,cy:0,r:7+Math.random()*4,
+    prog:0,speed:0.006+Math.random()*0.004,col:'#ff7043',type:'er'
+  });
+}
+
+function spawnOut(type){
+  const {hw}=cistData(0);
+  const sx=GX-hw*0.4+Math.random()*hw*0.75;
+  const sy=transCY()-SLAB_H*0.65;
+  let tx,ty,col;
+  if(type==='lyso'){col='#e53935';tx=GX+MAX_W+100+Math.random()*35;ty=GY-90-Math.random()*45;}
+  else if(type==='secr'){col='#43a047';tx=GX+Math.random()*55-27;ty=GY-GAP*(N-1)/2-130-Math.random()*45;}
+  else{col='#1e88e5';tx=GX-MAX_W-95-Math.random()*35;ty=GY-85-Math.random()*45;}
+  outVes.push({x:sx,y:sy,tx,ty,cx:0,cy:0,r:7+Math.random()*4,prog:0,speed:0.005+Math.random()*0.004,col,type});
+}
+
+function lerp(a,b,tt){return a+(b-a)*tt;}
+function ease(tt){return tt<.5?2*tt*tt:1-Math.pow(-2*tt+2,2)/2;}
+
+function drawCell(){
+  ctx.save();
+  ctx.beginPath();ctx.ellipse(CEX,CEY,CERX,CERY,0,0,Math.PI*2);ctx.clip();
+  const cy=ctx.createRadialGradient(CEX-80,CEY-60,15,CEX,CEY,420);
+  cy.addColorStop(0,'rgba(16,44,88,.97)');cy.addColorStop(.55,'rgba(8,24,58,.98)');cy.addColorStop(1,'rgba(4,11,30,.99)');
+  ctx.fillStyle=cy;ctx.fillRect(0,0,W,H);
+  for(let i=0;i<44;i++){
+    const px=((i*107+t*4.5)%(CERX*1.9))-CERX*.95+CEX;
+    const py=((i*71+t*2.8)%(CERY*1.9))-CERY*.95+CEY;
+    const dr=((px-CEX)/CERX)**2+((py-CEY)/CERY)**2;
+    if(dr<.82){ctx.fillStyle=`rgba(110,190,255,${.03+.02*Math.sin(t+i)})`;ctx.beginPath();ctx.arc(px,py,1.6,0,Math.PI*2);ctx.fill();}
+  }
+  ctx.restore();
+  ctx.save();
+  ctx.shadowColor='#3fa9f5';ctx.shadowBlur=22;ctx.strokeStyle='#5cc8ff';ctx.lineWidth=3.5;
+  ctx.beginPath();ctx.ellipse(CEX,CEY,CERX,CERY,0,0,Math.PI*2);ctx.stroke();
+  ctx.shadowBlur=5;ctx.strokeStyle='rgba(100,220,255,.12)';ctx.lineWidth=8;
+  ctx.beginPath();ctx.ellipse(CEX,CEY,CERX-8,CERY-8,0,0,Math.PI*2);ctx.stroke();
+  ctx.restore();
+}
+
+function drawNucleus(){
+  const nr=NR*(1+.012*Math.sin(t*.8));
+  ctx.save();
+  const g=ctx.createRadialGradient(NX,NY,nr*.35,NX,NY,nr*1.55);
+  g.addColorStop(0,'rgba(171,71,188,0)');g.addColorStop(1,'rgba(171,71,188,.15)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(NX,NY,nr*1.55,0,Math.PI*2);ctx.fill();
+  const nf=ctx.createRadialGradient(NX-18,NY-12,3,NX,NY,nr);
+  nf.addColorStop(0,'#6a1b9a');nf.addColorStop(.65,'#4a148c');nf.addColorStop(1,'#280948');
+  ctx.fillStyle=nf;ctx.beginPath();ctx.arc(NX,NY,nr,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(200,140,220,.2)';ctx.beginPath();ctx.arc(NX+10,NY+8,17,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(200,140,220,.3)';ctx.beginPath();ctx.arc(NX-12,NY-9,12,0,Math.PI*2);ctx.fill();
+  ctx.shadowColor='#ab47bc';ctx.shadowBlur=8;ctx.strokeStyle='rgba(206,147,216,.4)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(NX,NY,nr,0,Math.PI*2);ctx.stroke();
+  ctx.shadowColor='#ce93d8';ctx.shadowBlur=12;ctx.strokeStyle='#ce93d8';ctx.lineWidth=2.8;
+  ctx.beginPath();ctx.arc(NX,NY,nr+7,0,Math.PI*2);ctx.stroke();
+  [0,60,120,180,240,300].forEach(d=>{
+    const a=(d*Math.PI)/180;const px=NX+Math.cos(a)*(nr+7),py=NY+Math.sin(a)*(nr+7);
+    ctx.shadowColor='#ea80fc';ctx.shadowBlur=6;ctx.fillStyle='#f3e5f5';ctx.beginPath();ctx.arc(px,py,3.2,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#9c27b0';ctx.beginPath();ctx.arc(px,py,1.4,0,Math.PI*2);ctx.fill();
+  });
+  ctx.shadowBlur=0;ctx.setLineDash([5,5]);ctx.strokeStyle='rgba(255,112,67,.32)';ctx.lineWidth=1.4;
+  ctx.beginPath();
+  ctx.moveTo(NX+NR+7,NY+14);
+  ctx.bezierCurveTo(NX+NR+75,NY+75,GX-MAX_W-55,cisCY()+28,GX-MAX_W*0.55,cisCY()+SLAB_H/2);
+  ctx.stroke();ctx.setLineDash([]);
+  ctx.restore();
+}
+
+function drawERHint(){
+  ctx.save();
+  const tubes=[
+    [{x:226,y:276},{x:263,y:298},{x:296,y:310}],
+    [{x:216,y:306},{x:256,y:323},{x:292,y:333}],
+    [{x:222,y:336},{x:265,y:348},{x:298,y:356}]
+  ];
+  tubes.forEach(tb=>{
+    ctx.shadowColor='#ff7043';ctx.shadowBlur=7;ctx.strokeStyle='#ff7043';ctx.lineWidth=4;ctx.lineCap='round';ctx.globalAlpha=.5;
+    ctx.beginPath();ctx.moveTo(tb[0].x,tb[0].y);ctx.quadraticCurveTo(tb[1].x,tb[1].y,tb[2].x,tb[2].y);ctx.stroke();
+    [.25,.5,.75].forEach(tt=>{
+      const px=(1-tt)*(1-tt)*tb[0].x+2*(1-tt)*tt*tb[1].x+tt*tt*tb[2].x;
+      const py=(1-tt)*(1-tt)*tb[0].y+2*(1-tt)*tt*tb[1].y+tt*tt*tb[2].y;
+      ctx.globalAlpha=.78;ctx.shadowColor='#ffca28';ctx.shadowBlur=5;ctx.fillStyle='#ffca28';ctx.beginPath();ctx.arc(px,py,2.7,0,Math.PI*2);ctx.fill();
+    });
+  });
+  ctx.restore();
+}
+
+function drawCisterna(i,alpha){
+  const {cy,hw,curvePull,r,g,b}=cistData(i);
+  const col=`rgb(${r},${g},${b})`;
+  const colA=(a)=>`rgba(${r},${g},${b},${a})`;
+  const topCP=cy-SLAB_H/2+curvePull;
+  ctx.save();
+  ctx.globalAlpha=.14*alpha;
+  ctx.shadowColor=col;ctx.shadowBlur=14+3*Math.sin(t*.5+i);
+  ctx.strokeStyle=col;ctx.lineWidth=SLAB_H+8;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(GX-hw,cy);ctx.quadraticCurveTo(GX,topCP-3,GX+hw,cy);ctx.stroke();
+  ctx.globalAlpha=alpha;ctx.shadowBlur=5;
+  const grad=ctx.createLinearGradient(0,cy-SLAB_H/2,0,cy+SLAB_H/2);
+  grad.addColorStop(0,colA(.9));grad.addColorStop(.35,colA(.72));grad.addColorStop(1,colA(.52));
+  ctx.fillStyle=grad;
+  ctx.beginPath();
+  ctx.moveTo(GX-hw,cy);
+  ctx.quadraticCurveTo(GX,topCP-SLAB_H/2,GX+hw,cy);
+  ctx.bezierCurveTo(GX+hw+SLAB_H*.4,cy,GX+hw+SLAB_H*.4,cy+SLAB_H,GX+hw,cy+SLAB_H);
+  ctx.quadraticCurveTo(GX,topCP+SLAB_H/2,GX-hw,cy+SLAB_H);
+  ctx.bezierCurveTo(GX-hw-SLAB_H*.4,cy+SLAB_H,GX-hw-SLAB_H*.4,cy,GX-hw,cy);
+  ctx.closePath();ctx.fill();
+  ctx.strokeStyle=col;ctx.lineWidth=1.6;ctx.shadowBlur=4;ctx.stroke();
+  ctx.fillStyle=`rgba(255,255,255,${.08+.04*Math.sin(t*.5+i)})`;
+  ctx.beginPath();
+  ctx.moveTo(GX-hw*.68,cy+2);ctx.quadraticCurveTo(GX,topCP-SLAB_H/2+4,GX+hw*.68,cy+2);
+  ctx.lineTo(GX+hw*.68,cy+SLAB_H*.38);ctx.quadraticCurveTo(GX,topCP-SLAB_H/2+SLAB_H*.48,GX-hw*.68,cy+SLAB_H*.38);
+  ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+
+function drawRegionBanners(){
+  // Draw thick color coded bars on the RIGHT side to clearly mark regions
+  const bx=GX+MAX_W+12;
+  const bw=10;
+  const regions=[
+    {i0:0,i1:1,col:'#ff6d00',glow:'#ff6d00'},
+    {i0:2,i1:N-3,col:'#00acc1',glow:'#00acc1'},
+    {i0:N-2,i1:N-1,col:'#7c4dff',glow:'#7c4dff'}
+  ];
+  regions.forEach(({i0,i1,col,glow})=>{
+    const y0=cistData(i0).cy-SLAB_H/2-3;
+    const y1=cistData(i1).cy+SLAB_H+3;
+    ctx.save();
+    ctx.shadowColor=glow;ctx.shadowBlur=10;
+    ctx.fillStyle=col;
+    ctx.beginPath();ctx.roundRect(bx,y0,bw,y1-y0,4);ctx.fill();
+    ctx.restore();
+  });
+}
+
+function drawGolgi(){
+  const dim=(hlPart&&hlPart!=='er'&&hlPart!=='lyso'&&hlPart!=='secr'&&hlPart!=='membr');
+  const alpha=dim?0.15:1;
+  for(let i=N-1;i>=0;i--)drawCisterna(i,alpha);
+  if(alpha>0.5)drawRegionBanners();
+}
+
+function drawMod(){
+  for(let i=1;i<N-1;i++){
+    const {cy,curvePull}=cistData(i);
+    for(let s=0;s<3;s++){
+      const ph=t*1.4+i*.9+s*1.2;
+      const xo=GX+Math.sin(ph)*.5*MAX_W*1.35;
+      const yo=cy+curvePull*.5+Math.sin(ph*2)*3;
+      const al=.55+.44*Math.sin(ph*2.5);
+      ctx.save();ctx.globalAlpha=al;ctx.shadowColor='#fff176';ctx.shadowBlur=5;ctx.fillStyle='#fff176';
+      ctx.beginPath();ctx.arc(xo,yo,1.4,0,Math.PI*2);ctx.fill();ctx.restore();
+    }
+  }
+}
+
+function drawVesicles(){
+  [...inVes,...outVes].forEach(v=>{
+    const e=ease(v.prog);v.cx=lerp(v.x,v.tx,e);v.cy=lerp(v.y,v.ty,e);
+    const dim=hlPart&&hlPart!==v.type;const al=dim?.07:.9;
+    const pulse=1+.07*Math.sin(t*1.8+v.prog*10);
+    ctx.save();ctx.globalAlpha=al;ctx.shadowColor=v.col;ctx.shadowBlur=10;
+    const vg=ctx.createRadialGradient(v.cx-v.r*.3,v.cy-v.r*.3,v.r*.05,v.cx,v.cy,v.r*pulse);
+    vg.addColorStop(0,'rgba(255,255,255,.5)');vg.addColorStop(.45,v.col+'cc');vg.addColorStop(1,v.col+'44');
+    ctx.fillStyle=vg;ctx.beginPath();ctx.arc(v.cx,v.cy,v.r*pulse,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=v.col;ctx.lineWidth=1.3;ctx.stroke();
+    if(v.r>7){ctx.fillStyle='rgba(255,255,255,.28)';ctx.beginPath();ctx.arc(v.cx-v.r*.24,v.cy-.5,v.r*.15,0,Math.PI*2);ctx.fill();}
+    ctx.restore();
+  });
+}
+
+function drawDests(){
+  // Lysosome (upper right)
+  const lx=GX+MAX_W+112,ly=cistData(0).cy-62;
+  ctx.save();ctx.shadowColor='#e53935';ctx.shadowBlur=14+3*Math.sin(t);
+  const lg=ctx.createRadialGradient(lx-5,ly-5,2,lx,ly,19);
+  lg.addColorStop(0,'#ef5350');lg.addColorStop(1,'#b71c1c55');
+  ctx.fillStyle=lg;ctx.beginPath();ctx.arc(lx,ly,17+1.4*Math.sin(t*1.2),0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#ef5350';ctx.lineWidth=1.5;ctx.stroke();
+  ['#ff8a80','#ff6e40','#ffab40'].forEach((cl,i)=>{ctx.fillStyle=cl;ctx.shadowBlur=0;ctx.beginPath();ctx.arc(lx+(i-1)*5,ly+(i%2===0?-3:3),2.2,0,Math.PI*2);ctx.fill();});
+  ctx.restore();
+  // Secretion arrow up
+  const sx=GX,sy=cistData(0).cy-112;
+  ctx.save();ctx.shadowColor='#43a047';ctx.shadowBlur=10;ctx.strokeStyle='#43a047';ctx.lineWidth=2;ctx.setLineDash([5,4]);
+  ctx.beginPath();ctx.moveTo(sx,sy+28);ctx.lineTo(sx,sy-8);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#43a047';ctx.beginPath();ctx.moveTo(sx,sy-14);ctx.lineTo(sx-6,sy-2);ctx.lineTo(sx+6,sy-2);ctx.closePath();ctx.fill();ctx.restore();
+  // Membrane arrow upper-left
+  const mx=GX-MAX_W-98,my=cistData(0).cy-62;
+  ctx.save();ctx.shadowColor='#1e88e5';ctx.shadowBlur=10;ctx.strokeStyle='#1e88e5';ctx.lineWidth=2;ctx.setLineDash([5,4]);
+  ctx.beginPath();ctx.moveTo(mx+28,my+14);ctx.lineTo(mx-10,my-18);ctx.stroke();ctx.setLineDash([]);ctx.restore();
+}
+
+function pill(txt,x,y,col,sub){
+  ctx.save();ctx.font='bold 10.5px Outfit, sans-serif';ctx.textAlign='center';
+  const tw=ctx.measureText(txt).width;const sw=sub?ctx.measureText(sub).width*.84:0;
+  const ph=sub?33:19,pw=Math.max(tw,sw)+17;
+  ctx.fillStyle='rgba(5,12,26,.88)';ctx.strokeStyle=col;ctx.lineWidth=1.2;ctx.shadowColor=col;ctx.shadowBlur=8;
+  const bx=x-pw/2,by=y-ph/2;
+  ctx.beginPath();ctx.moveTo(bx+5,by);ctx.lineTo(bx+pw-5,by);ctx.arcTo(bx+pw,by,bx+pw,by+5,5);ctx.lineTo(bx+pw,by+ph-5);ctx.arcTo(bx+pw,by+ph,bx+pw-5,by+ph,5);ctx.lineTo(bx+5,by+ph);ctx.arcTo(bx,by+ph,bx,by+ph-5,5);ctx.lineTo(bx,by+5);ctx.arcTo(bx,by,bx+5,by,5);ctx.closePath();
+  ctx.fill();ctx.stroke();
+  ctx.fillStyle=col;ctx.shadowBlur=5;ctx.fillText(txt,x,y+(sub?-5.5:4));
+  if(sub){ctx.font='8.5px Outfit, sans-serif';ctx.fillStyle='rgba(255,255,255,.5)';ctx.shadowBlur=0;ctx.fillText(sub,x,y+8);}
+  ctx.restore();
+}
+
+function drawLabels(){
+  if(!labels)return;
+  // Large face labels on right of Golgi with thick coloured banners
+  const bx=GX+MAX_W+28;
+  // TRANS face label
+  ctx.save();
+  const {cy:ty0}=cistData(0);
+  ctx.font='bold 11.5px Outfit, sans-serif';ctx.fillStyle='#ffb74d';ctx.shadowColor='#ff6d00';ctx.shadowBlur=10;ctx.textAlign='left';
+  ctx.fillText('TRANS FACE  (shipping)', bx+18, ty0+5);
+  ctx.font='8.5px Outfit, sans-serif';ctx.fillStyle='rgba(255,183,77,.6)';ctx.shadowBlur=0;
+  ctx.fillText('Faces plasma membrane · dispatches vesicles',bx+18,ty0+17);
+  ctx.restore();
+  // CIS face label
+  ctx.save();
+  const {cy:cy0}=cistData(N-1);
+  ctx.font='bold 11.5px Outfit, sans-serif';ctx.fillStyle='#b39ddb';ctx.shadowColor='#7c4dff';ctx.shadowBlur=10;ctx.textAlign='left';
+  ctx.fillText('CIS FACE  (receiving)', bx+18, cy0+5);
+  ctx.font='8.5px Outfit, sans-serif';ctx.fillStyle='rgba(179,157,219,.6)';ctx.shadowBlur=0;
+  ctx.fillText('Faces ER & nucleus · receives from RER',bx+18,cy0+17);
+  ctx.restore();
+  // Medial label
+  ctx.save();
+  const {cy:myc}=cistData(Math.floor(N/2));
+  ctx.font='10px Outfit, sans-serif';ctx.fillStyle='#4dd0e1';ctx.shadowColor='#00acc1';ctx.shadowBlur=6;ctx.textAlign='left';
+  ctx.fillText('Medial Golgi',bx+18,myc+5);ctx.restore();
+  // Title
+  pill('Golgi Apparatus',GX,cistData(0).cy-SLAB_H/2-30,'#26c6da','Stack of 7 flattened cisternae');
+  // Nucleus & ER labels
+  pill('Nucleus',NX,NY-NR-16,'#ce93d8','');
+  ctx.save();ctx.font='bold 9.5px Outfit, sans-serif';ctx.fillStyle='#ff7043';ctx.shadowColor='#ff7043';ctx.shadowBlur=5;ctx.textAlign='center';ctx.fillText('Rough ER',262,266);ctx.restore();
+  // Cell membrane
+  ctx.save();ctx.font='bold 10px Outfit, sans-serif';ctx.textAlign='center';ctx.fillStyle='#5cc8ff';ctx.shadowColor='#3fa9f5';ctx.shadowBlur=6;ctx.fillText('Cell Membrane',CEX,CEY-CERY+15);ctx.restore();
+  // Destinations
+  ctx.save();ctx.font='bold 9px Outfit, sans-serif';ctx.textAlign='center';
+  const lx=GX+MAX_W+112,ly=cistData(0).cy-62;
+  ctx.fillStyle='#ef9a9a';ctx.shadowColor='#e53935';ctx.shadowBlur=4;ctx.fillText('Lysosome',lx,ly-25);
+  ctx.fillStyle='#a5d6a7';ctx.shadowColor='#43a047';ctx.shadowBlur=4;ctx.fillText('Secretion',GX,cistData(0).cy-132);
+  ctx.fillStyle='#90caf9';ctx.shadowColor='#1e88e5';ctx.shadowBlur=4;ctx.fillText('Membrane',GX-MAX_W-105,cistData(0).cy-82);
+  ctx.restore();
+  // Incoming label
+  ctx.save();ctx.font='8.5px Outfit, sans-serif';ctx.fillStyle='rgba(255,112,67,.65)';ctx.textAlign='center';
+  ctx.fillText('incoming from ER', GX-MAX_W*.5-30, cisCY()+SLAB_H+18);ctx.restore();
+}
+
+function render(){
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#06101e';ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-W/2,-H/2);
+  drawCell();
+  ctx.save();ctx.beginPath();ctx.ellipse(CEX,CEY,CERX-4,CERY-4,0,0,Math.PI*2);ctx.clip();
+  if(hlPart){ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(0,0,W,H);}
+  drawERHint();drawNucleus();drawDests();drawGolgi();drawMod();drawVesicles();drawLabels();
+  ctx.restore();ctx.restore();
+  if(anim){
+    t+=0.016;inTmr++;outTmr++;
+    if(inTmr>95&&inVes.length<5){spawnIn();inTmr=0;}
+    if(outTmr>72&&outVes.length<7){const tp=['lyso','secr','membr'];spawnOut(tp[Math.floor(Math.random()*3)]);outTmr=0;}
+    for(let i=inVes.length-1;i>=0;i--){inVes[i].prog+=inVes[i].speed;if(inVes[i].prog>=1)inVes.splice(i,1);}
+    for(let i=outVes.length-1;i>=0;i--){outVes[i].prog+=outVes[i].speed;if(outVes[i].prog>=1)outVes.splice(i,1);}
+  }
+  requestAnimationFrame(render);
+}
+
+function toggleAnim(){anim=!anim;const b=document.getElementById('bAnim');b.textContent=anim?'Pause':'Play';b.classList.toggle('on',anim);}
+function toggleLabel(){labels=!labels;const b=document.getElementById('bLabel');b.textContent='Labels: '+(labels?'ON':'OFF');b.classList.toggle('on',labels);}
+function zi(){zoom=Math.min(zoom+.14,2.3);}
+function zo(){zoom=Math.max(zoom-.14,.45);}
+function hl(p){hlPart=p;}
+
+const tipEl=document.getElementById('tip');
+const tipData={
+  nucleus:{t:'Nucleus',b:'The nucleus is the control centre. Located near the Golgi apparatus, it directs protein synthesis in the ER which delivers cargo to the cis face.'},
+  cis:{t:'Cis Face (Receiving Side)',b:'The PURPLE bottom face is the entry side of the Golgi. It faces the Endoplasmic Reticulum and nucleus. Transport vesicles from the Rough ER fuse here.'},
+  trans:{t:'Trans Face (Shipping Side)',b:'The ORANGE top face is the exit side of the Golgi. It faces the plasma membrane. Finished, sorted cargo is packaged into vesicles here for delivery.'},
+  cisternae:{t:'Cisternae (Medial Region)',b:'The middle teal cisternae are the medial Golgi. This is where most glycosylation (adding sugar chains) and phosphorylation of proteins and lipids occurs.'},
+  er:{t:'From Rough ER (Incoming)',b:'Transport vesicles bud from the Rough ER and fuse with the cis face (bottom, purple), delivering newly synthesised proteins and lipids.'},
+  lyso:{t:'Lysosome Formation',b:'Vesicles budding from the trans face (orange, top) carrying digestive enzymes will become primary lysosomes. They digest worn-out organelles and food.'},
+  secr:{t:'Secretory Vesicles',b:'Vesicles from the trans face carry proteins for export (hormones, digestive enzymes) and release them outside the cell by exocytosis.'},
+  membr:{t:'Membrane Transport',b:'These vesicles add new lipid and protein molecules to the plasma membrane, allowing the cell membrane to grow and renew itself.'}
+};
+
+c.addEventListener('mousemove',e=>{
+  const rect=c.getBoundingClientRect();
+  const mx=(e.clientX-rect.left)*(W/rect.width),my=(e.clientY-rect.top)*(H/rect.height);
+  let found=null;
+  if(Math.hypot(mx-NX,my-NY)<NR+10)found='nucleus';
+  else if(mx>GX-MAX_W-10&&mx<GX+MAX_W+10){
+    const topY=cistData(0).cy-SLAB_H/2,botY=cistData(N-1).cy+SLAB_H/2;
+    if(my>=topY&&my<=botY){
+      const frac=(my-topY)/(botY-topY);
+      if(frac<0.18)found='trans';
+      else if(frac>0.82)found='cis';
+      else found='cisternae';
+    }
+  }
+  if(found){
+    const d=tipData[found];
+    document.getElementById('ttitle').textContent=d.t;
+    document.getElementById('tbody').textContent=d.b;
+    tipEl.classList.add('on');tipEl.style.left=(e.clientX+15)+'px';tipEl.style.top=(e.clientY-12)+'px';
+  }else tipEl.classList.remove('on');
+});
+c.addEventListener('mouseleave',()=>tipEl.classList.remove('on'));
+
+function resize(){
+  const cw=c.parentElement.clientWidth;
+  if(cw<W){c.style.width=cw+'px';c.style.height=(cw*H/W)+'px';}
+  else{c.style.width='';c.style.height='';}
+}
+window.addEventListener('resize',resize);
+resize();
+for(let i=0;i<3;i++)spawnIn();
+for(let i=0;i<4;i++){const tp=['lyso','secr','membr'];spawnOut(tp[i%3]);}
+render();
+</script>
+</body>
+</html>
