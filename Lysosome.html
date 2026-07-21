@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lysosome – Cell Biology Simulation</title>
+  <meta name="description" content="Interactive Class 9 Biology simulation of the Lysosome showing enzyme-based digestion, autophagy, phagocytosis, and the suicide bag function in a cell."/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#050e1c;--panel:#0a1828;--border:rgba(80,160,255,.13);
+      --cyan:#00e5ff;--acid:#b5ff2f;--red:#ff3d5a;--orange:#ff7043;
+      --purple:#ce93d8;--green:#69f0ae;--gold:#ffd740;
+      --lyso:#7e57c2;--enzyme:#f06292;--membrane:#26c6da;
+      --text:#e2f0ff;--dim:#6a9abf;
+    }
+    body{background:var(--bg);font-family:'Outfit',sans-serif;color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+    header{width:100%;padding:18px 40px 12px;background:linear-gradient(135deg,#070f1e,#0d1f3c);border-bottom:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:5px}
+    .badge{font-size:.66rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--acid);background:rgba(181,255,47,.09);border:1px solid rgba(181,255,47,.3);padding:3px 14px;border-radius:20px}
+    h1{font-size:clamp(1.3rem,3vw,2rem);font-weight:800;background:linear-gradient(90deg,#ce93d8,#00e5ff,#b5ff2f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center}
+    header p{font-size:.82rem;color:var(--dim);text-align:center}
+    .wrap{display:flex;gap:16px;padding:18px 18px 0;width:100%;max-width:1340px;align-items:flex-start;flex-wrap:wrap}
+    .cvs-card{flex:1 1 640px;background:var(--panel);border:1px solid var(--border);border-radius:20px;overflow:hidden;position:relative;box-shadow:0 0 70px rgba(126,87,194,.1)}
+    canvas{display:block;width:100%;height:auto}
+    .ctrl-bar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:10;flex-wrap:wrap;justify-content:center}
+    .btn{font-family:'Outfit',sans-serif;font-size:.74rem;font-weight:700;padding:6px 14px;border-radius:28px;border:1px solid rgba(100,200,255,.28);background:rgba(10,24,40,.87);color:var(--cyan);cursor:pointer;backdrop-filter:blur(8px);transition:all .22s;white-space:nowrap}
+    .btn:hover{background:rgba(63,169,245,.22);border-color:var(--cyan)}
+    .btn.active{background:rgba(0,229,255,.18);border-color:var(--cyan);color:#fff}
+    .btn.danger{border-color:rgba(255,61,90,.45);color:var(--red)}
+    .btn.danger:hover{background:rgba(255,61,90,.18);border-color:var(--red)}
+    .btn.acid-btn{border-color:rgba(181,255,47,.45);color:var(--acid)}
+    .btn.acid-btn:hover{background:rgba(181,255,47,.13);border-color:var(--acid)}
+    .side{flex:0 0 278px;display:flex;flex-direction:column;gap:13px}
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:15px;padding:14px 16px}
+    .ctitle{font-size:.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--acid);margin-bottom:11px}
+    .fn-item{border-radius:10px;padding:10px 12px;border:1px solid;margin-bottom:8px;cursor:pointer;transition:all .2s}
+    .fn-item:hover{transform:translateX(2px)}
+    .fn-item.auto{border-color:rgba(240,98,146,.4);background:rgba(240,98,146,.07)}
+    .fn-item.auto:hover{background:rgba(240,98,146,.14)}
+    .fn-item.phago{border-color:rgba(0,229,255,.35);background:rgba(0,229,255,.06)}
+    .fn-item.phago:hover{background:rgba(0,229,255,.13)}
+    .fn-item.endo{border-color:rgba(255,112,67,.4);background:rgba(255,112,67,.07)}
+    .fn-item.endo:hover{background:rgba(255,112,67,.14)}
+    .fn-item.apop{border-color:rgba(255,215,64,.4);background:rgba(255,215,64,.07)}
+    .fn-item.apop:hover{background:rgba(255,215,64,.14)}
+    .fn-head{font-size:.81rem;font-weight:700;display:flex;align-items:center;gap:7px;margin-bottom:3px}
+    .fn-body{font-size:.69rem;color:var(--dim);line-height:1.5}
+    .fn-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+    .tag{font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:10px;border:1px solid}
+    .tag.a{background:rgba(240,98,146,.15);color:#f8bbd0;border-color:rgba(240,98,146,.35)}
+    .tag.b{background:rgba(0,229,255,.1);color:#80deea;border-color:rgba(0,229,255,.3)}
+    .tag.c{background:rgba(181,255,47,.1);color:#ccff90;border-color:rgba(181,255,47,.3)}
+    .tag.d{background:rgba(255,215,64,.1);color:#fff59d;border-color:rgba(255,215,64,.3)}
+    .enz-row{display:flex;align-items:center;gap:9px;padding:5px 8px;border-radius:8px;margin-bottom:6px;border:1px solid rgba(255,255,255,.06);transition:background .2s}
+    .enz-row:hover{background:rgba(255,255,255,.04)}
+    .enz-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+    .enz-name{font-size:.76rem;font-weight:600}
+    .enz-sub{font-size:.63rem;color:var(--dim)}
+    .ph-bar-wrap{background:rgba(0,0,0,.3);border-radius:8px;height:14px;overflow:hidden;margin-top:6px;position:relative;border:1px solid rgba(255,255,255,.07)}
+    .ph-bar{height:100%;border-radius:8px;background:linear-gradient(90deg,#ff3d5a,#ff7043,#ffd740,#69f0ae);transition:width .5s}
+    .ph-labels{display:flex;justify-content:space-between;font-size:.6rem;color:var(--dim);margin-top:3px}
+    .ticker-wrap{width:100%;max-width:1340px;padding:10px 18px 22px}
+    .ticker{background:rgba(126,87,194,.06);border:1px solid var(--border);border-radius:10px;padding:8px 16px;font-size:.76rem;color:var(--dim);overflow:hidden;white-space:nowrap}
+    .ticker-inner{display:inline-block;animation:scroll 42s linear infinite}
+    @keyframes scroll{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+    #tip{position:fixed;pointer-events:none;background:rgba(5,14,28,.96);border:1px solid var(--lyso);border-radius:11px;padding:10px 14px;font-size:.76rem;color:var(--text);max-width:250px;line-height:1.5;z-index:9999;opacity:0;transition:opacity .18s;backdrop-filter:blur(12px)}
+    #tip.on{opacity:1}
+    .tt{font-weight:700;color:var(--purple);margin-bottom:3px;font-size:.82rem}
+    .mode-badge{position:absolute;top:12px;right:14px;font-size:.67rem;font-weight:700;padding:4px 10px;border-radius:12px;background:rgba(10,24,40,.85);border:1px solid;backdrop-filter:blur(8px)}
+    .mode-badge.idle{border-color:rgba(126,87,194,.5);color:var(--purple)}
+    .mode-badge.auto{border-color:rgba(240,98,146,.5);color:var(--enzyme)}
+    .mode-badge.phago{border-color:rgba(0,229,255,.5);color:var(--cyan)}
+    .mode-badge.endo{border-color:rgba(255,112,67,.5);color:var(--orange)}
+    .mode-badge.apop{border-color:rgba(255,215,64,.5);color:var(--gold)}
+    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:4px}
+    .stat-box{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:8px 10px;text-align:center}
+    .stat-val{font-size:1.15rem;font-weight:800;color:var(--acid)}
+    .stat-lbl{font-size:.62rem;color:var(--dim);margin-top:1px}
+    @media(max-width:740px){.wrap{flex-direction:column}.side{flex:1 1 100%}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="badge">Class 9 &middot; Cell Biology &middot; Interactive Simulation</div>
+  <h1>Lysosome &ndash; The Cell's Digestive System</h1>
+  <p>Single-membrane bound &middot; <span style="color:#f48fb1">Acid hydrolase enzymes</span> &middot; pH 4.5&ndash;5.0 &middot; Autophagy &middot; Phagocytosis &middot; Endocytosis</p>
+</header>
+
+<div class="wrap">
+  <div class="cvs-card">
+    <canvas id="c"></canvas>
+    <div class="mode-badge idle" id="modeBadge">&bull; IDLE</div>
+    <div class="ctrl-bar">
+      <button class="btn active" id="bAnim" onclick="toggleAnim()">&#9646;&#9646; Pause</button>
+      <button class="btn active" id="bLabel" onclick="toggleLabels()">Labels: ON</button>
+      <button class="btn acid-btn" onclick="triggerAutophagy()">&blacktriangleright; Autophagy</button>
+      <button class="btn" onclick="triggerPhagocytosis()" style="border-color:rgba(0,229,255,.45);color:var(--cyan)">&blacktriangleright; Phagocytosis</button>
+      <button class="btn" onclick="triggerEndocytosis()" style="border-color:rgba(255,112,67,.45);color:var(--orange)">&blacktriangleright; Endocytosis</button>
+      <button class="btn danger" onclick="triggerApoptosis()">&#9760; Autolysis</button>
+      <button class="btn" onclick="resetSim()">&#8635; Reset</button>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="card">
+      <div class="ctitle">Lysosomal Functions</div>
+      <div class="fn-item auto" onclick="triggerAutophagy()">
+        <div class="fn-head"><span>&#128260;</span> Autophagy</div>
+        <div class="fn-body">Lysosome fuses with autophagosomes to digest worn-out organelles and cellular debris using acid hydrolases.</div>
+        <div class="fn-tags"><span class="tag a">Self-digestion</span><span class="tag c">Recycling</span></div>
+      </div>
+      <div class="fn-item phago" onclick="triggerPhagocytosis()">
+        <div class="fn-head"><span>&#129440;</span> Phagocytosis</div>
+        <div class="fn-body">Fuses with phagosomes containing engulfed bacteria or foreign particles. Enzymes destroy pathogens at low pH.</div>
+        <div class="fn-tags"><span class="tag b">Defence</span><span class="tag c">Immunity</span></div>
+      </div>
+      <div class="fn-item endo" onclick="triggerEndocytosis()">
+        <div class="fn-head"><span>&#128230;</span> Endocytosis</div>
+        <div class="fn-body">Fuses with endosomes to break down macromolecules (proteins, lipids, carbohydrates) taken in from outside.</div>
+        <div class="fn-tags"><span class="tag b">Nutrient</span><span class="tag a">Digestion</span></div>
+      </div>
+      <div class="fn-item apop" onclick="triggerApoptosis()">
+        <div class="fn-head"><span>&#9760;</span> Autolysis / Apoptosis</div>
+        <div class="fn-body">In damaged cells, lysosomes release enzymes causing self-destruction. Called the &quot;suicide bags&quot; of the cell.</div>
+        <div class="fn-tags"><span class="tag d">Suicide Bag</span><span class="tag a">Cell Death</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle">Lysosomal Enzymes (Acid Hydrolases)</div>
+      <div class="enz-row"><div class="enz-dot" style="background:#f06292"></div><div><div class="enz-name">Lipase</div><div class="enz-sub">Digests fats &amp; lipids</div></div></div>
+      <div class="enz-row"><div class="enz-dot" style="background:#64b5f6"></div><div><div class="enz-name">Protease / Cathepsins</div><div class="enz-sub">Breaks down proteins</div></div></div>
+      <div class="enz-row"><div class="enz-dot" style="background:#69f0ae"></div><div><div class="enz-name">Nuclease</div><div class="enz-sub">Digests DNA &amp; RNA</div></div></div>
+      <div class="enz-row"><div class="enz-dot" style="background:#ffd740"></div><div><div class="enz-name">Glycosidase</div><div class="enz-sub">Breaks polysaccharides</div></div></div>
+      <div class="enz-row"><div class="enz-dot" style="background:#ce93d8"></div><div><div class="enz-name">Phosphatase</div><div class="enz-sub">Removes phosphate groups</div></div></div>
+      <div class="enz-row"><div class="enz-dot" style="background:#ff8a65"></div><div><div class="enz-name">Sulfatase</div><div class="enz-sub">Breaks sulfate bonds</div></div></div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle">Internal pH Level</div>
+      <div id="phText" style="font-size:.82rem;font-weight:700;color:var(--red)">pH 4.8 &ndash; Highly Acidic</div>
+      <div class="ph-bar-wrap"><div class="ph-bar" id="phBar" style="width:34%"></div></div>
+      <div class="ph-labels"><span>pH 1 (Acid)</span><span>pH 7 (Neutral)</span><span>pH 14 (Base)</span></div>
+      <div style="font-size:.68rem;color:var(--dim);margin-top:7px;line-height:1.5">The H&#8314;-ATPase pump maintains the low pH needed for enzyme activation. Cytoplasm pH ~7.2 protects the rest of the cell.</div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle">Simulation Stats</div>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-val" id="sDigested">0</div><div class="stat-lbl">Particles Digested</div></div>
+        <div class="stat-box"><div class="stat-val" id="sEvents">0</div><div class="stat-lbl">Digest Events</div></div>
+        <div class="stat-box"><div class="stat-val" id="sEnzymes">50</div><div class="stat-lbl">Active Enzymes</div></div>
+        <div class="stat-box"><div class="stat-val" id="sLyso">3</div><div class="stat-lbl">Lysosomes</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span class="ticker-inner">
+      &#128300; Lysosomes are single-membrane organelles &nbsp;&middot;&nbsp;
+      &#9879;&#65039; They contain ~60 different acid hydrolase enzymes &nbsp;&middot;&nbsp;
+      &#9879;&#65039; Optimal pH inside a lysosome: 4.5 &ndash; 5.0 &nbsp;&middot;&nbsp;
+      &#128260; Autophagy: Digesting own damaged organelles for recycling &nbsp;&middot;&nbsp;
+      &#129440; Phagocytosis: Destroying engulfed bacteria and pathogens &nbsp;&middot;&nbsp;
+      &#9760;&#65039; Autolysis: Lysosomes rupture and digest the entire cell &mdash; &quot;Suicide Bags&quot; (term by de Duve) &nbsp;&middot;&nbsp;
+      &#127981; Lysosomes are produced by the Golgi apparatus &nbsp;&middot;&nbsp;
+      &#128300; Discovered by Christian de Duve in 1955 &nbsp;&middot;&nbsp;
+      &#129516; Size: 0.1 &ndash; 1.2 micrometers in diameter &nbsp;&middot;&nbsp;
+      &#128138; Lysosomal storage diseases: e.g., Tay-Sachs, Gaucher's, Pompe disease
+    </span>
+  </div>
+</div>
+
+<div id="tip"><div class="tt" id="tipTitle"></div><div id="tipBody"></div></div>
+
+<script>
+// LYSOSOME SIMULATION ENGINE
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const W = 860, H = 580;
+canvas.width = W; canvas.height = H;
+
+let animRunning = true;
+let showLabels = true;
+let simMode = 'idle';
+let frame = 0;
+let totalDigested = 0;
+let totalEvents = 0;
+let raf;
+
+const ENZYMES = [
+  {name:'Lipase',     col:'#f06292'},
+  {name:'Protease',   col:'#64b5f6'},
+  {name:'Nuclease',   col:'#69f0ae'},
+  {name:'Glycosidase',col:'#ffd740'},
+  {name:'Phosphatase',col:'#ce93d8'},
+  {name:'Sulfatase',  col:'#ff8a65'},
+];
+
+const CELL = { x: W*0.5, y: H*0.5, rx: W*0.42, ry: H*0.45 };
+
+let lysosomes = [];
+let particles = [];
+let fusionEffect = null;
+let explosionParticles = [];
+let autolysisActive = false;
+let autolysisT = 0;
+
+// Floating H+ ions in cytoplasm
+const hIons = Array.from({length:20}, () => ({
+  x: CELL.x + (Math.random()-.5)*CELL.rx*1.5,
+  y: CELL.y + (Math.random()-.5)*CELL.ry*1.5,
+  vx:(Math.random()-.5)*.5, vy:(Math.random()-.5)*.5,
+  t:Math.random()*Math.PI*2,
+}));
+
+// ─── LYSOSOME CLASS ───
+class Lysosome {
+  constructor(x,y,r,id) {
+    this.x=x; this.y=y; this.r=r; this.id=id;
+    this.baseX=x; this.baseY=y;
+    this.enzymes=[];
+    this.fusing=false; this.fuseProgress=0;
+    this.digestParticles=[];
+    this.pulseT=Math.random()*Math.PI*2;
+    this.glowIntensity=0;
+    this.acidBubbles=[];
+    this.initEnzymes(); this.initBubbles();
+  }
+  initEnzymes() {
+    for(let i=0;i<10;i++) {
+      const e=ENZYMES[i%ENZYMES.length];
+      this.enzymes.push({
+        x:(Math.random()-.5)*this.r*.6, y:(Math.random()-.5)*this.r*.6,
+        vx:(Math.random()-.5)*.8, vy:(Math.random()-.5)*.8,
+        r:3+Math.random()*2, col:e.col, name:e.name,
+        orbitAng:Math.random()*Math.PI*2, speed:.3+Math.random()*.5,
+      });
+    }
+  }
+  initBubbles() {
+    for(let i=0;i<8;i++) {
+      const ang=Math.random()*Math.PI*2, dist=Math.random()*this.r*.7;
+      this.acidBubbles.push({
+        x:Math.cos(ang)*dist, y:Math.sin(ang)*dist,
+        r:1+Math.random()*2.5, alpha:.15+Math.random()*.2,
+        vy:-(.1+Math.random()*.2),
+      });
+    }
+  }
+  update() {
+    this.pulseT+=0.025;
+    this.x=this.baseX+Math.sin(this.pulseT*.7)*5;
+    this.y=this.baseY+Math.cos(this.pulseT*.5)*4;
+    this.enzymes.forEach(e => {
+      e.orbitAng+=e.speed*0.018;
+      e.x+=e.vx; e.y+=e.vy;
+      e.vx+=(Math.random()-.5)*.06-e.x*.01;
+      e.vy+=(Math.random()-.5)*.06-e.y*.01;
+      const d=Math.hypot(e.x,e.y), maxD=this.r*.75;
+      if(d>maxD){e.x*=maxD/d;e.y*=maxD/d;e.vx*=.5;e.vy*=.5;}
+    });
+    this.acidBubbles.forEach(b => {
+      b.y+=b.vy; b.x+=(Math.random()-.5)*.2;
+      const d=Math.hypot(b.x,b.y);
+      if(d>this.r*.7||b.r<.1) {
+        const ang=Math.random()*Math.PI*2, dist=Math.random()*this.r*.5;
+        b.x=Math.cos(ang)*dist; b.y=Math.sin(ang)*dist;
+        b.r=1+Math.random()*2.5; b.alpha=.15+Math.random()*.2;
+      }
+    });
+    this.glowIntensity=Math.max(0,this.glowIntensity-.01);
+    this.digestParticles=this.digestParticles.filter(p=>{
+      p.life-=2; p.x+=p.vx; p.y+=p.vy; p.vx*=.95; p.vy*=.95;
+      p.r=Math.max(0,p.r-.07); return p.life>0&&p.r>0;
+    });
+    if(this.fusing) {
+      this.fuseProgress+=.012; this.glowIntensity=1;
+      if(this.fuseProgress>=1){this.fusing=false;this.fuseProgress=0;
+        totalEvents++; document.getElementById('sEvents').textContent=totalEvents;}
+    }
+  }
+  draw() {
+    ctx.save(); ctx.translate(this.x,this.y);
+    const r=this.r+Math.sin(this.pulseT)*1.5;
+    // Outer glow
+    if(this.glowIntensity>0){
+      const g=ctx.createRadialGradient(0,0,r*.5,0,0,r*2.2);
+      g.addColorStop(0,`rgba(126,87,194,${this.glowIntensity*.35})`);
+      g.addColorStop(1,'rgba(126,87,194,0)');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,r*2.2,0,Math.PI*2); ctx.fill();
+    }
+    // Ambient glow
+    const glow=ctx.createRadialGradient(0,-r*.2,0,0,0,r*1.1);
+    glow.addColorStop(0,'rgba(126,87,194,.22)'); glow.addColorStop(1,'rgba(126,87,194,0)');
+    ctx.fillStyle=glow; ctx.beginPath(); ctx.arc(0,0,r*1.1,0,Math.PI*2); ctx.fill();
+    // Interior lumen
+    const interior=ctx.createRadialGradient(0,-r*.25,0,0,0,r);
+    interior.addColorStop(0,'rgba(90,50,160,.55)'); interior.addColorStop(.6,'rgba(60,30,120,.7)'); interior.addColorStop(1,'rgba(40,15,90,.9)');
+    ctx.fillStyle=interior; ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
+    // Acid bubbles
+    this.acidBubbles.forEach(b=>{
+      ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(181,255,47,${b.alpha})`; ctx.fill();
+    });
+    // Digest particles
+    this.digestParticles.forEach(p=>{
+      ctx.save(); ctx.globalAlpha=p.life/p.maxLife;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=p.col; ctx.fill(); ctx.restore();
+    });
+    // Enzyme dots
+    this.enzymes.forEach(e=>{
+      ctx.beginPath(); ctx.arc(e.x,e.y,e.r+2,0,Math.PI*2); ctx.fillStyle=e.col+'33'; ctx.fill();
+      ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,Math.PI*2); ctx.fillStyle=e.col; ctx.fill();
+    });
+    // SINGLE MEMBRANE (outer)
+    ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2);
+    ctx.strokeStyle='rgba(38,198,218,.9)'; ctx.lineWidth=3.5; ctx.stroke();
+    // Inner leaflet
+    ctx.beginPath(); ctx.arc(0,0,r-4,0,Math.PI*2);
+    ctx.strokeStyle='rgba(38,198,218,.35)'; ctx.lineWidth=1.5; ctx.stroke();
+    // Phospholipid dots on membrane
+    const nDots=Math.floor(r*.45);
+    for(let i=0;i<nDots;i++){
+      const a=(i/nDots)*Math.PI*2;
+      ctx.beginPath(); ctx.arc(Math.cos(a)*r, Math.sin(a)*r, 1.8, 0, Math.PI*2);
+      ctx.fillStyle=i%2===0?'#4dd0e1':'#0097a7'; ctx.fill();
+    }
+    if(showLabels){
+      ctx.font='bold 10px Outfit'; ctx.fillStyle='#ce93d8'; ctx.textAlign='center';
+      ctx.fillText('Lysosome '+this.id, 0, r+14);
+      ctx.font='8.5px Outfit'; ctx.fillStyle='rgba(206,147,216,.6)';
+      ctx.fillText('(single membrane)', 0, r+24);
+    }
+    ctx.restore();
+  }
+}
+
+// ─── PARTICLE CLASS ───
+class Particle {
+  constructor(type,x,y){
+    this.type=type; this.x=x; this.y=y;
+    this.vx=(Math.random()-.5)*1.2; this.vy=(Math.random()-.5)*1.2;
+    this.r=8+Math.random()*10; this.baseR=this.r;
+    this.angle=Math.random()*Math.PI*2; this.alive=true;
+    this.beingDigested=false; this.digestT=0; this.opacity=1;
+    const cols={bacteria:'#69f0ae',debris:'#90a4ae',protein:'#80cbc4',lipid:'#ffd740'};
+    this.col=cols[type]||'#90a4ae';
+    this.spikes=type==='bacteria'?6+Math.floor(Math.random()*4):0;
+  }
+  update(){
+    if(this.beingDigested){
+      this.digestT+=.025; this.r=Math.max(0,this.baseR*(1-this.digestT));
+      this.opacity=Math.max(0,1-this.digestT); if(this.digestT>=1)this.alive=false; return;
+    }
+    this.x+=this.vx; this.y+=this.vy;
+    this.vx+=(Math.random()-.5)*.08; this.vy+=(Math.random()-.5)*.08;
+    this.vx=Math.max(-2,Math.min(2,this.vx)); this.vy=Math.max(-2,Math.min(2,this.vy));
+    this.angle+=.018;
+    if(this.x<CELL.x-CELL.rx+this.r){this.x=CELL.x-CELL.rx+this.r;this.vx*=-.8;}
+    if(this.x>CELL.x+CELL.rx-this.r){this.x=CELL.x+CELL.rx-this.r;this.vx*=-.8;}
+    if(this.y<CELL.y-CELL.ry+this.r){this.y=CELL.y-CELL.ry+this.r;this.vy*=-.8;}
+    if(this.y>CELL.y+CELL.ry-this.r){this.y=CELL.y+CELL.ry-this.r;this.vy*=-.8;}
+  }
+  draw(){
+    if(!this.alive) return;
+    ctx.save(); ctx.globalAlpha=this.opacity; ctx.translate(this.x,this.y); ctx.rotate(this.angle);
+    if(this.type==='bacteria'){
+      const grd=ctx.createRadialGradient(0,0,0,0,0,this.r);
+      grd.addColorStop(0,'#a5d6a7'); grd.addColorStop(1,'#388e3c');
+      ctx.beginPath(); ctx.arc(0,0,this.r,0,Math.PI*2); ctx.fillStyle=grd; ctx.fill();
+      for(let i=0;i<this.spikes;i++){
+        const a=(i/this.spikes)*Math.PI*2;
+        ctx.beginPath(); ctx.moveTo(Math.cos(a)*this.r,Math.sin(a)*this.r);
+        ctx.lineTo(Math.cos(a)*(this.r+5),Math.sin(a)*(this.r+5));
+        ctx.strokeStyle='#69f0ae'; ctx.lineWidth=1.5; ctx.stroke();
+      }
+      ctx.strokeStyle='rgba(105,240,174,.5)'; ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.arc(0,0,this.r,0,Math.PI*2); ctx.stroke();
+    } else if(this.type==='debris'){
+      ctx.beginPath();
+      for(let i=0;i<6;i++){
+        const a=(i/6)*Math.PI*2, rr=this.r*(.6+Math.random()*.4);
+        i===0?ctx.moveTo(Math.cos(a)*rr,Math.sin(a)*rr):ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);
+      }
+      ctx.closePath(); ctx.fillStyle='rgba(144,164,174,.45)'; ctx.fill();
+      ctx.strokeStyle='#90a4ae'; ctx.lineWidth=1.5; ctx.stroke();
+    } else if(this.type==='protein'){
+      ctx.beginPath();
+      for(let i=0;i<8;i++){
+        const a=(i/8)*Math.PI*2, rr=this.r*(.55+Math.abs(Math.sin(i*1.3))*.45);
+        i===0?ctx.moveTo(Math.cos(a)*rr,Math.sin(a)*rr):ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);
+      }
+      ctx.closePath(); ctx.fillStyle='rgba(128,203,196,.5)'; ctx.fill();
+      ctx.strokeStyle='#80cbc4'; ctx.lineWidth=1.5; ctx.stroke();
+    } else if(this.type==='lipid'){
+      const g=ctx.createRadialGradient(-this.r*.3,-this.r*.3,0,0,0,this.r);
+      g.addColorStop(0,'#fff176'); g.addColorStop(.5,'#ffd740'); g.addColorStop(1,'#f9a825');
+      ctx.beginPath(); ctx.arc(0,0,this.r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+      ctx.strokeStyle='rgba(255,215,64,.6)'; ctx.lineWidth=1.2; ctx.stroke();
+    }
+    if(showLabels&&!this.beingDigested){
+      ctx.rotate(-this.angle);
+      const labels={bacteria:'Bacterium',debris:'Cell Debris',protein:'Protein',lipid:'Lipid Droplet'};
+      ctx.font='bold 8px Outfit'; ctx.fillStyle='rgba(226,240,255,.85)'; ctx.textAlign='center';
+      ctx.fillText(labels[this.type]||this.type, 0, this.r+11);
+    }
+    ctx.restore();
+  }
+}
+
+function init(){
+  lysosomes=[
+    new Lysosome(W*.38,H*.38,42,1),
+    new Lysosome(W*.6,H*.55,36,2),
+    new Lysosome(W*.45,H*.62,30,3),
+  ];
+  particles=[]; explosionParticles=[];
+  autolysisActive=false; autolysisT=0;
+  simMode='idle'; updateModeBadge();
+  document.getElementById('sDigested').textContent='0';
+  document.getElementById('sEvents').textContent='0';
+  document.getElementById('sLyso').textContent='3';
+}
+
+function updateModeBadge(){
+  const el=document.getElementById('modeBadge');
+  const modes={idle:'\u25cf IDLE',auto:'\u21b3 AUTOPHAGY',phago:'\ud83e\udda0 PHAGOCYTOSIS',endo:'\ud83d\udce6 ENDOCYTOSIS',apop:'\u2620 AUTOLYSIS'};
+  el.textContent=modes[simMode]||'\u25cf IDLE';
+  el.className='mode-badge '+simMode;
+}
+
+function burstDigest(lys, col, count){
+  for(let i=0;i<count;i++){
+    const ang=Math.random()*Math.PI*2, spd=1+Math.random()*2.5;
+    lys.digestParticles.push({
+      x:(Math.random()-.5)*lys.r*.5, y:(Math.random()-.5)*lys.r*.5,
+      vx:Math.cos(ang)*spd*.4, vy:Math.sin(ang)*spd*.4,
+      r:2+Math.random()*4, col, life:80+Math.random()*40, maxLife:120,
+    });
+  }
+  totalDigested+=count;
+  document.getElementById('sDigested').textContent=totalDigested;
+}
+
+function showFusionEffect(x,y,col){
+  fusionEffect={x,y,t:0,col,maxT:60};
+}
+
+function triggerAutophagy(){
+  if(simMode!=='idle'&&simMode!=='auto') return;
+  simMode='auto'; updateModeBadge();
+  const cx=CELL.x+(Math.random()-.5)*CELL.rx*.7;
+  const cy=CELL.y+(Math.random()-.5)*CELL.ry*.7;
+  const p=new Particle('debris',cx,cy);
+  particles.push(p);
+  setTimeout(()=>{
+    const lys=lysosomes[0];
+    lys.fusing=true; lys.fuseTarget=p; lys.glowIntensity=1;
+    lys.baseX=p.x; lys.baseY=p.y;
+    p.beingDigested=true;
+    burstDigest(lys,'#90a4ae',18);
+    showFusionEffect(lys.x,lys.y,'#ce93d8');
+    setTimeout(()=>{
+      lys.baseX=W*.38; lys.baseY=H*.38;
+      simMode='idle'; updateModeBadge();
+    },2500);
+  },800);
+}
+
+function triggerPhagocytosis(){
+  if(simMode!=='idle'&&simMode!=='phago') return;
+  simMode='phago'; updateModeBadge();
+  const cx=CELL.x+(Math.random()-.5)*CELL.rx*.6;
+  const cy=CELL.y+(Math.random()-.5)*CELL.ry*.6;
+  const p=new Particle('bacteria',cx,cy);
+  particles.push(p);
+  setTimeout(()=>{
+    const lys=lysosomes[1];
+    lys.fusing=true; lys.fuseTarget=p; lys.glowIntensity=1;
+    lys.baseX=p.x; lys.baseY=p.y;
+    p.beingDigested=true;
+    burstDigest(lys,'#69f0ae',22);
+    showFusionEffect(lys.x,lys.y,'#69f0ae');
+    setTimeout(()=>{
+      lys.baseX=W*.6; lys.baseY=H*.55;
+      simMode='idle'; updateModeBadge();
+    },2500);
+  },800);
+}
+
+function triggerEndocytosis(){
+  if(simMode!=='idle'&&simMode!=='endo') return;
+  simMode='endo'; updateModeBadge();
+  const cx=CELL.x+(Math.random()-.5)*CELL.rx*.6;
+  const cy=CELL.y+(Math.random()-.5)*CELL.ry*.6;
+  const types=['protein','lipid'];
+  const p=new Particle(types[Math.floor(Math.random()*types.length)],cx,cy);
+  particles.push(p);
+  setTimeout(()=>{
+    const lys=lysosomes[2];
+    lys.fusing=true; lys.fuseTarget=p; lys.glowIntensity=1;
+    lys.baseX=p.x; lys.baseY=p.y;
+    p.beingDigested=true;
+    burstDigest(lys,p.col,16);
+    showFusionEffect(lys.x,lys.y,p.col);
+    setTimeout(()=>{
+      lys.baseX=W*.45; lys.baseY=H*.62;
+      simMode='idle'; updateModeBadge();
+    },2500);
+  },800);
+}
+
+function triggerApoptosis(){
+  simMode='apop'; updateModeBadge();
+  autolysisActive=true; autolysisT=0;
+  lysosomes.forEach(l=>{l.glowIntensity=1;});
+  document.getElementById('sLyso').textContent='0';
+  setTimeout(()=>{
+    startExplosion();
+    setTimeout(()=>{
+      init();
+      document.getElementById('sLyso').textContent='3';
+      document.getElementById('sEnzymes').textContent='50';
+      animRunning=true;
+      document.getElementById('bAnim').textContent='\u23f8 Pause';
+      document.getElementById('bAnim').classList.add('active');
+      raf=requestAnimationFrame(loop);
+    },5000);
+  },1200);
+}
+
+function startExplosion(){
+  const cols=['#ff3d5a','#ff7043','#ffd740','#ce93d8','#64b5f6','#f06292','#69f0ae'];
+  for(let i=0;i<180;i++){
+    const ang=Math.random()*Math.PI*2, spd=1+Math.random()*6;
+    explosionParticles.push({
+      x:CELL.x+(Math.random()-.5)*80, y:CELL.y+(Math.random()-.5)*80,
+      vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd,
+      r:2+Math.random()*6, col:cols[Math.floor(Math.random()*cols.length)],
+      life:120+Math.random()*80, maxLife:200,
+    });
+  }
+  lysosomes=[];
+}
+
+function drawGrid(){
+  ctx.save(); ctx.globalAlpha=.04; ctx.strokeStyle='#4488aa'; ctx.lineWidth=1;
+  const s=40;
+  for(let x=0;x<W;x+=s){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=s){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  ctx.restore();
+}
+
+function drawNucleus(){
+  const nx=CELL.x+W*.09, ny=CELL.y-H*.08, nrx=62, nry=50;
+  const ng=ctx.createRadialGradient(nx,ny,0,nx,ny,nrx);
+  ng.addColorStop(0,'rgba(0,140,200,.18)'); ng.addColorStop(1,'rgba(0,80,140,.06)');
+  ctx.fillStyle=ng; ctx.beginPath(); ctx.ellipse(nx,ny,nrx,nry,-.1,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(nx,ny,nrx,nry,-.1,0,Math.PI*2);
+  ctx.strokeStyle='rgba(100,180,255,.35)'; ctx.lineWidth=2; ctx.stroke();
+  ctx.beginPath(); ctx.arc(nx,ny,12,0,Math.PI*2); ctx.fillStyle='rgba(100,180,255,.2)'; ctx.fill();
+  if(showLabels){
+    ctx.font='9px Outfit'; ctx.fillStyle='rgba(100,180,255,.55)'; ctx.textAlign='center';
+    ctx.fillText('Nucleus',nx,ny+nry+13);
+  }
+}
+
+function drawCell(){
+  const cellGlow=ctx.createRadialGradient(CELL.x,CELL.y,0,CELL.x,CELL.y,CELL.rx*1.05);
+  cellGlow.addColorStop(0,'rgba(30,136,229,.04)'); cellGlow.addColorStop(1,'rgba(30,136,229,0)');
+  ctx.fillStyle=cellGlow;
+  ctx.beginPath(); ctx.ellipse(CELL.x,CELL.y,CELL.rx*1.08,CELL.ry*1.08,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(CELL.x,CELL.y,CELL.rx,CELL.ry,0,0,Math.PI*2);
+  ctx.strokeStyle='rgba(30,136,229,.75)'; ctx.lineWidth=3.5; ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(CELL.x,CELL.y,CELL.rx-5,CELL.ry-5,0,0,Math.PI*2);
+  ctx.strokeStyle='rgba(30,136,229,.25)'; ctx.lineWidth=1.5; ctx.stroke();
+  const cyto=ctx.createRadialGradient(CELL.x,CELL.y-60,0,CELL.x,CELL.y,CELL.rx);
+  cyto.addColorStop(0,'rgba(10,35,72,.7)'); cyto.addColorStop(.7,'rgba(7,25,52,.8)'); cyto.addColorStop(1,'rgba(5,14,28,.9)');
+  ctx.fillStyle=cyto; ctx.beginPath(); ctx.ellipse(CELL.x,CELL.y,CELL.rx-5,CELL.ry-5,0,0,Math.PI*2); ctx.fill();
+  drawNucleus();
+  if(showLabels){
+    ctx.font='bold 10.5px Outfit'; ctx.fillStyle='rgba(30,136,229,.6)'; ctx.textAlign='left';
+    ctx.fillText('Cell Membrane (lipid bilayer)',CELL.x-CELL.rx+12,CELL.y-CELL.ry+20);
+    ctx.font='9px Outfit'; ctx.fillStyle='rgba(30,136,229,.4)';
+    ctx.fillText('Cytoplasm (pH ~7.2)',CELL.x-CELL.rx+12,CELL.y-CELL.ry+35);
+  }
+}
+
+function drawHIons(){
+  hIons.forEach(h=>{
+    h.t+=.03; h.x+=h.vx; h.y+=h.vy;
+    if(h.x<20||h.x>W-20) h.vx*=-1;
+    if(h.y<20||h.y>H-20) h.vy*=-1;
+    ctx.save(); ctx.globalAlpha=.07+Math.abs(Math.sin(h.t))*.08;
+    ctx.font='bold 8px Outfit'; ctx.fillStyle='#b5ff2f'; ctx.textAlign='center';
+    ctx.fillText('H\u207a',h.x,h.y); ctx.restore();
+  });
+}
+
+function drawAnnotations(){
+  if(!showLabels||lysosomes.length===0) return;
+  const l=lysosomes[0];
+  ctx.save(); ctx.font='bold 8.5px Outfit'; ctx.fillStyle='rgba(181,255,47,.8)'; ctx.textAlign='left';
+  ctx.fillText('H\u207a-ATPase pump',l.x+l.r+8,l.y-5);
+  ctx.fillText('(maintains pH 4.8)',l.x+l.r+8,l.y+7);
+  ctx.strokeStyle='rgba(181,255,47,.4)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(l.x+l.r+6,l.y); ctx.lineTo(l.x+l.r+3,l.y); ctx.stroke();
+  ctx.restore();
+}
+
+function drawFusionEffect(){
+  if(!fusionEffect) return;
+  fusionEffect.t++;
+  const p=fusionEffect.t/fusionEffect.maxT, r=20+p*50;
+  ctx.save(); ctx.globalAlpha=1-p;
+  ctx.beginPath(); ctx.arc(fusionEffect.x,fusionEffect.y,r,0,Math.PI*2);
+  ctx.strokeStyle=fusionEffect.col; ctx.lineWidth=2+p*4; ctx.stroke();
+  if(showLabels&&p<.4){
+    ctx.font='bold 9px Outfit'; ctx.fillStyle=fusionEffect.col; ctx.textAlign='center';
+    ctx.fillText('FUSION EVENT',fusionEffect.x,fusionEffect.y-r-5);
+  }
+  ctx.restore();
+  if(fusionEffect.t>=fusionEffect.maxT) fusionEffect=null;
+}
+
+function drawExplosion(){
+  explosionParticles=explosionParticles.filter(p=>{
+    p.life--; p.x+=p.vx; p.y+=p.vy; p.vx*=.97; p.vy*=.97;
+    p.r=Math.max(0,p.r*.986); return p.life>0;
+  });
+  if(autolysisActive){
+    autolysisT+=.015;
+    ctx.save(); ctx.globalAlpha=Math.max(0,1-autolysisT*.3);
+    const segs=60;
+    for(let i=0;i<segs;i++){
+      if(Math.sin(i*7+autolysisT*5)>Math.sin(autolysisT*3)) continue;
+      const a1=(i/segs)*Math.PI*2, a2=((i+1)/segs)*Math.PI*2;
+      ctx.beginPath();
+      ctx.moveTo(CELL.x+Math.cos(a1)*CELL.rx,CELL.y+Math.sin(a1)*CELL.ry);
+      ctx.arc(CELL.x,CELL.y,CELL.rx,a1,a2);
+      ctx.strokeStyle='rgba(255,61,90,.7)'; ctx.lineWidth=3; ctx.stroke();
+    }
+    ctx.restore();
+    if(autolysisT>2) autolysisActive=false;
+  }
+  explosionParticles.forEach(p=>{
+    ctx.save(); ctx.globalAlpha=p.life/p.maxLife;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=p.col; ctx.fill(); ctx.restore();
+  });
+  if(autolysisT>0&&autolysisT<3){
+    ctx.save(); ctx.globalAlpha=Math.sin(Math.min(autolysisT*2,Math.PI));
+    ctx.font='bold 26px Outfit'; ctx.fillStyle='#ff3d5a'; ctx.textAlign='center';
+    ctx.shadowColor='#ff3d5a'; ctx.shadowBlur=20;
+    ctx.fillText('AUTOLYSIS \u2014 CELL SELF-DESTRUCTION',W*.5,H*.5-20);
+    ctx.font='bold 14px Outfit'; ctx.fillStyle='#ffd740'; ctx.shadowBlur=0;
+    ctx.fillText('"Suicide Bag" function activated',W*.5,H*.5+15);
+    ctx.restore();
+  }
+}
+
+function loop(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#050e1c'; ctx.fillRect(0,0,W,H);
+  drawGrid();
+  drawCell();
+  drawHIons();
+  particles=particles.filter(p=>{p.update();p.draw();return p.alive||p.opacity>0.01;});
+  drawAnnotations();
+  lysosomes.forEach(l=>{l.update();l.draw();});
+  drawFusionEffect();
+  if(autolysisActive||explosionParticles.length>0) drawExplosion();
+  document.getElementById('sEnzymes').textContent=Math.round(50+Math.sin(frame*.04)*5);
+  frame++;
+  if(animRunning) raf=requestAnimationFrame(loop);
+}
+
+function toggleAnim(){
+  animRunning=!animRunning;
+  const btn=document.getElementById('bAnim');
+  if(animRunning){btn.textContent='\u23f8 Pause';btn.classList.add('active');raf=requestAnimationFrame(loop);}
+  else{btn.textContent='\u25b6 Play';btn.classList.remove('active');cancelAnimationFrame(raf);}
+}
+function toggleLabels(){
+  showLabels=!showLabels;
+  const btn=document.getElementById('bLabel');
+  btn.textContent='Labels: '+(showLabels?'ON':'OFF');
+  btn.classList.toggle('active',showLabels);
+}
+function resetSim(){
+  cancelAnimationFrame(raf);
+  totalDigested=0; totalEvents=0;
+  init();
+  animRunning=true;
+  document.getElementById('bAnim').textContent='\u23f8 Pause';
+  document.getElementById('bAnim').classList.add('active');
+  raf=requestAnimationFrame(loop);
+}
+
+// Tooltip
+canvas.addEventListener('mousemove',e=>{
+  const rect=canvas.getBoundingClientRect();
+  const sx=(e.clientX-rect.left)*(W/rect.width);
+  const sy=(e.clientY-rect.top)*(H/rect.height);
+  const tip=document.getElementById('tip');
+  let found=false;
+  for(const l of lysosomes){
+    if(Math.hypot(sx-l.x,sy-l.y)<l.r){
+      document.getElementById('tipTitle').textContent='Lysosome '+l.id;
+      document.getElementById('tipBody').innerHTML=
+        '<b>Type:</b> Single-membrane organelle<br>'+
+        '<b>pH:</b> ~4.8 (Highly Acidic)<br>'+
+        '<b>Enzymes:</b> '+l.enzymes.length+' acid hydrolases<br>'+
+        '<b>Function:</b> Intracellular digestion<br>'+
+        '<b>Membrane:</b> Single phospholipid bilayer<br>'+
+        '<b>Origin:</b> Golgi apparatus';
+      tip.style.left=(e.clientX+15)+'px'; tip.style.top=(e.clientY-10)+'px';
+      tip.classList.add('on'); found=true; break;
+    }
+  }
+  if(!found) tip.classList.remove('on');
+});
+canvas.addEventListener('mouseleave',()=>document.getElementById('tip').classList.remove('on'));
+
+init();
+raf=requestAnimationFrame(loop);
+</script>
+</body>
+</html>
