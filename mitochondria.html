@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mitochondria – Realistic 3D Cell Organelle Simulation (Class 9 STC)</title>
+  <meta name="description" content="Realistic & scientific 3D interactive simulation of Mitochondria bringing textbook diagrams to life. Demonstrating double membrane structure, outer VDAC porins, prominent inner cristae folds, matrix, and ATP synthesis mechanism."/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --bg: #030813;
+      --panel: #0a1728;
+      --panel-hover: #0f213a;
+      --border: rgba(0, 229, 255, 0.18);
+      --border-bright: rgba(0, 229, 255, 0.5);
+      --cyan: #00e5ff;
+      --gold: #ffd54f;
+      --orange: #ff7043;
+      --red: #ff3d5a;
+      --acid: #b5ff2f;
+      --purple: #ce93d8;
+      --pink: #ff4081;
+      --matrix-bg: #1e1306;
+      --text: #e1f5fe;
+      --text-dim: #8ab4d4;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: 'Outfit', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    header {
+      width: 100%;
+      padding: 18px 40px 12px;
+      background: linear-gradient(135deg, #050e1a 0%, #0d1e38 50%, #170d28 100%);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      position: relative;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0; width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyan), var(--acid), var(--orange), transparent);
+    }
+
+    .badge {
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--acid);
+      background: rgba(181, 255, 47, 0.1);
+      border: 1px solid rgba(181, 255, 47, 0.35);
+      padding: 4px 16px;
+      border-radius: 20px;
+      box-shadow: 0 0 14px rgba(181, 255, 47, 0.2);
+    }
+
+    h1 {
+      font-size: clamp(1.4rem, 3.2vw, 2.2rem);
+      font-weight: 800;
+      background: linear-gradient(90deg, #ffd54f 0%, #00e5ff 40%, #ff7043 75%, #b5ff2f 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      font-size: 0.84rem;
+      color: var(--text-dim);
+      text-align: center;
+      max-width: 900px;
+    }
+
+    .wrap {
+      display: flex;
+      gap: 18px;
+      padding: 18px 20px 0;
+      width: 100%;
+      max-width: 1400px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .cvs-card {
+      flex: 1 1 700px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 0 70px rgba(0, 229, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 540px;
+      background: #030812;
+      cursor: crosshair;
+    }
+
+    .mode-badge {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      padding: 6px 14px;
+      border-radius: 14px;
+      background: rgba(8, 20, 36, 0.92);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 18px rgba(0,0,0,0.5);
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .ctrl-bar {
+      padding: 12px 16px;
+      background: rgba(5, 14, 26, 0.96);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      z-index: 10;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 7px 15px;
+      border-radius: 24px;
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      background: rgba(10, 23, 40, 0.85);
+      color: var(--cyan);
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: all 0.22s ease;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn:hover {
+      background: rgba(0, 229, 255, 0.2);
+      border-color: var(--cyan);
+      transform: translateY(-1px);
+    }
+
+    .btn.active {
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.28), rgba(255, 112, 67, 0.22));
+      border-color: var(--cyan);
+      color: #fff;
+      box-shadow: 0 0 16px rgba(0, 229, 255, 0.35);
+    }
+
+    .btn.gold {
+      border-color: rgba(255, 213, 79, 0.4);
+      color: var(--gold);
+    }
+
+    .btn.gold:hover, .btn.gold.active {
+      background: rgba(255, 213, 79, 0.22);
+      border-color: var(--gold);
+      color: #fff;
+    }
+
+    .btn.acid {
+      border-color: rgba(181, 255, 47, 0.4);
+      color: var(--acid);
+    }
+
+    .btn.acid:hover, .btn.acid.active {
+      background: rgba(181, 255, 47, 0.22);
+      border-color: var(--acid);
+      color: #fff;
+    }
+
+    .side {
+      flex: 0 0 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .ctitle {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--acid);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .struct-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .struct-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .struct-item:hover {
+      background: rgba(0, 229, 255, 0.09);
+      border-color: rgba(0, 229, 255, 0.35);
+      transform: translateX(3px);
+    }
+
+    .struct-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .struct-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .struct-desc {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      line-height: 1.45;
+    }
+
+    /* Process steps */
+    .step-box {
+      border-left: 3px solid var(--cyan);
+      padding-left: 10px;
+      margin-bottom: 10px;
+    }
+
+    .step-box:last-child { margin-bottom: 0; }
+
+    .step-num {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .step-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .step-desc {
+      font-size: 0.71rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+
+    /* Live Gauges */
+    .gauge-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .gauge-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .gauge-val {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--acid);
+      line-height: 1.1;
+    }
+
+    .gauge-lbl {
+      font-size: 0.63rem;
+      color: var(--text-dim);
+      margin-top: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Controls slider */
+    .slider-row {
+      margin-bottom: 10px;
+    }
+
+    .slider-row:last-child { margin-bottom: 0; }
+
+    .slider-lbl {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    input[type=range] {
+      width: 100%;
+      height: 5px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.15);
+      outline: none;
+      accent-color: var(--cyan);
+    }
+
+    /* Ticker */
+    .ticker-wrap {
+      width: 100%;
+      max-width: 1400px;
+      padding: 14px 20px 24px;
+    }
+
+    .ticker {
+      background: rgba(0, 229, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 9px 18px;
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .ticker-inner {
+      display: inline-block;
+      animation: scrollTicker 45s linear infinite;
+    }
+
+    @keyframes scrollTicker {
+      0% { transform: translateX(100vw); }
+      100% { transform: translateX(-100%); }
+    }
+
+    /* Info Tooltip & Modal */
+    #tip {
+      position: fixed;
+      pointer-events: none;
+      background: rgba(4, 11, 22, 0.96);
+      border: 1px solid var(--cyan);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 0.76rem;
+      color: var(--text);
+      max-width: 280px;
+      line-height: 1.5;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    #tip.show { opacity: 1; }
+
+    .tip-title {
+      font-weight: 800;
+      color: var(--gold);
+      font-size: 0.85rem;
+      margin-bottom: 3px;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #0a1728;
+      border: 1px solid var(--cyan);
+      border-radius: 20px;
+      width: 90%;
+      max-width: 540px;
+      padding: 24px;
+      box-shadow: 0 0 60px rgba(0, 229, 255, 0.25);
+      transform: scale(0.92);
+      transition: transform 0.25s ease;
+      position: relative;
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px; right: 18px;
+      background: none; border: none;
+      color: var(--text-dim);
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+
+    .modal-close:hover { color: #fff; }
+
+    .modal-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--acid);
+      margin-bottom: 6px;
+    }
+
+    .modal-h2 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+
+    .modal-p {
+      font-size: 0.84rem;
+      line-height: 1.6;
+      color: var(--text-dim);
+      margin-bottom: 14px;
+    }
+
+    .modal-p strong { color: var(--gold); }
+
+    .modal-bullet {
+      background: rgba(255, 255, 255, 0.04);
+      border-left: 3px solid var(--cyan);
+      border-radius: 0 8px 8px 0;
+      padding: 8px 12px;
+      font-size: 0.78rem;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    @media (max-width: 820px) {
+      .wrap { flex-direction: column; }
+      .side { flex: 1 1 100%; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Class 9 STC Biology &middot; 3D Realistic Cell Simulation</div>
+  <h1>Mitochondria &ndash; Powerhouse of the Cell</h1>
+  <p>Realistic 3D cutaway diagram showing the porous double outer membrane, deeply folded finger-like <strong>Cristae</strong> inner membrane, matrix DNA &amp; ribosomes, and ATP generation mechanism.</p>
+</header>
+
+<div class="wrap">
+  <!-- Left Column: Interactive Canvas & Canvas Controls -->
+  <div class="cvs-card">
+    <div class="mode-badge" id="modeBadge">VIEW: 3D TEXTBOOK CUTAWAY</div>
+    <canvas id="c"></canvas>
+    
+    <div class="ctrl-bar">
+      <div class="btn-group">
+        <button class="btn active" id="bView1" onclick="setMode('overview')">&#128065; 3D Cutaway</button>
+        <button class="btn gold" id="bView2" onclick="setMode('etc')">&#9889; Crista &amp; ETC Zoom</button>
+        <button class="btn acid" id="bView3" onclick="setMode('krebs')">&#128260; Krebs Cycle</button>
+        <button class="btn" id="bView4" onclick="setMode('porin')">&#128269; VDAC Porin Pores</button>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn" id="bPause" onclick="togglePlay()">&#9646;&#9646; Pause</button>
+        <button class="btn active" id="bLabels" onclick="toggleLabels()">Labels: ON</button>
+        <button class="btn" onclick="resetParams()">&#8635; Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column: Interactive Educational Panels -->
+  <div class="side">
+    
+    <!-- Card 1: Structural Anatomy Breakdown -->
+    <div class="card">
+      <div class="ctitle">
+        <span>Anatomical Features</span>
+        <span style="font-size:0.6rem; color:var(--text-dim); text-transform:none">Click element to inspect</span>
+      </div>
+      <div class="struct-list">
+        <div class="struct-item" onclick="openModal('outer')">
+          <div class="struct-head">
+            <span class="struct-title"><span class="dot" style="background:#00e5ff"></span> Outer Membrane &amp; Porins</span>
+          </div>
+          <div class="struct-desc">Smooth outer boundary containing large barrel-like <strong>VDAC Porin channels</strong> permeable to small metabolites.</div>
+        </div>
+
+        <div class="struct-item" onclick="openModal('ims')">
+          <div class="struct-head">
+            <span class="struct-title"><span class="dot" style="background:#ce93d8"></span> Intermembrane Space (IMS)</span>
+          </div>
+          <div class="struct-desc">Fluid space between outer &amp; inner membrane where high <strong>Proton (H&#8314;) gradient</strong> accumulates during respiration.</div>
+        </div>
+
+        <div class="struct-item" onclick="openModal('cristae')">
+          <div class="struct-head">
+            <span class="struct-title"><span class="dot" style="background:#ff7043"></span> Cristae (Folded Inner Membrane)</span>
+          </div>
+          <div class="struct-desc">Deep finger/shelf-like folds extending into matrix, packed with <strong>ETC Complexes</strong> and <strong>ATP Synthase</strong> knobs!</div>
+        </div>
+
+        <div class="struct-item" onclick="openModal('matrix')">
+          <div class="struct-head">
+            <span class="struct-title"><span class="dot" style="background:#ffd54f"></span> Matrix &amp; Circular mtDNA</span>
+          </div>
+          <div class="struct-desc">Dense interior containing circular double-stranded <strong>mtDNA</strong>, <strong>70S Ribosomes</strong>, and Krebs cycle enzymes.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: ATP Synthesis Mechanism -->
+    <div class="card">
+      <div class="ctitle">Energy Preparation Mechanism</div>
+      
+      <div class="step-box">
+        <div class="step-num">Step 1 &bull; Substrate Entry</div>
+        <div class="step-title">Pyruvate &amp; O&#8502; Pass VDAC Porins</div>
+        <div class="step-desc">Pyruvate &amp; Oxygen pass through outer membrane porin pores into the mitochondrial matrix.</div>
+      </div>
+
+      <div class="step-box" style="border-color: var(--acid);">
+        <div class="step-num">Step 2 &bull; Matrix Oxidation</div>
+        <div class="step-title">Krebs Cycle (Citric Acid Cycle)</div>
+        <div class="step-desc">Matrix enzymes oxidize Pyruvate &rarr; Acetyl-CoA, releasing CO&#8502; and loading electron carriers (NADH &amp; FADH&#8282;).</div>
+      </div>
+
+      <div class="step-box" style="border-color: var(--gold);">
+        <div class="step-num">Step 3 &bull; Cristae ETC</div>
+        <div class="step-title">Electron Transport &amp; H&#8314; Pumping</div>
+        <div class="step-desc">Complexes I, III &amp; IV on Cristae folds pump H&#8314; protons into Crista lumens / IMS creating electrochemical gradient.</div>
+      </div>
+
+      <div class="step-box" style="border-color: var(--pink);">
+        <div class="step-num">Step 4 &bull; Chemiosmosis</div>
+        <div class="step-title">ATP Synthase Molecular Rotor</div>
+        <div class="step-desc">Protons rush back into matrix through ATP Synthase knobs, turning F&#8321; rotor to phosphorylate ADP + P&#7522; &rarr; <strong>ATP</strong>!</div>
+      </div>
+    </div>
+
+    <!-- Card 3: Live Bioenergetic Metrics & Substrate Sliders -->
+    <div class="card">
+      <div class="ctitle">Bioenergetic Dashboard</div>
+      
+      <div class="gauge-grid" style="margin-bottom: 12px;">
+        <div class="gauge-box">
+          <div class="gauge-val" id="gAtp">34.8</div>
+          <div class="gauge-lbl">ATP Output / sec</div>
+        </div>
+        <div class="gauge-box">
+          <div class="gauge-val" id="gMotive" style="color:var(--cyan)">185 mV</div>
+          <div class="gauge-lbl">Proton Gradient (&Delta;&psi;)</div>
+        </div>
+        <div class="gauge-box">
+          <div class="gauge-val" id="gPhIms" style="color:var(--purple)">pH 6.85</div>
+          <div class="gauge-lbl">IMS Acidic pH</div>
+        </div>
+        <div class="gauge-box">
+          <div class="gauge-val" id="gPhMat" style="color:var(--gold)">pH 7.82</div>
+          <div class="gauge-lbl">Matrix Alkaline pH</div>
+        </div>
+      </div>
+
+      <!-- Interactive Controls -->
+      <div class="slider-row">
+        <div class="slider-lbl">
+          <span>Oxygen (O&#8502;) Supply</span>
+          <span id="vO2" style="color:var(--cyan)">85%</span>
+        </div>
+        <input type="range" id="slO2" min="0" max="100" value="85" oninput="updateSliders()"/>
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-lbl">
+          <span>Pyruvate Substrate Level</span>
+          <span id="vPyr" style="color:var(--acid)">80%</span>
+        </div>
+        <input type="range" id="slPyr" min="10" max="100" value="80" oninput="updateSliders()"/>
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-lbl">
+          <span>Simulation Speed</span>
+          <span id="vSpd" style="color:var(--gold)">1.0x</span>
+        </div>
+        <input type="range" id="slSpd" min="2" max="25" value="10" oninput="updateSliders()"/>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Ticker Bar -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <div class="ticker-inner">
+      &bull; <strong>Class 9 NCERT Biology Fact:</strong> Mitochondria are known as the <em>Powerhouses of the Cell</em> because they generate chemical energy in the form of ATP (Adenosine Triphosphate).
+      &emsp;&bull; <strong>Double Membrane &amp; Cristae:</strong> Outer membrane has VDAC Porins; Inner membrane is deeply folded into shelf-like <strong>Cristae</strong> to maximize surface area for ATP synthesis.
+      &emsp;&bull; <strong>Self-Replicating Organelle:</strong> Mitochondria contain their own circular double-stranded DNA (mtDNA) and 70S ribosomes, making their own proteins!
+      &emsp;&bull; <strong>Chemiosmosis:</strong> ATP Synthase functions like a microscopic rotary turbine powered by H&#8314; proton flow back into the matrix.
+    </div>
+  </div>
+</div>
+
+<!-- Hover Tooltip -->
+<div id="tip">
+  <div class="tip-title" id="ttTitle">Title</div>
+  <div id="ttBody">Body text</div>
+</div>
+
+<!-- Detail Modal Overlay -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div class="modal-tag" id="mTag">STRUCTURE EXPLANATION</div>
+    <div class="modal-h2" id="mTitle">Outer Membrane</div>
+    <div class="modal-p" id="mBody">Description goes here...</div>
+    <div id="mBullets"></div>
+  </div>
+</div>
+
+<script>
+  // Canvas Setup
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  
+  let dpr = window.devicePixelRatio || 1;
+  let width = 0;
+  let height = 0;
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    width = rect.width;
+    height = rect.height;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+  }
+  
+  window.addEventListener('resize', resizeCanvas);
+
+  // Simulation State
+  let currentMode = 'overview'; // 'overview', 'etc', 'krebs', 'porin'
+  let isPlaying = true;
+  let showLabels = true;
+  let animFrameId = null;
+
+  // Substrate variables
+  let levelO2 = 0.85;
+  let levelPyr = 0.80;
+  let simSpeed = 1.0;
+  let time = 0;
+
+  // Particles
+  let protons = [];
+  let atpSparks = [];
+
+  function initParticles() {
+    protons = [];
+    atpSparks = [];
+    for (let i = 0; i < 45; i++) {
+      protons.push({
+        x: Math.random(),
+        y: Math.random(),
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        inIms: Math.random() > 0.35
+      });
+    }
+  }
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.querySelectorAll('.ctrl-bar .btn').forEach(b => {
+      if (b.id.startsWith('bView')) b.classList.remove('active');
+    });
+    
+    const badge = document.getElementById('modeBadge');
+    if (mode === 'overview') {
+      document.getElementById('bView1').classList.add('active');
+      badge.textContent = 'VIEW: 3D TEXTBOOK CUTAWAY';
+    } else if (mode === 'etc') {
+      document.getElementById('bView2').classList.add('active');
+      badge.textContent = 'ZOOM: CRISTA & ETC ROTOR';
+    } else if (mode === 'krebs') {
+      document.getElementById('bView3').classList.add('active');
+      badge.textContent = 'MATRIX: KREBS CYCLE MECHANISM';
+    } else if (mode === 'porin') {
+      document.getElementById('bView4').classList.add('active');
+      badge.textContent = 'OUTER MEMBRANE: VDAC PORINS';
+    }
+  }
+
+  function togglePlay() {
+    isPlaying = !isPlaying;
+    const btn = document.getElementById('bPause');
+    if (isPlaying) {
+      btn.innerHTML = '&#9646;&#9646; Pause';
+      btn.classList.remove('gold');
+    } else {
+      btn.innerHTML = '&#9654; Play';
+      btn.classList.add('gold');
+    }
+  }
+
+  function toggleLabels() {
+    showLabels = !showLabels;
+    const btn = document.getElementById('bLabels');
+    btn.textContent = `Labels: ${showLabels ? 'ON' : 'OFF'}`;
+    btn.classList.toggle('active', showLabels);
+  }
+
+  function resetParams() {
+    document.getElementById('slO2').value = 85;
+    document.getElementById('slPyr').value = 80;
+    document.getElementById('slSpd').value = 10;
+    updateSliders();
+    initParticles();
+    setMode('overview');
+    isPlaying = true;
+    document.getElementById('bPause').innerHTML = '&#9646;&#9646; Pause';
+  }
+
+  function updateSliders() {
+    levelO2 = parseFloat(document.getElementById('slO2').value) / 100;
+    levelPyr = parseFloat(document.getElementById('slPyr').value) / 100;
+    simSpeed = parseFloat(document.getElementById('slSpd').value) / 10;
+
+    document.getElementById('vO2').textContent = `${Math.round(levelO2 * 100)}%`;
+    document.getElementById('vPyr').textContent = `${Math.round(levelPyr * 100)}%`;
+    document.getElementById('vSpd').textContent = `${simSpeed.toFixed(1)}x`;
+  }
+
+  // Mouse Hover & Click Detection
+  const tip = document.getElementById('tip');
+
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    let hit = checkHit(mx, my);
+    if (hit) {
+      tip.classList.add('show');
+      tip.style.left = `${e.clientX + 14}px`;
+      tip.style.top = `${e.clientY + 14}px`;
+      document.getElementById('ttTitle').textContent = hit.title;
+      document.getElementById('ttBody').textContent = hit.desc;
+      canvas.style.cursor = 'pointer';
+    } else {
+      tip.classList.remove('show');
+      canvas.style.cursor = 'crosshair';
+    }
+  });
+
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    let hit = checkHit(mx, my);
+    if (hit && hit.id) {
+      openModal(hit.id);
+    }
+  });
+
+  function checkHit(mx, my) {
+    const cx = width / 2;
+    const cy = height / 2 - 10;
+
+    if (currentMode === 'overview') {
+      let rx = Math.min(width * 0.36, 330);
+      let ry = Math.min(height * 0.28, 160);
+
+      let dx = (mx - cx) / rx;
+      let dy = (my - cy) / ry;
+      let dist = dx * dx + dy * dy;
+
+      if (dist > 0.88 && dist < 1.18) {
+        return {
+          id: 'outer',
+          title: 'Outer Membrane & Porin Channels',
+          desc: 'Smooth outer envelope packed with VDAC porin pores allowing small molecules to pass.'
+        };
+      } else if (dist <= 0.88 && dist >= 0.25) {
+        return {
+          id: 'cristae',
+          title: 'Cristae (Folded Inner Membrane)',
+          desc: 'Shelf-like invaginations packed with Electron Transport Chain & ATP Synthase molecular rotors!'
+        };
+      } else if (dist < 0.25) {
+        return {
+          id: 'matrix',
+          title: 'Mitochondrial Matrix',
+          desc: 'Gel interior containing circular mtDNA, 70S ribosomes, and Krebs cycle enzymes.'
+        };
+      }
+    } else if (currentMode === 'etc') {
+      if (my >= height * 0.38 && my <= height * 0.65) {
+        if (mx > width * 0.15 && mx < width * 0.28) return { id: 'etc1', title: 'Complex I (NADH Dehydrogenase)', desc: 'Transfers 2e⁻ from NADH to CoQ & pumps 4 H⁺ into IMS.' };
+        if (mx > width * 0.30 && mx < width * 0.40) return { id: 'etc2', title: 'Complex II (Succinate Dehydrogenase)', desc: 'Passes electrons from FADH₂ to CoQ without proton pumping.' };
+        if (mx > width * 0.43 && mx < width * 0.55) return { id: 'etc3', title: 'Complex III (Cytochrome bc₁)', desc: 'Transfers electrons to Cytochrome c & pumps 4 H⁺ into IMS.' };
+        if (mx > width * 0.58 && mx < width * 0.70) return { id: 'etc4', title: 'Complex IV (Cytochrome c Oxidase)', desc: 'Combines e⁻ with O₂ and H⁺ to form H₂O & pumps 2 H⁺.' };
+        if (mx > width * 0.73 && mx < width * 0.88) return { id: 'atpsyn', title: 'ATP Synthase (F₀F₁ Rotor)', desc: 'Molecular turbine powered by H⁺ flux down gradient to generate ATP!' };
+      }
+    }
+    return null;
+  }
+
+  // --- DRAWING FUNCTIONS ---
+
+  // 1. REALISTIC 3D TEXTBOOK CUTAWAY MODE
+  function drawOverview() {
+    const cx = width / 2;
+    const cy = height / 2 - 10;
+    
+    // Outer Dimensions (Bean / Sausage Capsule Shape)
+    const rx = Math.min(width * 0.36, 330);
+    const ry = Math.min(height * 0.28, 160);
+    const imsGap = 16; // Gap between outer and inner membrane
+
+    // Background Cytosolic Ambient Glow
+    ctx.save();
+    let cytoGlow = ctx.createRadialGradient(cx, cy, rx * 0.4, cx, cy, rx * 1.3);
+    cytoGlow.addColorStop(0, 'rgba(10, 25, 45, 0)');
+    cytoGlow.addColorStop(1, 'rgba(0, 229, 255, 0.06)');
+    ctx.fillStyle = cytoGlow;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx * 1.2, ry * 1.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // --- 1. OUTER MEMBRANE (3D SHADED CAPSULE SHELL) ---
+    ctx.shadowColor = '#00e5ff';
+    ctx.shadowBlur = 22;
+
+    // Outer membrane shadow & double bilayer
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.95)';
+    ctx.lineWidth = 7;
+    ctx.stroke();
+
+    // Intermembrane Space (IMS) translucency
+    ctx.fillStyle = 'rgba(180, 130, 230, 0.14)';
+    ctx.fill();
+    ctx.restore();
+
+    // --- 2. VDAC PORIN CHANNELS ON OUTER MEMBRANE (20 Channels) ---
+    const porinCount = 20;
+    for (let i = 0; i < porinCount; i++) {
+      let angle = (i / porinCount) * Math.PI * 2 + (time * 0.03);
+      let px = cx + Math.cos(angle) * rx;
+      let py = cy + Math.sin(angle) * ry;
+
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(angle + Math.PI / 2);
+      
+      // Barrel Channel
+      ctx.fillStyle = '#00e5ff';
+      ctx.beginPath();
+      ctx.roundRect(-8, -4, 16, 8, 3);
+      ctx.fill();
+
+      // Pore Center
+      ctx.fillStyle = '#030812';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 3.5, 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Substrate passing animation
+      if (i % 3 === 0 && isPlaying) {
+        ctx.fillStyle = '#b5ff2f';
+        let offset = Math.sin(time * 4 + i) * 4;
+        ctx.beginPath();
+        ctx.arc(0, offset, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // --- 3. INNER MEMBRANE & MATRIX CAVITY ---
+    const irx = rx - imsGap;
+    const iry = ry - imsGap;
+
+    ctx.save();
+    // Matrix Background Fluid Gradient
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, irx, iry, 0, 0, Math.PI * 2);
+    let matGrad = ctx.createRadialGradient(cx, cy, 20, cx, cy, irx);
+    matGrad.addColorStop(0, '#2e1c07');
+    matGrad.addColorStop(0.65, '#1b1003');
+    matGrad.addColorStop(1, '#0e0701');
+    ctx.fillStyle = matGrad;
+    ctx.fill();
+
+    // Inner Membrane Boundary Line
+    ctx.strokeStyle = '#ff7043';
+    ctx.lineWidth = 5;
+    ctx.shadowColor = '#ff7043';
+    ctx.shadowBlur = 10;
+    ctx.stroke();
+    ctx.restore();
+
+    // --- 4. PROMINENT SHELF-LIKE CRISTAE FOLDS (THE STAR OF THE SHOW!) ---
+    // Defined 12 deep shelf invaginations alternating from Top, Bottom, Left & Right
+    const cristaeConfigs = [
+      // Top side Cristae extending DOWN into matrix
+      { angle: -2.5, depth: 0.68, width: 24, tilt: 0.1 },
+      { angle: -2.0, depth: 0.76, width: 28, tilt: -0.05 },
+      { angle: -1.5, depth: 0.84, width: 30, tilt: 0.0 },
+      { angle: -1.0, depth: 0.78, width: 28, tilt: 0.08 },
+      { angle: -0.5, depth: 0.70, width: 24, tilt: -0.1 },
+
+      // Bottom side Cristae extending UP into matrix
+      { angle: 2.5, depth: 0.68, width: 24, tilt: -0.08 },
+      { angle: 2.0, depth: 0.76, width: 28, tilt: 0.05 },
+      { angle: 1.5, depth: 0.84, width: 30, tilt: 0.0 },
+      { angle: 1.0, depth: 0.78, width: 28, tilt: -0.06 },
+      { angle: 0.5, depth: 0.70, width: 24, tilt: 0.1 },
+
+      // Left and Right End Cristae
+      { angle: Math.PI, depth: 0.55, width: 26, tilt: 0 },
+      { angle: 0, depth: 0.55, width: 26, tilt: 0 }
+    ];
+
+    ctx.save();
+    cristaeConfigs.forEach((c, idx) => {
+      let baseAngle = c.angle;
+      let startX = cx + Math.cos(baseAngle) * irx;
+      let startY = cy + Math.sin(baseAngle) * iry;
+
+      // Crista Fold Loop calculation
+      let tipDist = irx * (1 - c.depth);
+      let tipX = cx + Math.cos(baseAngle + c.tilt) * tipDist;
+      let tipY = cy + Math.sin(baseAngle + c.tilt) * (tipDist * (iry / irx));
+
+      let perpAngle = baseAngle + Math.PI / 2;
+      let halfW = c.width / 2;
+
+      let p1x = startX - Math.cos(perpAngle) * halfW;
+      let p1y = startY - Math.sin(perpAngle) * halfW;
+      let p2x = startX + Math.cos(perpAngle) * halfW;
+      let p2y = startY + Math.sin(perpAngle) * halfW;
+
+      let cp1x = (p1x + tipX) / 2 - Math.cos(perpAngle) * (halfW * 0.4);
+      let cp1y = (p1y + tipY) / 2 - Math.sin(perpAngle) * (halfW * 0.4);
+      let cp2x = (p2x + tipX) / 2 + Math.cos(perpAngle) * (halfW * 0.4);
+      let cp2y = (p2y + tipY) / 2 + Math.sin(perpAngle) * (halfW * 0.4);
+
+      // Draw Crista Lumen Interior (Continuous with IMS translucent purple)
+      ctx.beginPath();
+      ctx.moveTo(p1x, p1y);
+      ctx.quadraticCurveTo(cp1x, cp1y, tipX, tipY);
+      ctx.quadraticCurveTo(cp2x, cp2y, p2x, p2y);
+      ctx.closePath();
+
+      ctx.fillStyle = 'rgba(180, 130, 230, 0.28)';
+      ctx.fill();
+
+      // Draw Crista Double Membrane Contour
+      ctx.strokeStyle = '#ff7043';
+      ctx.lineWidth = 4.5;
+      ctx.shadowColor = '#ff7043';
+      ctx.shadowBlur = 10;
+      ctx.stroke();
+
+      // DRAW ATP SYNTHASE KNOBS (F0F1 Complexes) along sides of Crista facing Matrix
+      let knobSteps = 5;
+      for (let k = 1; k < knobSteps; k++) {
+        let t = k / knobSteps;
+        // Point along side 1
+        let k1x = (1-t)*(1-t)*p1x + 2*(1-t)*t*cp1x + t*t*tipX;
+        let k1y = (1-t)*(1-t)*p1y + 2*(1-t)*t*cp1y + t*t*tipY;
+
+        // Point along side 2
+        let k2x = (1-t)*(1-t)*p2x + 2*(1-t)*t*cp2x + t*t*tipX;
+        let k2y = (1-t)*(1-t)*p2y + 2*(1-t)*t*cp2y + t*t*tipY;
+
+        // Draw golden ATP Synthase knob 1
+        ctx.fillStyle = '#ffd54f';
+        ctx.shadowColor = '#ffd54f';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.arc(k1x - Math.cos(perpAngle)*4, k1y - Math.sin(perpAngle)*4, 2.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw golden ATP Synthase knob 2
+        ctx.beginPath();
+        ctx.arc(k2x + Math.cos(perpAngle)*4, k2y + Math.sin(perpAngle)*4, 2.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // ATP Generation Sparks during active simulation
+        if (isPlaying && Math.random() < 0.12 * levelO2 * levelPyr) {
+          ctx.fillStyle = '#b5ff2f';
+          ctx.beginPath();
+          ctx.arc(k1x + (Math.random() - 0.5)*14, k1y + (Math.random() - 0.5)*14, 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    });
+    ctx.restore();
+
+    // --- 5. MATRIX CONTENTS (mtDNA & 70S RIBOSOMES & DENSE GRANULES) ---
+    // Circular Mitochondrial DNA (mtDNA)
+    ctx.save();
+    let dnaCx = cx - irx * 0.35;
+    let dnaCy = cy + iry * 0.15;
+    ctx.translate(dnaCx, dnaCy);
+
+    ctx.strokeStyle = '#69f0ae';
+    ctx.lineWidth = 2.8;
+    ctx.shadowColor = '#69f0ae';
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    for (let a = 0; a <= Math.PI * 2; a += 0.1) {
+      let r = 22 + Math.sin(a * 6 + time * 2.5) * 4;
+      let x = Math.cos(a) * r;
+      let y = Math.sin(a) * (r * 0.55);
+      if (a === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.fillStyle = '#69f0ae';
+    ctx.font = '800 10px Outfit';
+    ctx.fillText('Circular mtDNA', -32, 24);
+    ctx.restore();
+
+    // 70S Ribosome Clusters
+    ctx.save();
+    for (let r = 0; r < 24; r++) {
+      let ra = r * 0.28;
+      let rxPos = cx + Math.cos(ra * 4.1) * (irx * 0.45);
+      let ryPos = cy + Math.sin(ra * 2.7) * (iry * 0.45);
+
+      ctx.fillStyle = '#ff4081';
+      ctx.shadowColor = '#ff4081';
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.arc(rxPos, ryPos, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Matrix Dense Calcium Granules
+    ctx.save();
+    const granuleLocs = [
+      {x: cx + irx * 0.25, y: cy - iry * 0.2},
+      {x: cx - irx * 0.2, y: cy - iry * 0.35},
+      {x: cx + irx * 0.3, y: cy + iry * 0.3}
+    ];
+    granuleLocs.forEach(g => {
+      ctx.fillStyle = '#b0bec5';
+      ctx.beginPath();
+      ctx.arc(g.x, g.y, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.restore();
+
+    // --- 6. FLOATING PROTONS & METABOLITES ---
+    protons.forEach(p => {
+      if (isPlaying) {
+        p.x += p.vx * 0.003 * simSpeed;
+        p.y += p.vy * 0.003 * simSpeed;
+        if (p.x < 0 || p.x > 1) p.vx *= -1;
+        if (p.y < 0 || p.y > 1) p.vy *= -1;
+      }
+
+      let px = p.x * width;
+      let py = p.y * height;
+
+      ctx.fillStyle = p.inIms ? '#ce93d8' : '#ffd54f';
+      ctx.font = '800 10px Outfit';
+      ctx.fillText('H⁺', px, py);
+    });
+
+    // --- 7. SCIENTIFIC LEADER LABELS ---
+    if (showLabels) {
+      drawLabelLine(cx - rx * 0.82, cy - ry * 0.82, cx - rx * 0.52, cy - ry * 0.52, 'Outer Membrane (With VDAC Porins)', '#00e5ff');
+      drawLabelLine(cx + rx * 0.78, cy - ry * 0.75, cx + rx * 0.48, cy - ry * 0.45, 'Intermembrane Space (IMS)', '#ce93d8');
+      drawLabelLine(cx + rx * 0.82, cy + ry * 0.65, cx + rx * 0.38, cy + ry * 0.32, 'Cristae (Folded Inner Membrane)', '#ff7043');
+      drawLabelLine(cx - rx * 0.75, cy + ry * 0.75, cx - rx * 0.25, cy + ry * 0.25, 'Mitochondrial Matrix (Krebs Cycle)', '#ffd54f');
+      drawLabelLine(cx, cy + ry * 0.9, cx + 15, cy + ry * 0.55, 'ATP Synthase Knobs (F₀F₁ Motors)', '#b5ff2f');
+    }
+  }
+
+  function drawLabelLine(lx, ly, tx, ty, text, color) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(lx, ly);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(tx, ty, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '700 12px Outfit';
+    ctx.shadowColor = 'rgba(0,0,0,0.85)';
+    ctx.shadowBlur = 5;
+    ctx.fillText(text, lx < tx ? lx - 150 : lx + 8, ly < ty ? ly - 5 : ly + 14);
+    ctx.restore();
+  }
+
+  // 2. CRISTA & ETC ZOOM MODE
+  function drawEtcZoom() {
+    ctx.save();
+
+    // Top 38%: Intermembrane Space / Crista Lumen (Acidic pH ~6.85)
+    let imsGrad = ctx.createLinearGradient(0, 0, 0, height * 0.38);
+    imsGrad.addColorStop(0, '#0c071e');
+    imsGrad.addColorStop(1, '#261244');
+    ctx.fillStyle = imsGrad;
+    ctx.fillRect(0, 0, width, height * 0.38);
+
+    // Center 38%-58%: Inner Crista Membrane Lipid Bilayer
+    let memGrad = ctx.createLinearGradient(0, height * 0.38, 0, height * 0.58);
+    memGrad.addColorStop(0, '#2e1908');
+    memGrad.addColorStop(0.5, '#4a2507');
+    memGrad.addColorStop(1, '#2e1908');
+    ctx.fillStyle = memGrad;
+    ctx.fillRect(0, height * 0.38, width, height * 0.20);
+
+    // Phospholipid Heads & Tails
+    let headR = 4;
+    for (let x = 10; x < width; x += 12) {
+      ctx.fillStyle = '#ff7043';
+      ctx.beginPath();
+      ctx.arc(x, height * 0.38, headR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255, 112, 67, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x, height * 0.38);
+      ctx.lineTo(x, height * 0.44);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ff7043';
+      ctx.beginPath();
+      ctx.arc(x, height * 0.58, headR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x, height * 0.58);
+      ctx.lineTo(x, height * 0.52);
+      ctx.stroke();
+    }
+
+    // Bottom 58%-100%: Matrix (Alkaline pH ~7.82)
+    let matGrad = ctx.createLinearGradient(0, height * 0.58, 0, height);
+    matGrad.addColorStop(0, '#1f1608');
+    matGrad.addColorStop(1, '#0d0802');
+    ctx.fillStyle = matGrad;
+    ctx.fillRect(0, height * 0.58, width, height * 0.42);
+
+    // Zone Title Overlays
+    ctx.font = '800 13px Outfit';
+    ctx.fillStyle = '#ce93d8';
+    ctx.fillText('CRISTA LUMEN / IMS - High [H⁺] Proton Concentration (pH ~6.85)', 20, 30);
+
+    ctx.fillStyle = '#ffd54f';
+    ctx.fillText('MITOCHONDRIAL MATRIX - Low [H⁺] Alkaline Environment (pH ~7.82)', 20, height - 25);
+
+    ctx.fillStyle = '#ffab91';
+    ctx.font = '700 11px Outfit';
+    ctx.fillText('CRISTA MEMBRANE (CARDIOLIPIN BILAYER WITH RESPIRATORY COMPLEXES)', 20, height * 0.48 + 4);
+
+    // DRAW ETC COMPLEXES I - IV & ATP SYNTHASE
+    let myTop = height * 0.34;
+    let myH = height * 0.28;
+
+    drawComplexBlock(width * 0.16, myTop, width * 0.10, myH, '#7c4dff', 'Complex I', 'NADH Deh.');
+    drawComplexBlock(width * 0.31, myTop + 15, width * 0.08, myH - 15, '#29b6f6', 'Complex II', 'Succinate Deh.');
+    drawComplexBlock(width * 0.44, myTop, width * 0.09, myH, '#ab47bc', 'Complex III', 'Cyt bc₁');
+    drawComplexBlock(width * 0.58, myTop, width * 0.09, myH, '#ff4081', 'Complex IV', 'Cyt c Oxidase');
+
+    drawAtpSynthase(width * 0.76, myTop, width * 0.11, myH);
+
+    // ANIMATION: Electron Sparks along complexes
+    if (isPlaying) {
+      let eProgress = (time * 1.5 * simSpeed) % 4;
+      let eX = width * (0.21 + eProgress * 0.13);
+      let eY = height * 0.48 + Math.sin(time * 10) * 3;
+
+      ctx.save();
+      ctx.shadowColor = '#00e5ff';
+      ctx.shadowBlur = 16;
+      ctx.fillStyle = '#00e5ff';
+      ctx.beginPath();
+      ctx.arc(eX, eY, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 9px Outfit';
+      ctx.fillText('e⁻', eX - 4, eY + 3);
+      ctx.restore();
+
+      if (eProgress > 2.8) {
+        ctx.fillStyle = '#69f0ae';
+        ctx.font = '700 11px Outfit';
+        ctx.fillText('½ O₂ + 2H⁺ → H₂O', width * 0.58, height * 0.68);
+      }
+    }
+
+    // ANIMATION: Proton Pumping UP (Matrix -> Crista Lumen)
+    if (isPlaying && Math.random() < 0.4 * levelPyr * levelO2) {
+      let pumpX = width * (0.21 + Math.floor(Math.random() * 3) * 0.18);
+      ctx.fillStyle = '#ce93d8';
+      ctx.font = '800 12px Outfit';
+      let animY = height * (0.6 - (time * 0.8 % 0.3));
+      ctx.fillText('↑ H⁺', pumpX, animY);
+    }
+
+    // ANIMATION: Proton Flux DOWN through ATP Synthase (Crista Lumen -> Matrix)
+    if (isPlaying) {
+      let fluxY = height * (0.34 + (time * 0.9 % 0.3));
+      ctx.fillStyle = '#b5ff2f';
+      ctx.font = '800 13px Outfit';
+      ctx.fillText('↓ H⁺', width * 0.80, fluxY);
+
+      let burstProgress = (time * 2 * simSpeed) % 1;
+      let burstY = height * 0.72 + burstProgress * 25;
+      ctx.save();
+      ctx.shadowColor = '#ffd54f';
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = '#ffd54f';
+      ctx.font = '800 13px Outfit';
+      ctx.fillText('✨ ATP Produced!', width * 0.77, burstY);
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
+  function drawComplexBlock(x, y, w, h, color, title, sub) {
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, 12);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '800 12px Outfit';
+    ctx.textAlign = 'center';
+    ctx.fillText(title, x + w / 2, y + 25);
+    ctx.font = '600 10px Outfit';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.fillText(sub, x + w / 2, y + 42);
+    ctx.restore();
+  }
+
+  function drawAtpSynthase(x, y, w, h) {
+    ctx.save();
+    ctx.fillStyle = '#ffb300';
+    ctx.fillRect(x + w * 0.35, y, w * 0.3, h * 0.55);
+
+    let headCx = x + w * 0.5;
+    let headCy = y + h * 0.75;
+    let headR = w * 0.42;
+
+    ctx.translate(headCx, headCy);
+    if (isPlaying) {
+      ctx.rotate(time * 4 * simSpeed * levelO2);
+    }
+
+    ctx.fillStyle = '#ffd54f';
+    ctx.shadowColor = '#ffd54f';
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.arc(0, 0, headR, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#ff6f00';
+    for (let b = 0; b < 6; b++) {
+      ctx.rotate(Math.PI / 3);
+      ctx.fillRect(-3, -headR, 6, headR * 0.6);
+    }
+    ctx.restore();
+
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = '800 12px Outfit';
+    ctx.textAlign = 'center';
+    ctx.fillText('ATP Synthase', x + w / 2, y - 8);
+    ctx.font = '700 10px Outfit';
+    ctx.fillText('(F₀F₁ Rotor)', x + w / 2, y + h + 28);
+  }
+
+  // 3. KREBS CYCLE MATRIX MODE
+  function drawKrebsCycle() {
+    const cx = width / 2;
+    const cy = height / 2;
+    const radius = Math.min(width, height) * 0.28;
+
+    ctx.save();
+    ctx.fillStyle = '#140c03';
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.font = '800 16px Outfit';
+    ctx.fillStyle = '#b5ff2f';
+    ctx.textAlign = 'center';
+    ctx.fillText('MITOCHONDRIAL MATRIX: KREBS CYCLE (CITRIC ACID CYCLE)', cx, 40);
+
+    ctx.strokeStyle = 'rgba(181, 255, 47, 0.35)';
+    ctx.lineWidth = 4;
+    ctx.setLineDash([8, 6]);
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    const nodes = [
+      { name: 'Acetyl-CoA (2C)', angle: -Math.PI / 2, col: '#00e5ff' },
+      { name: 'Citrate (6C)', angle: -Math.PI / 4, col: '#ffd54f' },
+      { name: 'α-Ketoglutarate (5C)', angle: 0, col: '#ff7043' },
+      { name: 'Succinate (4C)', angle: Math.PI / 3, col: '#ce93d8' },
+      { name: 'Fumarate (4C)', angle: (2 * Math.PI) / 3, col: '#69f0ae' },
+      { name: 'Oxaloacetate (4C)', angle: (7 * Math.PI) / 6, col: '#ff4081' }
+    ];
+
+    nodes.forEach(n => {
+      let nx = cx + Math.cos(n.angle) * radius;
+      let ny = cy + Math.sin(n.angle) * radius;
+
+      ctx.fillStyle = n.col;
+      ctx.shadowColor = n.col;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(nx, ny, 14, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 12px Outfit';
+      ctx.textAlign = 'center';
+      ctx.fillText(n.name, nx + (Math.cos(n.angle) * 38), ny + (Math.sin(n.angle) * 22));
+    });
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    if (isPlaying) ctx.rotate(time * 0.8 * simSpeed * levelPyr);
+
+    ctx.strokeStyle = '#b5ff2f';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0, 0, 30, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = '#b5ff2f';
+    ctx.font = '800 10px Outfit';
+    ctx.textAlign = 'center';
+    ctx.fillText('KREBS', 0, -4);
+    ctx.fillText('CYCLE', 0, 10);
+    ctx.restore();
+
+    if (isPlaying) {
+      let sparkA = time * 2;
+      let co2X = cx + Math.cos(sparkA) * (radius * 1.25);
+      let co2Y = cy + Math.sin(sparkA) * (radius * 1.25);
+
+      ctx.fillStyle = '#ff3d5a';
+      ctx.font = '800 11px Outfit';
+      ctx.fillText('💨 CO₂ Released', co2X, co2Y);
+
+      let nadhX = cx + Math.cos(sparkA + 2) * (radius * 0.7);
+      let nadhY = cy + Math.sin(sparkA + 2) * (radius * 0.7);
+      ctx.fillStyle = '#00e5ff';
+      ctx.font = '800 11px Outfit';
+      ctx.fillText('⚡ NADH + H⁺', nadhX, nadhY);
+    }
+
+    ctx.restore();
+  }
+
+  // 4. VDAC PORIN CHANNELS OUTER MEMBRANE MODE
+  function drawPorinTransport() {
+    ctx.save();
+    ctx.fillStyle = '#040d1a';
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.font = '800 16px Outfit';
+    ctx.fillStyle = '#00e5ff';
+    ctx.textAlign = 'center';
+    ctx.fillText('OUTER MITOCHONDRIAL MEMBRANE: VDAC PORIN CHANNELS', width / 2, 40);
+
+    let midY = height * 0.5;
+    ctx.fillStyle = '#0f2744';
+    ctx.fillRect(0, midY - 25, width, 50);
+
+    for (let x = width * 0.2; x <= width * 0.8; x += width * 0.3) {
+      ctx.fillStyle = '#00e5ff';
+      ctx.shadowColor = '#00e5ff';
+      ctx.shadowBlur = 15;
+      ctx.beginPath();
+      ctx.roundRect(x - 25, midY - 35, 50, 70, 10);
+      ctx.fill();
+
+      ctx.fillStyle = '#040d1a';
+      ctx.fillRect(x - 10, midY - 35, 20, 70);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 11px Outfit';
+      ctx.textAlign = 'center';
+      ctx.fillText('Porin Channel', x, midY - 42);
+      ctx.font = '600 10px Outfit';
+      ctx.fillText('(VDAC Pore)', x, midY + 48);
+    }
+
+    ctx.fillStyle = '#8ab4d4';
+    ctx.font = '700 12px Outfit';
+    ctx.fillText('CYTOSOL (OUTSIDE MITOCHONDRIA)', 20, 70);
+
+    ctx.fillStyle = '#ce93d8';
+    ctx.fillText('INTERMEMBRANE SPACE (INSIDE MITOCHONDRIA)', 20, height - 40);
+
+    if (isPlaying) {
+      for (let p = 0; p < 8; p++) {
+        let pX = width * (0.2 + (p % 3) * 0.3);
+        let pY = midY - 80 + ((time * 40 + p * 30) % 160);
+
+        ctx.fillStyle = p % 2 === 0 ? '#b5ff2f' : '#ffd54f';
+        ctx.beginPath();
+        ctx.arc(pX, pY, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '800 9px Outfit';
+        ctx.fillText(p % 2 === 0 ? 'Pyruvate' : 'ADP', pX + 10, pY + 3);
+      }
+    }
+
+    ctx.restore();
+  }
+
+  // --- MAIN LOOP ---
+  function loop() {
+    if (isPlaying) {
+      time += 0.016 * simSpeed;
+
+      let atpRate = (34.8 * levelO2 * levelPyr * simSpeed).toFixed(1);
+      document.getElementById('gAtp').textContent = atpRate;
+
+      let motivemV = Math.round(185 * Math.sqrt(levelO2 * levelPyr));
+      document.getElementById('gMotive').textContent = `${motivemV} mV`;
+    }
+
+    ctx.clearRect(0, 0, width, height);
+
+    if (currentMode === 'overview') {
+      drawOverview();
+    } else if (currentMode === 'etc') {
+      drawEtcZoom();
+    } else if (currentMode === 'krebs') {
+      drawKrebsCycle();
+    } else if (currentMode === 'porin') {
+      drawPorinTransport();
+    }
+
+    animFrameId = requestAnimationFrame(loop);
+  }
+
+  // --- MODAL DATA & HANDLERS ---
+  const modalData = {
+    outer: {
+      tag: 'DOUBLE MEMBRANE BOUNDARY',
+      title: 'Outer Mitochondrial Membrane & Porins',
+      body: 'The outer membrane is a smooth lipid envelope (~6-7 nm thick) enclosing the mitochondrion. It contains large transmembrane protein channels called <strong>VDAC (Voltage-Dependent Anion Channels)</strong> or <strong>Porins</strong>.',
+      bullets: [
+        '<strong>Pore Function:</strong> Forms aqueous channels allowing Pyruvate, ADP, ATP, and ions (<5 kDa) to diffuse freely.',
+        '<strong>Gateway:</strong> Controls metabolite flow between cytosol and intermembrane space.'
+      ]
+    },
+    ims: {
+      tag: 'PROTON RESERVOIR',
+      title: 'Intermembrane Space (IMS)',
+      body: 'The fluid gap between outer &amp; inner membrane. During electron transport, protons (H⁺) are pumped into the IMS, building a strong electrochemical proton gradient.',
+      bullets: [
+        '<strong>Acidic pH:</strong> Maintains pH ~6.85 compared to alkaline matrix (~7.82).',
+        '<strong>Proton Motive Force (&Delta;p):</strong> Drives ATP synthesis through ATP Synthase.'
+      ]
+    },
+    cristae: {
+      tag: 'SURFACE AREA MAXIMIZATION',
+      title: 'Cristae (Folded Inner Membrane)',
+      body: 'The inner membrane is deeply folded into shelf-like or finger-like invaginations called <strong>Cristae</strong>. This drastically expands the surface area available for cellular respiration.',
+      bullets: [
+        '<strong>Respiratory Chain:</strong> Packed with ETC Complexes I, II, III, IV and ATP Synthase knobs.',
+        '<strong>Cardiolipin Rich:</strong> Strictly impermeable to protons except through ATP Synthase rotors.'
+      ]
+    },
+    matrix: {
+      tag: 'AUTONOMOUS METABOLIC CORE',
+      title: 'Mitochondrial Matrix & DNA',
+      body: 'The dense gel interior containing Krebs cycle enzymes, circular double-stranded mtDNA, and 70S ribosomes.',
+      bullets: [
+        '<strong>Krebs Cycle:</strong> Oxidizes Acetyl-CoA to release CO₂ and generate NADH / FADH₂.',
+        '<strong>Circular mtDNA:</strong> Encodes 13 essential respiratory proteins, proving Endosymbiotic origin!'
+      ]
+    },
+    etc1: {
+      tag: 'COMPLEX I',
+      title: 'NADH Dehydrogenase Complex',
+      body: 'Accepts 2 electrons from NADH, passes them to Coenzyme Q, and pumps <strong>4 H⁺ protons</strong> into the Crista Lumen / IMS.',
+      bullets: ['NADH + H⁺ + CoQ + 4H⁺(matrix) → NAD⁺ + CoQH₂ + 4H⁺(IMS)']
+    },
+    etc2: {
+      tag: 'COMPLEX II',
+      title: 'Succinate Dehydrogenase',
+      body: 'Direct link between Krebs cycle and ETC. Accepts electrons from FADH₂ and transfers them to CoQ without proton pumping.',
+      bullets: ['Succinate + CoQ → Fumarate + CoQH₂']
+    },
+    etc3: {
+      tag: 'COMPLEX III',
+      title: 'Cytochrome bc₁ Complex',
+      body: 'Transfers electrons from CoQH₂ to Cytochrome c, pumping <strong>4 H⁺ protons</strong> into the Crista Lumen.',
+      bullets: ['CoQH₂ + 2 Cyt c(ox) + 4H⁺(matrix) → CoQ + 2 Cyt c(red) + 4H⁺(IMS)']
+    },
+    etc4: {
+      tag: 'COMPLEX IV',
+      title: 'Cytochrome c Oxidase',
+      body: 'Transfers 4 electrons to Oxygen (O₂), forming Water (H₂O), while pumping <strong>2 H⁺ protons</strong> into the IMS.',
+      bullets: ['O₂ + 4H⁺ + 4e⁻ → 2 H₂O (Requires breathed Oxygen)']
+    },
+    atpsyn: {
+      tag: 'MOLECULAR ROTOR',
+      title: 'ATP Synthase (F₀F₁ Complex)',
+      body: 'A microscopic rotary motor protein. As H⁺ protons flow down their gradient back into the matrix, the F₁ headpiece rotates to synthesize ATP from ADP + Pᵢ.',
+      bullets: [
+        '<strong>Chemiosmotic Coupling:</strong> Discovered by Peter Mitchell (Nobel Prize).',
+        '<strong>High Yield:</strong> Generates ~32 to 34 ATP per glucose molecule!'
+      ]
+    }
+  };
+
+  function openModal(key) {
+    const data = modalData[key];
+    if (!data) return;
+
+    document.getElementById('mTag').textContent = data.tag;
+    document.getElementById('mTitle').textContent = data.title;
+    document.getElementById('mBody').innerHTML = data.body;
+
+    let bHtml = '';
+    if (data.bullets) {
+      data.bullets.forEach(b => {
+        bHtml += `<div class="modal-bullet">${b}</div>`;
+      });
+    }
+    document.getElementById('mBullets').innerHTML = bHtml;
+    document.getElementById('modal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+  }
+
+  document.getElementById('modal').addEventListener('click', (e) => {
+    if (e.target.id === 'modal') closeModal();
+  });
+
+  // Init
+  resizeCanvas();
+  initParticles();
+  loop();
+</script>
+</body>
+</html>
