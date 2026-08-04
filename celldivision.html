@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mitosis &amp; Meiosis &ndash; Cell Division Simulation | Class 9 STC</title>
+<meta name="description" content="Scientifically accurate interactive simulation of Mitosis and Meiosis using WebGL (Pixi.js) and GSAP animations. Class 9 STC."/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#030812;--panel:rgba(6,16,38,0.9);--border:rgba(0,200,255,0.18);--border-hi:rgba(0,220,255,0.5);
+  --cyan:#00d4ff;--green:#00ff9d;--amber:#ffb300;--red:#ff3040;--violet:#b06cff;--pink:#ff4cad;
+  --text:#d8eeff;--text-dim:#6a9ab8;--font:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);font-family:var(--font);color:var(--text);display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse 70% 50% at 20% 20%,rgba(0,80,180,.07) 0%,transparent 65%),
+             radial-gradient(ellipse 55% 45% at 80% 78%,rgba(80,0,180,.07) 0%,transparent 65%);pointer-events:none}
+
+/* TOP BAR */
+.top-bar{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;
+  padding:10px 22px 9px;background:linear-gradient(135deg,#020610,#060f20,#080d22);
+  border-bottom:1px solid var(--border);flex-shrink:0}
+.top-bar::after{content:'';position:absolute;bottom:-2px;left:0;width:100%;height:2px;
+  background:linear-gradient(90deg,transparent,var(--cyan),var(--green),var(--amber),var(--violet),transparent)}
+.top-title{font-size:clamp(1rem,2.2vw,1.55rem);font-weight:800;
+  background:linear-gradient(90deg,var(--cyan),var(--green),var(--amber));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.top-sub{font-size:.72rem;color:var(--text-dim);letter-spacing:.8px;text-transform:uppercase;margin-top:1px}
+.mode-toggle{display:flex;gap:8px}
+.mode-btn{padding:7px 22px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.04);
+  color:var(--text-dim);cursor:pointer;font-family:var(--font);font-size:.85rem;font-weight:600;transition:all .22s}
+.mode-btn:hover{color:var(--text);border-color:rgba(255,255,255,.25)}
+.mode-btn.active{background:rgba(0,212,255,.12);border-color:var(--cyan);color:#fff;
+  box-shadow:0 0 14px rgba(0,212,255,.2)}
+.mode-btn.meiosis.active{background:rgba(176,108,255,.12);border-color:var(--violet);box-shadow:0 0 14px rgba(176,108,255,.2);color:#fff}
+
+/* MAIN LAYOUT */
+.main{position:relative;z-index:1;flex:1;display:grid;grid-template-columns:185px 1fr 270px;overflow:hidden}
+
+/* STAGE PANEL */
+.stage-panel{background:var(--panel);border-right:1px solid var(--border);padding:12px 8px;
+  display:flex;flex-direction:column;gap:4px;overflow-y:auto}
+.sp-title{font-size:.68rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--cyan);
+  font-weight:600;padding:0 6px 8px;border-bottom:1px solid var(--border);margin-bottom:4px}
+.stage-item{padding:8px 10px;border-radius:8px;cursor:pointer;transition:all .2s;
+  border:1px solid transparent;display:flex;align-items:center;gap:8px}
+.stage-item:hover{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:var(--text)}
+.stage-item.active{background:rgba(0,212,255,.1);border-color:rgba(0,212,255,.35);color:#fff}
+.stage-item.meiosis.active{background:rgba(176,108,255,.1);border-color:rgba(176,108,255,.35)}
+.si-num{font-family:var(--mono);font-size:.65rem;color:var(--text-dim);flex-shrink:0;width:16px;text-align:right}
+.si-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--text-dim)}
+.si-name{font-size:.8rem;font-weight:500;color:var(--text-dim)}
+.stage-item.active .si-name{color:#fff}
+.stage-item.active .si-dot{background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
+.stage-item.meiosis.active .si-dot{background:var(--violet);box-shadow:0 0 6px var(--violet)}
+.stage-item.done .si-dot{background:rgba(0,212,255,.4)}
+.stage-divider{margin:6px 0;border:none;border-top:1px solid var(--border);opacity:.4}
+
+/* CANVAS AREA */
+.canvas-area{display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+#pix-canvas{border-radius:0;display:block}
+.canvas-overlay-label{position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  font-size:.68rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);
+  display:flex;align-items:center;gap:5px;pointer-events:none}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);
+  animation:pdot 1.4s ease-in-out infinite}
+@keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+
+/* INFO PANEL */
+.info-panel{background:var(--panel);border-left:1px solid var(--border);padding:16px 14px;
+  display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+.info-stage-name{font-size:.68rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--cyan);
+  font-weight:700;padding-bottom:8px;border-bottom:1px solid rgba(0,212,255,.2)}
+.info-stage-name.meiosis{color:var(--violet);border-color:rgba(176,108,255,.2)}
+#stage-title{font-size:1.1rem;font-weight:700;color:var(--text);line-height:1.3}
+#stage-desc{font-size:.75rem;color:var(--text-dim);line-height:1.6}
+.facts-title{font-size:.66rem;letter-spacing:1px;text-transform:uppercase;color:var(--amber);font-weight:600;margin-top:4px}
+#stage-facts{display:flex;flex-direction:column;gap:5px}
+.fact-item{display:flex;gap:7px;align-items:flex-start;font-size:.72rem;color:var(--text-dim);
+  padding:5px 8px;border-radius:6px;background:rgba(255,255,255,.025);border-left:2px solid var(--amber);line-height:1.4}
+.fact-item::before{content:'â–¸';color:var(--amber);flex-shrink:0;font-size:.65rem;margin-top:1px}
+.chr-legend{display:flex;flex-direction:column;gap:5px;padding:8px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px}
+.cl-title{font-size:.64rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-weight:600;margin-bottom:2px}
+.cl-item{display:flex;align-items:center;gap:7px;font-size:.72rem;color:var(--text-dim)}
+.cl-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* CONTROLS */
+.controls{position:relative;z-index:10;display:flex;align-items:center;gap:10px;
+  padding:8px 18px;background:rgba(3,8,18,.95);border-top:1px solid var(--border);flex-shrink:0}
+.ctrl-btn{padding:6px 16px;border-radius:7px;border:1px solid var(--border);background:rgba(255,255,255,.05);
+  color:var(--text-dim);cursor:pointer;font-family:var(--font);font-size:.8rem;font-weight:600;
+  transition:all .2s;display:flex;align-items:center;gap:5px}
+.ctrl-btn:hover{color:var(--text);border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.08)}
+.ctrl-btn.play{background:rgba(0,212,255,.12);border-color:var(--cyan);color:var(--cyan)}
+.ctrl-btn.play:hover{background:rgba(0,212,255,.22)}
+.ctrl-btn:disabled{opacity:.35;cursor:not-allowed}
+.speed-wrap{display:flex;align-items:center;gap:7px;margin-left:auto}
+.speed-lbl{font-size:.74rem;color:var(--text-dim)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:110px;height:4px;
+  background:linear-gradient(90deg,var(--cyan) var(--fill,50%),rgba(255,255,255,.15) var(--fill,50%));
+  border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;
+  border-radius:50%;background:var(--cyan);box-shadow:0 0 8px rgba(0,212,255,.6);cursor:pointer}
+.speed-val{font-family:var(--mono);font-size:.76rem;color:var(--cyan);min-width:26px}
+.stage-counter{font-family:var(--mono);font-size:.72rem;color:var(--text-dim);padding:0 8px}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,212,255,.2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <div class="top-title">&#129516; Mitosis &amp; Meiosis &mdash; Cell Division Simulation</div>
+    <div class="top-sub">Class 9 Science &middot; Biology &middot; STC &mdash; WebGL Accelerated</div>
+  </div>
+  <div class="mode-toggle">
+    <button id="btn-mitosis" class="mode-btn active">&#129516; Mitosis</button>
+    <button id="btn-meiosis" class="mode-btn meiosis">&#127812; Meiosis</button>
+  </div>
+</div>
+
+<div class="main">
+  <aside class="stage-panel">
+    <div class="sp-title">Stages</div>
+    <div id="stage-list"></div>
+  </aside>
+
+  <div class="canvas-area">
+    <div class="canvas-overlay-label"><span class="live-dot"></span>WebGL &bull; 60 FPS</div>
+    <div id="pix-canvas"></div>
+  </div>
+
+  <aside class="info-panel">
+    <div class="info-stage-name" id="info-mode-label">Mitosis</div>
+    <div id="stage-title"></div>
+    <div id="stage-desc"></div>
+    <div class="facts-title">&#128270; Key Scientific Facts</div>
+    <div id="stage-facts"></div>
+    <div class="chr-legend">
+      <div class="cl-title">Chromosome Key</div>
+      <div class="cl-item"><div class="cl-dot" style="background:#ff3366"></div>Pair 1 (Large)</div>
+      <div class="cl-item"><div class="cl-dot" style="background:#3399ff"></div>Pair 2 (Medium)</div>
+      <div class="cl-item"><div class="cl-dot" style="background:#33ee88"></div>Pair 3 (Small)</div>
+      <div id="meiosis-legend" style="display:none">
+        <div class="cl-item" style="margin-top:4px"><div class="cl-dot" style="background:#ff6699;opacity:.7"></div>Paternal homologs</div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="controls">
+  <button class="ctrl-btn" id="btn-prev">&#9664; Prev</button>
+  <button class="ctrl-btn play" id="btn-play">&#9654; Play</button>
+  <button class="ctrl-btn" id="btn-next">Next &#9654;</button>
+  <span class="stage-counter" id="stage-counter">1 / 6</span>
+  <div class="speed-wrap">
+    <span class="speed-lbl">Speed</span>
+    <input type="range" id="speed-slider" min="0.5" max="2" step="0.25" value="1"/>
+    <span class="speed-val" id="speed-val">1&times;</span>
+  </div>
+</div>
+
+<!-- Pixi.js + GSAP -->
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.0/dist/pixi.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+"use strict";
+
+/* ================================================================
+   STAGE DATA
+   ================================================================ */
+const MITOSIS_STAGES = [
+  { name:'Interphase', title:'Interphase (G2 Phase)',
+    desc:'The cell has completed DNA replication (S phase). Each chromosome now consists of two identical sister chromatids joined at the centromere. Centrioles have duplicated. The chromatin remains loosely arranged (uncondensed) inside the intact nuclear envelope.',
+    facts:['DNA fully replicated â€” sister chromatids formed','Nuclear envelope intact and visible','Centrioles duplicated near nucleus','Cell at maximum growth â€” ready for division'] },
+  { name:'Prophase', title:'Prophase',
+    desc:'Chromatin condenses into distinct, visible chromosomes. The nuclear envelope begins to break down. The two pairs of centrioles migrate to opposite poles of the cell, nucleating microtubules that form the mitotic spindle.',
+    facts:['Chromatin condenses into X-shaped chromosomes','Nuclear envelope disintegrates','Centrioles migrate to opposite poles','Mitotic spindle begins forming'] },
+  { name:'Metaphase', title:'Metaphase',
+    desc:'Chromosomes reach maximum condensation and align along the equatorial plane (metaphase plate). Spindle fibers from both poles attach to kinetochores â€” specialized protein complexes on each centromere. This bi-orientation ensures accurate segregation.',
+    facts:['Chromosomes align at metaphase plate (cell equator)','Spindle fibers connect centrioles to kinetochores','Each chromosome is pulled equally from both poles','Checkpoint ensures all chromosomes are attached'] },
+  { name:'Anaphase', title:'Anaphase',
+    desc:'Cohesin proteins holding sister chromatids together are cleaved by separase. Motor proteins (dynein/kinesin) pull the sister chromatids to opposite poles along shortening spindle fibers. The cell elongates as polar microtubules push the poles apart.',
+    facts:['Sister chromatids separate â€” each becomes a chromosome','Pulled to opposite poles by shortening spindle fibers','Cell elongates as poles are pushed apart','92 chromatids â†’ 46 chromosomes per pole (in humans)'] },
+  { name:'Telophase', title:'Telophase',
+    desc:'Chromosomes arrive at the poles and begin to decondense. Nuclear envelopes reform around each set of chromosomes, forming two nuclei. The mitotic spindle disassembles. The contractile ring (actin + myosin) begins forming the cleavage furrow.',
+    facts:['Nuclear envelopes reform at both poles','Chromosomes begin to decondense into chromatin','Spindle apparatus disassembles','Cleavage furrow starts forming at equator'] },
+  { name:'Cytokinesis', title:'Cytokinesis',
+    desc:'The contractile ring of actin and myosin filaments tightens the cleavage furrow, pinching the cell in two. Result: two genetically identical daughter cells, each with the full diploid chromosome number (2n). In plant cells, a cell plate forms instead.',
+    facts:['Contractile ring of actin/myosin divides cytoplasm','Two genetically IDENTICAL daughter cells formed','Each daughter cell has full diploid number (2n)','In plants: cell plate forms instead of furrow'] },
+];
+
+const MEIOSIS_STAGES = [
+  { name:'Prophase I', title:'Prophase I',
+    desc:'Homologous chromosomes pair up (synapsis) forming structures called bivalents or tetrads. Crossing over occurs at points called chiasmata â€” non-sister chromatids of homologous chromosomes exchange segments. This creates genetic recombination and diversity.',
+    facts:['Homologs pair up via synapsis â€” bivalents (tetrads) form','Crossing over occurs at chiasmata','Genetic recombination creates NEW allele combinations','Nuclear envelope breaks down; spindle forms'] },
+  { name:'Metaphase I', title:'Metaphase I',
+    desc:'Bivalents (homolog pairs) align at the metaphase plate. Spindle fibers attach to the outer kinetochore of each homolog (not to both chromatids as in mitosis). Independent assortment: each pair aligns randomly, generating 2â¿ possible combinations.',
+    facts:['Bivalents align at metaphase plate as PAIRS','Spindle fibers attach to outer kinetochores','Independent assortment â€” random orientation of each pair','2n=6 â†’ 2Â³ = 8 possible chromosome arrangements'] },
+  { name:'Anaphase I', title:'Anaphase I',
+    desc:'Homologous chromosomes separate and move to opposite poles. Unlike mitosis, sister chromatids remain attached. This is the REDUCTION DIVISION â€” chromosome number is halved from 2n to n. The cell becomes haploid.',
+    facts:['Homologs separate to opposite poles','Sister chromatids remain joined at centromere','REDUCTION DIVISION: 2n â†’ n (diploid to haploid)','Recombined segments from crossing-over now separate'] },
+  { name:'Telophase I', title:'Telophase I / Cytokinesis I',
+    desc:'Chromosomes arrive at the poles. Cytokinesis I divides the cell into two daughter cells, each haploid (n). Each chromosome still consists of two sister chromatids. No DNA replication occurs before Meiosis II.',
+    facts:['Two haploid (n) daughter cells formed','Each chromosome still has 2 sister chromatids','NO DNA replication between Meiosis I and II','Nuclear envelopes may briefly reform'] },
+  { name:'Prophase II', title:'Prophase II',
+    desc:'Both daughter cells prepare for the second meiotic division. New spindle apparatus forms. Chromosomes condense again. The process is similar to mitotic prophase, but in haploid cells (n chromosomes).',
+    facts:['New spindle forms in both daughter cells','Chromosomes condense in both haploid cells','NO synapsis occurs (no homologs to pair)','Similar to mitotic prophase but in haploid cells'] },
+  { name:'Metaphase II', title:'Metaphase II',
+    desc:'Chromosomes (each consisting of 2 sister chromatids) align at the metaphase plate in each of the two cells. Spindle fibers attach to kinetochores on each sister chromatid, ready to pull them apart.',
+    facts:['Chromosomes align at metaphase plate in EACH daughter cell','Spindle fibers attach to both kinetochores','Each chromosome still = 2 sister chromatids','Similar to mitotic metaphase but in haploid cells'] },
+  { name:'Anaphase II', title:'Anaphase II',
+    desc:'Sister chromatids finally separate. Motor proteins pull them to opposite poles in each cell. This division is essentially identical to mitotic anaphase, occurring simultaneously in both haploid daughter cells.',
+    facts:['Sister chromatids separate â€” identical to mitotic anaphase','Chromosomes pulled to poles by shortening spindle fibers','Occurs simultaneously in BOTH daughter cells','Each chromatid becomes an individual chromosome'] },
+  { name:'Telophase II', title:'Telophase II / Cytokinesis II',
+    desc:'Four haploid daughter cells form. Each has a unique genetic combination due to crossing over (Prophase I) and independent assortment (Metaphase I). These cells differentiate into gametes: sperm or eggs.',
+    facts:['FOUR haploid daughter cells produced','Each cell has unique genetic composition','Genetic variation from: crossing over + independent assortment','In males â†’ 4 sperm; in females â†’ 1 egg + 3 polar bodies'] },
+];
+
+/* ================================================================
+   CONSTANTS & GEOMETRY
+   ================================================================ */
+const CW = 660, CH = 520, CCX = CW/2, CCY = CH/2;
+const COLORS = {
+  bg:     0x030812,
+  cell:   0x00cc66,
+  cell2:  0x4499ff,
+  nucMem: 0x5577ff,
+  spin:   0x88aaff,
+  cent:   0xffaa00,
+  p1a: 0xff3366, p1b: 0xff6699,
+  p2a: 0x3399ff, p2b: 0x66bbff,
+  p3a: 0x33ee88, p3b: 0x77ffaa,
+};
+
+// Chromosome sizes [h, w] per pair
+const CHR_SIZES = [[54,8],[42,7],[32,6]];
+const CHR_PAIR  = [0,0,1,1,2,2];  // pair index for chr[0..5] and chr[6..11]
+
+// Prophase scattered positions (relative to CCX, CCY)
+const PROP_POS = [[-95,-65],[80,-82],[-68,58],[88,52],[-16,-118],[24,104]];
+
+// Metaphase plate x positions for 6 chromosomes
+const META_X = [-90,-54,-18,18,54,90];
+
+// Pole Y offsets
+const POLE  = 165;  // pixels from center to pole
+const POLE2 =  80;  // inner pole for two-cell stages
+
+/* ================================================================
+   STATE
+   ================================================================ */
+const S = {
+  mode:'mitosis', stageIdx:0, playing:false, speed:1, tl:null,
+  // tweened draw values
+  cellRx:190, cellRy:190,
+  pinch:0,           // 0=round, 1=split into 2
+  pinch2:0,          // meiosis II pinch (two cells each splitting)
+  cellTopY:CCY, cellBotY:CCY, // center Ys for two-cell layout
+  nucAlpha:1,        // nuclear envelope alpha
+  chrmAlpha:1,       // chromatin blob alpha (interphase only)
+  spindAlpha:0,      // spindle fibers alpha
+  centAlpha:0,       // centriole alpha
+  crossover:0,       // 0=none, 1=full crossing over (meiosis Prophase I)
+  showTwoCells:false,// after Telophase I
+  showFourCells:false,// after Telophase II
+  cellRxSmall:115,   // radius of each cell in 2-cell layout
+  cellRxMicro:80,    // radius of each cell in 4-cell layout
+};
+
+// Per-chromosome data (12 total: 0-5 primary, 6-11 copies)
+const CD = [];
+for(let i=0;i<12;i++){
+  CD.push({
+    x:CCX, y:CCY, rot:0, alpha:0,
+    split:0,        // chromatid split 0-1
+    crossAmt:0,     // crossover color mix
+    pairIdx: CHR_PAIR[i%6],
+    useB: (i%2===1) // use B color (paternal, for meiosis)
+  });
+}
+
+/* ================================================================
+   PIXI APPLICATION
+   ================================================================ */
+let app;
+let gCellGlow, gCell, gNucleus, gSpindle, gCentral, gChromatin, gOverlay;
+let chrContainers=[], chrGfxArr=[];
+
+function initPixi(){
+  const area = document.getElementById('pix-canvas').getBoundingClientRect();
+  // Check if already initialized
+  if(app) return;
+
+  app = new PIXI.Application({
+    width:CW, height:CH,
+    backgroundColor:COLORS.bg,
+    antialias:true,
+    resolution:Math.min(window.devicePixelRatio||1,2),
+    autoDensity:true
+  });
+  document.getElementById('pix-canvas').appendChild(app.view);
+  app.view.style.maxWidth = '100%';
+  app.view.style.maxHeight = '100%';
+
+  // Layer order: glow â†’ cell â†’ spindle â†’ chromosomes â†’ nucleus â†’ centrioles â†’ overlay
+  gCellGlow  = new PIXI.Graphics(); app.stage.addChild(gCellGlow);
+  gCell      = new PIXI.Graphics(); app.stage.addChild(gCell);
+  gSpindle   = new PIXI.Graphics(); app.stage.addChild(gSpindle);
+  gChromatin = new PIXI.Graphics(); app.stage.addChild(gChromatin);
+
+  // Chromosome containers
+  for(let i=0;i<12;i++){
+    const c=new PIXI.Container(); const g=new PIXI.Graphics();
+    c.addChild(g); c.alpha=0; c.x=CCX; c.y=CCY;
+    app.stage.addChild(c); chrContainers.push(c); chrGfxArr.push(g);
+  }
+
+  gNucleus = new PIXI.Graphics(); app.stage.addChild(gNucleus);
+  gCentral = new PIXI.Graphics(); app.stage.addChild(gCentral);
+  gOverlay = new PIXI.Graphics(); app.stage.addChild(gOverlay);
+
+  // Initial chromosome draw
+  for(let i=0;i<12;i++) redrawChr(i,0);
+
+  app.ticker.add(renderFrame);
+}
+
+/* ================================================================
+   CHROMOSOME DRAWING
+   ================================================================ */
+function chrColors(idx){
+  const d=CD[idx]; const pairs=[
+    [COLORS.p1a,COLORS.p1b],[COLORS.p2a,COLORS.p2b],[COLORS.p3a,COLORS.p3b]
+  ];
+  const [ca,cb]=pairs[d.pairIdx];
+  return { c1:ca, c2:(S.mode==='meiosis'&&d.useB)?cb:ca };
+}
+
+function redrawChr(idx,split){
+  const g=chrGfxArr[idx]; g.clear();
+  const d=CD[idx];
+  const [h,w]=CHR_SIZES[d.pairIdx];
+  const {c1,c2}=chrColors(idx);
+  const arm=h*0.44; const centR=w*0.85;
+  const gap=3+split*16; // gap widens as chromatids split
+
+  // Top p-arms
+  g.beginFill(c1,0.93); g.drawRoundedRect(-w-gap/2,-arm-centR,w,arm,w/2); g.endFill();
+  g.beginFill(c2,0.82); g.drawRoundedRect(gap/2,-arm-centR,w,arm,w/2); g.endFill();
+  // Bottom q-arms
+  g.beginFill(c1,0.93); g.drawRoundedRect(-w-gap/2,centR,w,arm,w/2); g.endFill();
+  g.beginFill(c2,0.82); g.drawRoundedRect(gap/2,centR,w,arm,w/2); g.endFill();
+
+  // Centromere
+  if(split<0.9){
+    g.beginFill(0xffffff,0.75);
+    g.drawCircle(-gap/2-w/2,0,centR);
+    g.drawCircle(gap/2+w/2,0,centR);
+    g.endFill();
+    if(split<0.5){
+      g.lineStyle(1.5,0xffffff,0.4);
+      g.moveTo(-gap/2-w,0); g.lineTo(gap/2+w,0);
+      g.lineStyle(0);
+    }
+  }
+
+  // Glow halo around chromosome
+  g.lineStyle(2,c1,0.08); g.drawRoundedRect(-w-gap/2-3,-arm-centR-3,w+6,arm*2+centR*2+6,w/2+3);
+  g.lineStyle(0);
+  d.split=split;
+}
+
+function redrawChrCrossover(idx,crossAmt){
+  // Draw chromosome with crossing-over color mix on one arm
+  const g=chrGfxArr[idx]; g.clear();
+  const d=CD[idx];
+  const [h,w]=CHR_SIZES[d.pairIdx];
+  const {c1}=chrColors(idx);
+  const pairColors=[[COLORS.p1a,COLORS.p1b],[COLORS.p2a,COLORS.p2b],[COLORS.p3a,COLORS.p3b]];
+  const [ca,cb]=pairColors[d.pairIdx];
+  const arm=h*0.44; const centR=w*0.85; const gap=3;
+
+  // Chromatid 1: top arm normal, bottom arm mixed
+  const switchPt=arm*(1-crossAmt*0.6);
+  g.beginFill(ca,0.93); g.drawRoundedRect(-w-gap/2,-arm-centR,w,switchPt,w/2); g.endFill();
+  if(crossAmt>0.05){
+    g.beginFill(cb,0.88); g.drawRoundedRect(-w-gap/2,-arm-centR+switchPt,w,arm-switchPt,w/2); g.endFill();
+  }
+  g.beginFill(ca,0.93); g.drawRoundedRect(-w-gap/2,centR,w,arm,w/2); g.endFill();
+
+  // Chromatid 2: complementary mix
+  g.beginFill(cb,0.82); g.drawRoundedRect(gap/2,-arm-centR,w,switchPt,w/2); g.endFill();
+  if(crossAmt>0.05){
+    g.beginFill(ca,0.78); g.drawRoundedRect(gap/2,-arm-centR+switchPt,w,arm-switchPt,w/2); g.endFill();
+  }
+  g.beginFill(cb,0.82); g.drawRoundedRect(gap/2,centR,w,arm,w/2); g.endFill();
+
+  // Centromere
+  g.beginFill(0xffffff,0.75);
+  g.drawCircle(-gap/2-w/2,0,centR); g.drawCircle(gap/2+w/2,0,centR); g.endFill();
+}
+
+/* ================================================================
+   RENDER FRAME (called by Pixi.js ticker at ~60fps)
+   ================================================================ */
+function renderFrame(){
+  // Sync container transforms from CD data
+  for(let i=0;i<12;i++){
+    const c=chrContainers[i]; const d=CD[i];
+    c.x=d.x; c.y=d.y; c.alpha=d.alpha; c.rotation=d.rot*Math.PI/180;
+  }
+  gCellGlow.clear(); gCell.clear(); gNucleus.clear();
+  gSpindle.clear(); gChromatin.clear(); gCentral.clear();
+
+  drawCell();
+  drawNucleus();
+  drawSpindle();
+  drawChromatin();
+  drawCentrioles();
+}
+
+/* ================================================================
+   DRAWING: CELL MEMBRANE
+   ================================================================ */
+function glowLine(g,color,rx,ry,cx,cy){
+  for(let i=5;i>=0;i--){
+    g.lineStyle(i*2.5+1,color,0.025+i*0.018);
+    g.drawEllipse(cx,cy,rx+i*4,ry+i*4);
+  }
+  g.lineStyle(2.5,color,0.92);
+  g.drawEllipse(cx,cy,rx,ry);
+}
+
+function drawPinchCell(g,cx,cy,rx,ry,pinch,col,fillCol){
+  const waist=Math.max(2,rx*(1-pinch*0.98));
+  const stretch=ry*(1+pinch*0.35);
+
+  // Glow layers
+  for(let i=4;i>=0;i--){
+    g.lineStyle(i*3+1,col,0.018+i*0.02);
+    // simplified glow as ellipse hint
+    g.drawEllipse(cx,cy,rx+i*5,stretch+i*5);
+  }
+  g.lineStyle(0);
+
+  g.lineStyle(2.5,col,0.9);
+  g.beginFill(fillCol,0.2);
+  g.moveTo(cx,cy-stretch);
+  g.bezierCurveTo(cx+rx*1.08,cy-stretch,cx+rx*1.08,cy-stretch*0.08,cx+waist,cy);
+  g.bezierCurveTo(cx+rx*1.08,cy+stretch*0.08,cx+rx*1.08,cy+stretch,cx,cy+stretch);
+  g.bezierCurveTo(cx-rx*1.08,cy+stretch,cx-rx*1.08,cy+stretch*0.08,cx-waist,cy);
+  g.bezierCurveTo(cx-rx*1.08,cy-stretch*0.08,cx-rx*1.08,cy-stretch,cx,cy-stretch);
+  g.closePath(); g.endFill();
+  g.lineStyle(0);
+
+  // Cleavage furrow highlight
+  if(pinch>0.05){
+    const fw=waist+6; const fAlpha=Math.min(0.7,pinch*0.9);
+    g.lineStyle(2,0xffffff,fAlpha*0.18);
+    g.moveTo(cx-fw,cy); g.lineTo(cx+fw,cy);
+    g.lineStyle(0);
+  }
+}
+
+function drawSingleCell(g,gGlow,cx,cy,rx,ry,col,fillCol){
+  glowLine(gGlow,col,rx,ry,cx,cy);
+  g.lineStyle(2.5,col,0.92);
+  g.beginFill(fillCol,0.22);
+  g.drawEllipse(cx,cy,rx,ry); g.endFill(); g.lineStyle(0);
+}
+
+function drawCell(){
+  const col=S.mode==='mitosis'?COLORS.cell:COLORS.cell2;
+  const fill=S.mode==='mitosis'?0x001a0d:0x00112a;
+
+  if(S.showFourCells){
+    // 4 micro cells
+    const r=S.cellRxMicro;
+    const pos=[
+      [CCX-165,CCY-145],[CCX+165,CCY-145],
+      [CCX-165,CCY+145],[CCX+165,CCY+145]
+    ];
+    pos.forEach(([x,y])=>{
+      drawSingleCell(gCell,gCellGlow,x,y,r,r,col,fill);
+    });
+  } else if(S.showTwoCells){
+    const r=S.cellRxSmall;
+    const topY=S.cellTopY, botY=S.cellBotY;
+    if(S.pinch2>0.02){
+      drawPinchCell(gCell,CCX,topY,r,r,S.pinch2,col,fill);
+      drawPinchCell(gCell,CCX,botY,r,r,S.pinch2,col,fill);
+    } else {
+      drawSingleCell(gCell,gCellGlow,CCX,topY,r,r,col,fill);
+      drawSingleCell(gCell,gCellGlow,CCX,botY,r,r,col,fill);
+    }
+  } else if(S.pinch>0.02){
+    drawPinchCell(gCell,CCX,CCY,S.cellRx,S.cellRy,S.pinch,col,fill);
+    if(S.pinch>0.95){
+      const off=S.cellRy*0.65+10;
+      drawSingleCell(gCell,gCellGlow,CCX,CCY-off,S.cellRx*0.82,S.cellRy*0.65,col,fill);
+      drawSingleCell(gCell,gCellGlow,CCX,CCY+off,S.cellRx*0.82,S.cellRy*0.65,col,fill);
+    }
+  } else {
+    drawSingleCell(gCell,gCellGlow,CCX,CCY,S.cellRx,S.cellRy,col,fill);
+  }
+}
+
+/* ================================================================
+   DRAWING: NUCLEUS
+   ================================================================ */
+function drawNucleus(){
+  if(S.nucAlpha<0.01) return;
+  const g=gNucleus; const a=S.nucAlpha;
+  const NRX=90, NRY=82;
+  // Soft fill inside nucleus
+  g.lineStyle(0); g.beginFill(0x000d2e,a*0.6); g.drawEllipse(CCX,CCY,NRX,NRY); g.endFill();
+  // Glow rings
+  g.lineStyle(8,COLORS.nucMem,a*0.08); g.drawEllipse(CCX,CCY,NRX+6,NRY+6);
+  g.lineStyle(5,COLORS.nucMem,a*0.12); g.drawEllipse(CCX,CCY,NRX,NRY);
+  g.lineStyle(0);
+  // Dashed nuclear envelope: draw segments as small arcs
+  const NSEGS=24;
+  for(let i=0;i<NSEGS;i++){
+    if(i%2===0){
+      const a1=(i/NSEGS)*Math.PI*2;
+      const a2=((i+0.72)/NSEGS)*Math.PI*2;
+      // Draw arc segment as a path
+      const pts=6;
+      g.lineStyle(2,COLORS.nucMem,a*0.88);
+      for(let p=0;p<pts;p++){
+        const angle=a1+(a2-a1)*(p/pts);
+        const px=CCX+Math.cos(angle)*NRX, py=CCY+Math.sin(angle)*NRY;
+        if(p===0) g.moveTo(px,py); else g.lineTo(px,py);
+      }
+      g.lineStyle(0);
+    }
+  }
+  // Nuclear pore complexes (small dots on membrane)
+  for(let i=0;i<10;i++){
+    const ang=(i/10)*Math.PI*2;
+    const px=CCX+Math.cos(ang)*NRX, py=CCY+Math.sin(ang)*NRY;
+    g.beginFill(0x8899ff,a*0.7); g.drawCircle(px,py,2.5); g.endFill();
+  }
+  // Nucleolus
+  g.beginFill(0x6677ee,a*0.55); g.drawCircle(CCX+6,CCY+5,13); g.endFill();
+  g.lineStyle(1,0x9999ff,a*0.4); g.drawCircle(CCX+6,CCY+5,13); g.lineStyle(0);
+  g.beginFill(0x9999ee,a*0.35); g.drawCircle(CCX-7,CCY-9,8); g.endFill();
+}
+
+/* ================================================================
+   DRAWING: CHROMATIN (interphase)
+   ================================================================ */
+function drawChromatin(){
+  if(S.chrmAlpha<0.01) return;
+  const g=gChromatin; const a=S.chrmAlpha;
+  const blobs=[
+    {x:CCX-38,y:CCY-28,rx:24,ry:16,col:COLORS.p1a},
+    {x:CCX+32,y:CCY-22,rx:20,ry:14,col:COLORS.p2a},
+    {x:CCX-10,y:CCY+30,rx:22,ry:13,col:COLORS.p3a},
+    {x:CCX+40,y:CCY+18,rx:16,ry:18,col:COLORS.p1a},
+    {x:CCX-42,y:CCY+15,rx:14,ry:12,col:COLORS.p2a},
+    {x:CCX+15,y:CCY-38,rx:18,ry:12,col:COLORS.p3a},
+  ];
+  blobs.forEach(b=>{
+    g.beginFill(b.col,a*0.4); g.drawEllipse(b.x,b.y,b.rx,b.ry); g.endFill();
+    g.lineStyle(1,b.col,a*0.6);
+    g.drawEllipse(b.x,b.y,b.rx,b.ry); g.lineStyle(0);
+  });
+}
+
+/* ================================================================
+   DRAWING: SPINDLE FIBERS
+   ================================================================ */
+function drawSpindle(){
+  if(S.spindAlpha<0.01) return;
+  const g=gSpindle; const a=S.spindAlpha;
+
+  let poleAY,poleBY,poleAX,poleBX;
+  if(S.showFourCells||S.showTwoCells){
+    return; // spindle redrawn per-cell inside stage functions
+  }
+
+  poleAX=CCX; poleBX=CCX;
+  poleAY=CCY-POLE; poleBY=CCY+POLE;
+
+  // Centriole glow
+  g.beginFill(COLORS.cent,a*0.25); g.drawCircle(poleAX,poleAY,10); g.endFill();
+  g.beginFill(COLORS.cent,a*0.25); g.drawCircle(poleBX,poleBY,10); g.endFill();
+
+  // Fibers to each active chromosome
+  for(let i=0;i<6;i++){
+    const d=CD[i];
+    if(d.alpha<0.3) continue;
+    g.lineStyle(1,COLORS.spin,a*0.5);
+    g.moveTo(poleAX,poleAY); g.lineTo(d.x,d.y);
+    g.lineStyle(1,COLORS.spin,a*0.4);
+    g.moveTo(poleBX,poleBY); g.lineTo(d.x,d.y);
+  }
+
+  // Polar fibers (pole-to-pole)
+  g.lineStyle(1,COLORS.spin,a*0.2);
+  for(let t=0;t<5;t++){
+    const ox=(t-2)*18;
+    g.moveTo(poleAX+ox,poleAY); g.lineTo(poleBX+ox,poleBY);
+  }
+  g.lineStyle(0);
+}
+
+/* ================================================================
+   DRAWING: CENTRIOLES
+   ================================================================ */
+function drawCentrioles(){
+  if(S.centAlpha<0.01) return;
+  const g=gCentral; const a=S.centAlpha;
+
+  const drawCent=(x,y)=>{
+    for(let i=3;i>=0;i--){
+      g.beginFill(COLORS.cent,a*(0.04+i*0.04));
+      g.drawCircle(x,y,8+i*5); g.endFill();
+    }
+    g.beginFill(COLORS.cent,a*0.9); g.drawCircle(x,y,5); g.endFill();
+    g.lineStyle(1.5,COLORS.cent,a*0.6);
+    g.drawCircle(x+8,y,3); g.drawCircle(x-8,y,3); g.lineStyle(0);
+  };
+
+  if(!S.showTwoCells&&!S.showFourCells){
+    drawCent(CCX,CCY-POLE);
+    drawCent(CCX,CCY+POLE);
+  }
+}
+
+/* ================================================================
+   GSAP STAGE ANIMATION HELPERS
+   ================================================================ */
+function killTimeline(){
+  if(S.tl){ S.tl.kill(); S.tl=null; }
+}
+
+function setAllChrAlpha(alpha){ for(let i=0;i<12;i++) CD[i].alpha=alpha; }
+
+function setChrAlpha(indices,alpha){ indices.forEach(i=>{ CD[i].alpha=alpha; }); }
+
+function getChrTweenTarget(i){ return {get x(){return CD[i].x},set x(v){CD[i].x=v},
+  get y(){return CD[i].y},set y(v){CD[i].y=v},
+  get rot(){return CD[i].rot},set rot(v){CD[i].rot=v},
+  get alpha(){return CD[i].alpha},set alpha(v){CD[i].alpha=v}}; }
+
+// Tween CD array positions with GSAP
+function tweenChr(idx,vars,duration,delay,ease){
+  const tgt={}; const d=CD[idx];
+  if(vars.x!==undefined) tgt.x=vars.x;
+  if(vars.y!==undefined) tgt.y=vars.y;
+  if(vars.rot!==undefined) tgt.rot=vars.rot;
+  if(vars.alpha!==undefined) tgt.alpha=vars.alpha;
+  Object.assign(d,{}); // trigger read
+  return gsap.to(d,{...tgt,duration:duration/S.speed,delay:(delay||0)/S.speed,ease:ease||'power2.inOut'});
+}
+
+/* ================================================================
+   MITOSIS STAGE ANIMATIONS
+   ================================================================ */
+function runMitoInterphase(){
+  killTimeline();
+  const tl=gsap.timeline({onComplete:()=>{ if(S.playing) advanceStage(); }});
+  S.tl=tl;
+  // Reset state
+  tl.set(S,{cellRx:190,cellRy:190,pinch:0,pinch2:0,spindAlpha:0,centAlpha:0.5,
+    nucAlpha:1,chrmAlpha:1,showTwoCells:false,showFourCells:false});
+  setAllChrAlpha(0);
+  // Animate chromatin blobs pulsing
+  tl.to(S,{chrmAlpha:0.8,duration:1/S.speed,yoyo:true,repeat:2,ease:'sine.inOut'});
+  tl.to(S,{chrmAlpha:1,duration:0.5/S.speed});
+  return tl;
+}
+
+function runMitoProphase(){
+  killTimeline();
+  const tl=gsap.timeline({onComplete:()=>{ if(S.playing) advanceStage(); }});
+  S.tl=tl;
+  tl.set(S,{cellRx:190,cellRy:190,pinch:0,showTwoCells:false,showFourCells:false});
+
+  // Chromatin fades out as chromosomes appear
+  tl.to(S,{chrmAlpha:0,duration:1.2/S.speed});
+  // Nuclear envelope breaks down
+  tl.to(S,{nucAlpha:0,duration:1.5/S.speed},0.8/S.speed);
+  // Centrioles brighten and move (visual)
+  tl.to(S,{centAlpha:1,duration:0.8/S.speed},0);
+
+  // Chromosomes condense and scatter
+  for(let i=0;i<6;i++){
+    const [px,py]=PROP_POS[i];
+    CD[i].x=CCX; CD[i].y=CCY; CD[i].alpha=0; CD[i].rot=0;
+    redrawChr(i,0);
+    tl.to(CD[i],{alpha:1,x:CCX+px,y:CCY+py,rot:(Math.random()-0.5)*40,
+      duration:1.2/S.speed,delay:(i*0.12)/S.speed,ease:'back.out(1.4)'},'<');
+  }
+  // Spindle starts forming
+  tl.to(S,{spindAlpha:0.3,duration:1/S.speed},1.5/S.speed);
+  return tl;
+}
+
+function runMitoMetaphase(){
+  killTimeline();
+  const tl=gsap.timeline({onComplete:()=>{ if(S.playing) advanceStage(); }});
+  S.tl=tl;
+  tl.set(S,{nucAlpha:0,chrmAlpha:0,showTwoCells:false,showFourCells:false});
+
+  // Chromosomes align to metaphase plate
+  for(let i=0;i<6;i++){
+    if(CD[i].alpha<0.5){CD[i].x=CCX+PROP_POS[i][0];CD[i].y=CCY+PROP_POS[i][1];CD[i].alpha=1;}
+    tl.to(CD[i],{x:CCX+META_X[i],y:CCY,rot:0,duration:1.8/S.speed,
+      delay:(i*0.08)/S.speed,ease:'power2.inOut'},'<');
+  }
+  // Full spindle
+  tl.to(S,{spindAlpha:0.8,duration:1/S.speed},'<');
+  // Cell flattens slightly
+  tl.to(S,{cellRx:200,cellRy:185,duration:1.5/S.speed},'<');
+  return tl;
+}
+
+function runMitoAnaphase(){
+  killTimeline();
+  const tl=gsap.timeline({onComplete:()=>{ if(S.playing) advanceStage(); }});
+  S.tl=tl;
+
+  // Make sure chr 0-5 are at metaphase positions
+  for(let i=0;i<6;i++){
+    CD[i].x=CCX+META_X[i]; CD[i].y=CCY; CD[i].alpha=1; CD[i].rot=0;
+    redrawChr(i,0);
+  }
+  // Prepare copies (chr 6-11) at same positions, hidden
+  for(let i=0;i<6;i++){
+    CD[i+6].x=CCX+META_X[i]; CD[i+6].y=CCY; CD[i+6].alpha=0;
+    CD[i+6].pairIdx=CD[i].pairIdx; CD[i+6].useB=CD[i].useB;
+    redrawChr(i+6,0);
+  }
+
+  // Step 1: ALL chromatids split simultaneously (closure fix: use IIFE)
+  const splitState={v:0};
+  tl.to(splitState,{v:1, duration:0.7/S.speed, ease:'power2.in',
+    onUpdate:function(){
+      const sv=splitState.v;
+      for(let k=0;k<6;k++) redrawChr(k,sv);
+    }
+  });
+
+  // Step 2: copies appear at same positions, then diverge to poles
+  const topY=CCY-POLE+20, botY=CCY+POLE-20;
+  const topXs=META_X.map(x=>x*0.85);
+  for(let i=0;i<6;i++){
+    tl.set(CD[i+6],{alpha:1},'>');
+  }
+  for(let i=0;i<6;i++){
+    tl.to(CD[i],{x:CCX+topXs[i],y:topY,duration:1.6/S.speed,
+      delay:(i*0.05)/S.speed,ease:'power2.inOut'},'<');
+    tl.to(CD[i+6],{x:CCX+topXs[i],y:botY,duration:1.6/S.speed,
+      delay:(i*0.05)/S.speed,ease:'power2.inOut'},'<');
+  }
+  // Cell elongates
+  tl.to(S,{cellRx:175,cellRy:245,duration:1.8/S.speed},'<');
+  tl.to(S,{spindAlpha:0.35,duration:0.8/S.speed},'<');
+
+  // Reset split visuals after separation
+  tl.call(()=>{ for(let k=0;k<12;k++) redrawChr(k,0); });
+  return tl;
+}
+
+function runMitoTelophase(){
+  killTimeline();
+  const tl=gsap.timeline({onComplete:()=>{ if(S.playing) advanceStage(); }});
+  S.tl=tl;
+
+  // Chromosomes move further apart / cluster at poles
+  const topY=CCY-POLE-10, botY=CCY+POLE+10;
+  const clusterXTop=[-60,-20,20,-40,0,40], clusterXBot=[-60,-20,20,-40,0,40];
+  for(let i=0;i<6;i++){
+    tl.to(CD[i],{x:CCX+clusterXTop[i],y:topY-Math.abs(clusterXTop[i])*0.15,
+      duration:0.9/S.speed},'<');
+    tl.to(CD[i+6],{x:CCX+clusterXBot[i],y:botY+Math.abs(clusterXBot[i])*0.15,
+      duration:0.9/S.speed},'<');
+  }
+  // Spindle disappears
+  tl.to(S,{spindAlpha:0,duration:0.8/S.speed},'<');
+  // Nuclear envelopes reform (draw two of them)
+  tl.to(S,{nucAlpha:0.7,duration:1.2/S.speed}); // reuse nucAlpha for top nucleus
+  // Cell starts pinching
+  tl.to(S,{cellRx:175,cellRy:250,pinch:0.35,duration:1.5/S.speed});
+  return tl;
+}
+
+function runMitoCytokinesis(){
+  killTimeline();
+  const tl=gsap.timeline({onComplete:()=>{ if(S.playing&&S.stageIdx<MITOSIS_STAGES.length-1) advanceStage(); }});
+  S.tl=tl;
+  // Complete the pinch
+  tl.to(S,{pinch:1,duration:2/S.speed,ease:'power2.inOut'});
+  // Move chromosomes into the two new cells
+  const off=S.cellRy*0.65+15;
+  for(let i=0;i<6;i++){
+    tl.to(CD[i],{y:CCY-(160+30),duration:0.8/S.speed},'<');
+    tl.to(CD[i+6],{y:CCY+(160+30),duration:0.8/S.speed},'<');
+  }
+  return tl;
+}
+
+/* ================================================================
+   MEIOSIS STAGE ANIMATIONS
+   ================================================================ */
+function runMeioProphase1(){
+  killTimeline();
+  const tl=gsap.timeline({onComplete:()=>{ if(S.playing) advanceStage(); }});
+  S.tl=tl;
+  tl.set(S,{cellRx:190,cellRy:190,pinch:0,pinch2:0,showTwoCells:false,showFourCells:false,nucAlpha:1,chrmAlpha:1,spindAlpha:0,centAlpha:0.5});
+  setAllChrAlpha(0);
+  // Make all 6 chromosomes (0-5), pair B colors for homologs (1,3,5)
+  for(let i=0;i<6;i++){
+    CD[i].useB=(i%2===1);
+    redrawChr(i,0);
+    CD[i].x=CCX+PROP_POS[i][0]; CD[i].y=CCY+PROP_POS[i][1]; CD[i].alpha=0;
+  }
+  // Chromatin â†’ chromosomes
+  tl.to(S,{chrmAlpha:0,duration:1.2/S.speed});
+  tl.to(S,{nucAlpha:0,duration:1/S.speed},0.8/S.speed);
+  for(let i=0;i<6;i++){
+    tl.to(CD[i],{alpha:1,duration:0.8/S.speed,delay:(i*0.1)/S.speed},'<');
+  }
+  // Homologs come together (synapsis): 0+1, 2+3, 4+5
+  const SYNAPSIS_POS=[[-72,-40],[72,-40],[-72,40],[72,40],[0,-90],[0,90]];
+  // pair centers
+  const PC=[[-72,0],[72,0],[0,0]];
+  for(let p=0;p<3;p++){
+    const [px,py]=PC[p];
+    tl.to(CD[p*2],{x:CCX+px-10,y:CCY+py,duration:1.5/S.speed,ease:'power2.inOut'},1.8/S.speed);
+    tl.to(CD[p*2+1],{x:CCX+px+10,y:CCY+py,duration:1.5/S.speed,ease:'power2.inOut'},1.8/S.speed);
+  }
+  // Crossing over animation
+  tl.to(S,{crossover:1,duration:1.8/S.speed,onUpdate:()=>{
+    for(let i=0;i<6;i++) if(i%2===0) redrawChrCrossover(i,S.crossover);
+  }},3.5/S.speed);
+  return tl;
+}
+
+function runMeiMetaphase1(){
+  killTimeline();
+  const tl=gsap.timeline({onComplete:()=>{ if(S.playing) advanceStage(); }});
+  S.tl=tl;
+  tl.set(S,{nucAlpha:0,chrmAlpha:0,spindAlpha:0});
+  // Ensure synapsis state
+  for(let p=0;p<3;p++){
+    const cx_=[[-72,0],[0,0],[72,0]][p];
+    if(CD[p*2].alpha<0.5){CD[p*2].alpha=1;CD[p*2].x=CCX+cx_[0]-10;CD[p*2].y=CCY+cx_[1];}
+    if(CD[p*2+1].alpha<0.5){CD[p*2+1].alpha=1;CD[p*2+1].x=CCX+cx_[0]+10;CD[p*2+1].y=CCY+cx_[1];}
+  }
+  // Bivalents align at metaphase plate (y=CCY)
+  const BX=[-90,0,90];
+  for(let p=0;p<3;p++){
+    tl.to(CD[p*2],{x:CCX+BX[p]-11,y:CCY,duration:1.5/S.speed,ease:'power2.inOut'},'<');
+    tl.to(CD[p*2+1],{x:CCX+BX[p]+11,y:CCY,duration:1.5/S.speed,ease:'power2.inOut'},'<');
+  }
+  tl.to(S,{spindAlpha:0.75,duration:1/S.speed},'<');
+  return tl;
+}
+
+function runMeiAnaphase1(){
+  killTimeline();
+  const tl=gsap.timeline({onComplete:()=>{ if(S.playing) advanceStage(); }});
+  S.tl=tl;
+  const BX=[-90,0,90];
+  for(let p=0;p<3;p++){
+    if(CD[p*2].alpha<0.5){CD[p*2].alpha=1;CD[p*2].x=CCX+BX[p]-11;CD[p*2].y=CCY;}
+    if(CD[p*2+1].alpha<0.5){CD[p*2+1].alpha=1;CD[p*2+1].x=CCX+BX[p]+11;CD[p*2+1].y=CCY;}
+  }
+  // Homologs separate: chr 0,2,4 go top; chr 1,3,5 go bottom
+  const topY=CCY-POLE+20, botY=CCY+POLE-20;
+  const topXs=[-80,0,80], botXs=[-80,0,80];
+  for(let p=0;p<3;p++){
+    tl.to(CD[p*2],{x:CCX+topXs[p],y:topY,duration:1.8/S.speed,ease:'power2.inOut'},'<');
+    tl.to(CD[p*2+1],{x:CCX+botXs[p],y:botY,duration:1.8/S.speed,ease:'power2.inOut'},'<');
+  }
+  tl.to(S,{cellRx:175,cellRy:240,spindAlpha:0.3,duration:1.5/S.speed},'<');
+  return tl;
+}
+
+function runMeiTelophase1(){
+  killTimeline();
+  const tl=gsap.timeline({onComplete:()=>{ if(S.playing) advanceStage(); }});
+  S.tl=tl;
+  // Cell pinches into two
+  tl.to(S,{pinch:1,cellRy:230,duration:2/S.speed,ease:'power2.inOut'});
+  tl.to(S,{spindAlpha:0,duration:0.8/S.speed},'<');
+  // After pinch, switch to two-cell layout
+  tl.call(()=>{
+    S.showTwoCells=true;
+    S.cellTopY=CCY-150; S.cellBotY=CCY+150;
+    S.pinch=0; S.cellRx=190; S.cellRy=190;
+    // Move chromosomes to their cells
+    const topXs=[-50,0,50];
+    for(let p=0;p<3;p++){
+      CD[p*2].x=CCX+topXs[p]; CD[p*2].y=S.cellTopY;
+      CD[p*2+1].x=CCX+topXs[p]; CD[p*2+1].y=S.cellBotY;
+    }
+  });
+  tl.to(S,{cellRxSmall:115,duration:0.5/S.speed});
+  return tl;
+}
+
+function runMeiProphase2(){
+  killTimeline();
+  const tl=gsap.timeline({onComplete:()=>{ if(S.playing) advanceStage(); }});
+  S.tl=tl;
+  if(!S.showTwoCells){
+    S.showTwoCells=true; S.cellTopY=CCY-150; S.cellBotY=CCY+150;
+  }
+  // Chromosomes recondense â€” already visible, just animate them slightly
+  for(let p=0;p<3;p++){
+    tl.to(CD[p*2],{x:CCX+(-50+p*50),y:S.cellTopY,duration:1/S.speed},'<');
+    tl.to(CD[p*2+1],{x:CCX+(-50+p*50),y:S.cellBotY,duration:1/S.speed},'<');
+  }
+  tl.to(S,{spindAlpha:0,duration:0.5/S.speed},'<');
+  tl.to(S,{spindAlpha:0.4,duration:1/S.speed},1.2/S.speed);
+  return tl;
+}
+
+function runMeiMetaphase2(){
+  killTimeline();
+  const tl=gsap.timeline({onComplete:()=>{ if(S.playing) advanceStage(); }});
+  S.tl=tl;
+  if(!S.showTwoCells){S.showTwoCells=true;S.cellTopY=CCY-150;S.cellBotY=CCY+150;}
+  // Align in each cell
+  const xs=[-45,0,45];
+  for(let p=0;p<3;p++){
+    tl.to(CD[p*2],{x:CCX+xs[p],y:S.cellTopY,duration:1.2/S.speed,ease:'power2.inOut'},'<');
+    tl.to(CD[p*2+1],{x:CCX+xs[p],y:S.cellBotY,duration:1.2/S.speed,ease:'power2.inOut'},'<');
+  }
+  tl.to(S,{spindAlpha:0.7,duration:0.8/S.speed},'<');
+  return tl;
+}
+
+function runMeiAnaphase2(){
+  killTimeline();
+  const tl=gsap.timeline({onComplete:()=>{ if(S.playing) advanceStage(); }});
+  S.tl=tl;
+  if(!S.showTwoCells){S.showTwoCells=true;S.cellTopY=CCY-150;S.cellBotY=CCY+150;}
+  const xs=[-45,0,45];
+  // Ensure positions
+  for(let p=0;p<3;p++){
+    if(CD[p*2].alpha<0.5){CD[p*2].alpha=1;CD[p*2].x=CCX+xs[p];CD[p*2].y=S.cellTopY;}
+    if(CD[p*2+1].alpha<0.5){CD[p*2+1].alpha=1;CD[p*2+1].x=CCX+xs[p];CD[p*2+1].y=S.cellBotY;}
+  }
+  // Set up copies (6-11) for anaphase II
+  for(let p=0;p<3;p++){
+    const i=p*2; const ci=i+6;
+    CD[ci].x=CCX+xs[p]; CD[ci].y=S.cellTopY; CD[ci].alpha=1; CD[ci].pairIdx=CD[i].pairIdx;
+    const ci2=i+1+6;
+    CD[ci2].x=CCX+xs[p]; CD[ci2].y=S.cellBotY; CD[ci2].alpha=1; CD[ci2].pairIdx=CD[i+1].pairIdx;
+    redrawChr(ci,0); redrawChr(ci2,0);
+  }
+  // Sister chromatids separate in top cell
+  const sep=POLE2;
+  for(let p=0;p<3;p++){
+    tl.to(CD[p*2],{y:S.cellTopY-sep,duration:1.5/S.speed,ease:'power2.inOut'},'<');
+    tl.to(CD[p*2+6],{y:S.cellTopY+sep,duration:1.5/S.speed,ease:'power2.inOut'},'<');
+    tl.to(CD[p*2+1],{y:S.cellBotY-sep,duration:1.5/S.speed,ease:'power2.inOut'},'<');
+    tl.to(CD[p*2+1+6],{y:S.cellBotY+sep,duration:1.5/S.speed,ease:'power2.inOut'},'<');
+  }
+  tl.to(S,{spindAlpha:0.3,duration:0.8/S.speed},'<');
+  return tl;
+}
+
+function runMeiTelophase2(){
+  killTimeline();
+  const tl=gsap.timeline({onComplete:()=>{}});
+  S.tl=tl;
+  // Pinch each of the two cells into two â†’ 4 cells total
+  tl.to(S,{pinch2:1,duration:2/S.speed,ease:'power2.inOut'});
+  tl.to(S,{spindAlpha:0,duration:0.8/S.speed},'<');
+  tl.call(()=>{
+    S.showFourCells=true; S.showTwoCells=false; S.pinch2=0;
+    // Position all 12 chromosomes into 4 micro-cells
+    const cx=[CCX-165,CCX+165,CCX-165,CCX+165];
+    const cy=[CCY-145,CCY-145,CCY+145,CCY+145];
+    const cellChrs=[[0,2,4],[6,8,10],[1,3,5],[7,9,11]];
+    cellChrs.forEach((clist,ci)=>{
+      clist.forEach((chrIdx,j)=>{
+        const ox=(j-1)*36;
+        CD[chrIdx].x=cx[ci]+ox; CD[chrIdx].y=cy[ci]; CD[chrIdx].alpha=1;
+      });
+    });
+  });
+  return tl;
+}
+
+/* ================================================================
+   STAGE RUNNER
+   ================================================================ */
+const MITOSIS_FNS=[runMitoInterphase,runMitoProphase,runMitoMetaphase,runMitoAnaphase,runMitoTelophase,runMitoCytokinesis];
+const MEIOSIS_FNS=[runMeioProphase1,runMeiMetaphase1,runMeiAnaphase1,runMeiTelophase1,runMeiProphase2,runMeiMetaphase2,runMeiAnaphase2,runMeiTelophase2];
+
+function runStage(idx){
+  S.stageIdx=idx;
+  updateUI();
+  const fns=S.mode==='mitosis'?MITOSIS_FNS:MEIOSIS_FNS;
+  if(fns[idx]) fns[idx]();
+}
+
+function advanceStage(){
+  const stages=S.mode==='mitosis'?MITOSIS_STAGES:MEIOSIS_STAGES;
+  if(S.stageIdx<stages.length-1){ runStage(S.stageIdx+1); }
+  else { S.playing=false; updatePlayBtn(); }
+}
+
+/* ================================================================
+   UI
+   ================================================================ */
+function buildStageList(){
+  const list=document.getElementById('stage-list');
+  list.innerHTML='';
+  const stages=S.mode==='mitosis'?MITOSIS_STAGES:MEIOSIS_STAGES;
+  const isMei=S.mode==='meiosis';
+
+  // For meiosis, show divider between I and II
+  stages.forEach((st,i)=>{
+    if(isMei&&i===4){
+      const div=document.createElement('hr'); div.className='stage-divider'; list.appendChild(div);
+      const lbl=document.createElement('div');
+      lbl.style.cssText='font-size:.62rem;color:#6a9ab8;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;';
+      lbl.textContent='Meiosis II'; list.appendChild(lbl);
+    }
+    const item=document.createElement('div');
+    item.className='stage-item'+(isMei?' meiosis':'')+(i===S.stageIdx?' active':'');
+    item.innerHTML=`<span class="si-num">${i+1}</span><span class="si-dot"></span><span class="si-name">${st.name}</span>`;
+    item.addEventListener('click',()=>{ S.playing=false; updatePlayBtn(); runStage(i); });
+    list.appendChild(item);
+  });
+}
+
+function updateUI(){
+  const stages=S.mode==='mitosis'?MITOSIS_STAGES:MEIOSIS_STAGES;
+  const st=stages[S.stageIdx];
+  const isMei=S.mode==='meiosis';
+
+  // Stage list highlight
+  document.querySelectorAll('.stage-item').forEach((el,i)=>{
+    el.classList.toggle('active',i===S.stageIdx);
+  });
+
+  // Info panel
+  const lbl=document.getElementById('info-mode-label');
+  lbl.textContent=isMei?'Meiosis':'Mitosis';
+  lbl.className='info-stage-name'+(isMei?' meiosis':'');
+
+  document.getElementById('stage-title').textContent=st.title;
+  document.getElementById('stage-desc').textContent=st.desc;
+
+  const factsEl=document.getElementById('stage-facts');
+  factsEl.innerHTML='';
+  st.facts.forEach(f=>{
+    const d=document.createElement('div'); d.className='fact-item'; d.textContent=f;
+    factsEl.appendChild(d);
+  });
+
+  document.getElementById('meiosis-legend').style.display=isMei?'block':'none';
+  document.getElementById('stage-counter').textContent=`${S.stageIdx+1} / ${stages.length}`;
+
+  // Prev/Next buttons
+  document.getElementById('btn-prev').disabled=S.stageIdx===0;
+  document.getElementById('btn-next').disabled=S.stageIdx===stages.length-1;
+}
+
+function updatePlayBtn(){
+  const btn=document.getElementById('btn-play');
+  btn.innerHTML=S.playing?'&#9646;&#9646; Pause':'&#9654; Play';
+}
+
+/* ================================================================
+   EVENT HANDLERS
+   ================================================================ */
+document.getElementById('btn-mitosis').addEventListener('click',()=>{
+  if(S.mode==='mitosis') return;
+  S.mode='mitosis'; S.stageIdx=0; S.playing=false;
+  S.crossover=0; S.showTwoCells=false; S.showFourCells=false;
+  document.getElementById('btn-mitosis').classList.add('active');
+  document.getElementById('btn-meiosis').classList.remove('active');
+  setAllChrAlpha(0);
+  buildStageList(); updateUI(); updatePlayBtn();
+  runStage(0);
+});
+
+document.getElementById('btn-meiosis').addEventListener('click',()=>{
+  if(S.mode==='meiosis') return;
+  S.mode='meiosis'; S.stageIdx=0; S.playing=false;
+  S.crossover=0; S.showTwoCells=false; S.showFourCells=false;
+  document.getElementById('btn-meiosis').classList.add('active');
+  document.getElementById('btn-mitosis').classList.remove('active');
+  setAllChrAlpha(0);
+  buildStageList(); updateUI(); updatePlayBtn();
+  runStage(0);
+});
+
+document.getElementById('btn-prev').addEventListener('click',()=>{
+  if(S.stageIdx>0){ S.playing=false; updatePlayBtn(); runStage(S.stageIdx-1); }
+});
+
+document.getElementById('btn-next').addEventListener('click',()=>{
+  const stages=S.mode==='mitosis'?MITOSIS_STAGES:MEIOSIS_STAGES;
+  if(S.stageIdx<stages.length-1){ S.playing=false; updatePlayBtn(); runStage(S.stageIdx+1); }
+});
+
+document.getElementById('btn-play').addEventListener('click',()=>{
+  S.playing=!S.playing; updatePlayBtn();
+  if(S.playing){
+    // If at last stage, restart
+    const stages=S.mode==='mitosis'?MITOSIS_STAGES:MEIOSIS_STAGES;
+    if(S.stageIdx===stages.length-1){ runStage(0); }
+    else { runStage(S.stageIdx); }
+  } else { killTimeline(); }
+});
+
+document.getElementById('speed-slider').addEventListener('input',function(){
+  S.speed=parseFloat(this.value);
+  document.getElementById('speed-val').textContent=S.speed+'Ã—';
+  const pct=((S.speed-0.5)/(2-0.5))*100;
+  this.style.setProperty('--fill',pct+'%');
+});
+
+/* ================================================================
+   KEYBOARD
+   ================================================================ */
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'){ document.getElementById('btn-next').click(); }
+  if(e.key==='ArrowLeft') { document.getElementById('btn-prev').click(); }
+  if(e.key===' '){ e.preventDefault(); document.getElementById('btn-play').click(); }
+  if(e.key==='m') document.getElementById('btn-mitosis').click();
+  if(e.key==='e') document.getElementById('btn-meiosis').click();
+});
+
+/* ================================================================
+   INIT
+   ================================================================ */
+window.addEventListener('load',()=>{
+  initPixi();
+  buildStageList();
+  updateUI();
+  updatePlayBtn();
+  // Init slider fill
+  const sl=document.getElementById('speed-slider');
+  sl.style.setProperty('--fill','50%');
+});
+</script>
+</body>
+</html>
