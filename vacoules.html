@@ -1,0 +1,635 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vacuole â€“ Plant Cell Simulation | Class 9 STC</title>
+  <meta name="description" content="Scientifically accurate interactive simulation of the plant cell vacuole: water, mineral and sugar storage, waste containment, turgor pressure and wilting (plasmolysis). Class 9 Science STC."/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#030812;--bg2:#050f1c;--panel:rgba(8,20,42,0.82);
+  --border:rgba(0,200,255,0.18);--border-hi:rgba(0,220,255,0.55);
+  --cyan:#00d4ff;--blue:#4488ff;--green:#00ff9d;--lime:#c6ff00;
+  --amber:#ffb300;--orange:#ff6d00;--red:#ff3040;--violet:#b06cff;
+  --pink:#ff4cad;--water:#29b6f6;--mineral:#69f0ae;--sugar:#ffcc02;
+  --waste:#cf6679;--text:#d8eeff;--text-dim:#6a9ab8;
+  --font:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;
+  --r:12px;
+}
+body{background:var(--bg);font-family:var(--font);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse 70% 50% at 15% 20%,rgba(0,100,200,0.07) 0%,transparent 65%),
+             radial-gradient(ellipse 55% 45% at 85% 75%,rgba(80,0,180,0.07) 0%,transparent 65%),
+             radial-gradient(ellipse 40% 30% at 50% 5%,rgba(0,200,120,0.05) 0%,transparent 60%);
+  pointer-events:none}
+/* HEADER */
+header{position:relative;z-index:10;width:100%;padding:16px 36px 12px;
+  background:linear-gradient(135deg,#020610 0%,#060f20 60%,#080d22 100%);
+  border-bottom:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:6px}
+header::after{content:'';position:absolute;bottom:-2px;left:0;width:100%;height:2px;
+  background:linear-gradient(90deg,transparent,var(--cyan),var(--green),var(--amber),var(--violet),transparent)}
+header h1{font-size:clamp(1.4rem,3.5vw,2.3rem);font-weight:800;letter-spacing:.5px;
+  background:linear-gradient(90deg,var(--cyan),var(--green),var(--amber));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+header p{font-size:.82rem;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase}
+.badge-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:3px}
+.badge{font-size:.73rem;padding:3px 12px;border-radius:20px;border:1px solid rgba(0,212,255,.3);
+  background:rgba(0,212,255,.08);color:var(--cyan);letter-spacing:.6px;font-weight:500}
+.badge.g{border-color:rgba(0,255,157,.3);background:rgba(0,255,157,.08);color:var(--green)}
+.badge.a{border-color:rgba(255,179,0,.3);background:rgba(255,179,0,.08);color:var(--amber)}
+/* MAIN GRID */
+.main-wrap{position:relative;z-index:1;flex:1;display:grid;
+  grid-template-columns:280px 1fr 300px;gap:0;
+  max-width:1600px;width:100%;margin:0 auto;padding:18px 14px 14px}
+/* LEFT */
+.left-panel{display:flex;flex-direction:column;gap:12px;padding-right:12px}
+.glass-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px;backdrop-filter:blur(12px);position:relative;overflow:hidden}
+.glass-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent)}
+.card-title{font-size:.72rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--cyan);
+  font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.card-title::before{content:'';display:block;width:8px;height:8px;border-radius:50%;
+  background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.mode-btns{display:flex;flex-direction:column;gap:8px}
+.mode-btn{position:relative;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:9px;padding:10px 14px;color:var(--text-dim);cursor:pointer;
+  font-family:var(--font);font-size:.84rem;font-weight:500;text-align:left;
+  transition:all .25s ease;display:flex;align-items:center;gap:9px;overflow:hidden}
+.mode-btn:hover{color:var(--text);border-color:rgba(255,255,255,.2);transform:translateX(2px)}
+.mode-btn.active{color:#fff;border-color:var(--ac,var(--cyan));background:rgba(0,0,0,.2);
+  box-shadow:inset 0 0 20px rgba(0,0,0,.3),0 0 12px rgba(0,212,255,.15)}
+.btn-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;background:var(--dc,var(--cyan));box-shadow:0 0 6px var(--dc,var(--cyan))}
+.btn-key{font-family:var(--mono);font-size:.68rem;background:rgba(255,255,255,.08);border-radius:4px;padding:1px 5px;color:var(--text-dim)}
+.gauge-row{display:flex;flex-direction:column;gap:10px}
+.gauge-item{display:flex;flex-direction:column;gap:4px}
+.gauge-hdr{display:flex;justify-content:space-between;align-items:center}
+.gauge-lbl{font-size:.78rem;color:var(--text-dim)}
+.gauge-val{font-family:var(--mono);font-size:.78rem;color:var(--text);font-weight:600}
+.gauge-track{height:7px;border-radius:4px;background:rgba(255,255,255,.06);overflow:hidden;position:relative}
+.gauge-fill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1);position:relative}
+.gauge-fill::after{content:'';position:absolute;top:0;right:0;bottom:0;width:20px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.3))}
+.legend-list{display:flex;flex-direction:column;gap:8px}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--text-dim)}
+.ldot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.fact-box{background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);border-radius:8px;
+  padding:10px 12px;font-size:.78rem;line-height:1.55;color:var(--text-dim);min-height:60px;transition:all .4s ease}
+.fact-box strong{color:var(--cyan)}
+/* CENTER */
+.canvas-wrap{position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px}
+#mainCanvas{border-radius:16px;border:1px solid var(--border);
+  box-shadow:0 0 50px rgba(0,100,200,.12),inset 0 0 40px rgba(0,0,0,.4);
+  cursor:crosshair;max-width:100%}
+.canvas-lbl{font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);display:flex;align-items:center;gap:6px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pdot 1.4s ease-in-out infinite}
+@keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)}}
+.canvas-hint{font-size:.74rem;color:var(--text-dim);background:rgba(0,0,0,.3);border-radius:6px;padding:4px 10px}
+/* RIGHT */
+.right-panel{display:flex;flex-direction:column;gap:12px;padding-left:12px}
+.info-sec{display:flex;flex-direction:column;gap:8px}
+.info-title{font-size:.7rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--violet);font-weight:600;
+  padding-bottom:6px;border-bottom:1px solid rgba(176,108,255,.2)}
+.mol-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:9px;
+  padding:11px 13px;display:flex;align-items:flex-start;gap:10px;transition:border-color .25s,background .25s}
+.mol-card:hover{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.055)}
+.mol-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;flex-shrink:0;border:1px solid rgba(255,255,255,.1)}
+.mol-body{flex:1}
+.mol-name{font-size:.8rem;font-weight:700;color:var(--text);margin-bottom:2px}
+.mol-desc{font-size:.73rem;color:var(--text-dim);line-height:1.45}
+.step-list{display:flex;flex-direction:column;gap:6px}
+.step-item{display:flex;gap:10px;align-items:flex-start;font-size:.76rem;color:var(--text-dim);
+  padding:8px 10px;border-radius:7px;background:rgba(255,255,255,.025);
+  border-left:2px solid var(--sc,var(--cyan));line-height:1.45}
+.step-num{font-family:var(--mono);font-size:.72rem;color:var(--sc,var(--cyan));font-weight:700;flex-shrink:0;margin-top:1px}
+.pressure-display{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;
+  background:rgba(255,107,0,.05);border:1px solid rgba(255,107,0,.2);border-radius:9px}
+.pressure-meter{width:100%;height:16px;border-radius:8px;background:rgba(0,0,0,.3);
+  border:1px solid rgba(255,107,0,.3);overflow:hidden;position:relative}
+#pressureFill{height:100%;border-radius:8px;background:linear-gradient(90deg,#ff6d00,#ff9100,#ffb300,#ff3040);
+  transition:width 1s ease;box-shadow:0 0 12px rgba(255,107,0,.6)}
+.pressure-lbl{font-family:var(--mono);font-size:.8rem;color:var(--amber);font-weight:600}
+/* TIMELINE */
+.timeline-bar{position:relative;z-index:1;display:flex;align-items:center;gap:0;
+  max-width:1600px;width:100%;margin:0 auto;padding:0 14px 14px}
+.tl-track{flex:1;display:flex;align-items:center;background:rgba(255,255,255,.04);
+  border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.tl-step{flex:1;padding:9px 10px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;transition:background .2s;border-right:1px solid var(--border);
+  font-size:.7rem;color:var(--text-dim);text-align:center}
+.tl-step:last-child{border-right:none}
+.tl-step:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.tl-step.active{background:rgba(0,212,255,.08);color:var(--cyan)}
+.tl-icon{font-size:1.2rem}
+.tl-name{font-weight:600;letter-spacing:.4px}
+/* TOOLTIP */
+.tooltip{position:absolute;background:rgba(5,12,28,.95);border:1px solid var(--border-hi);
+  border-radius:8px;padding:7px 12px;font-size:.75rem;color:var(--text);
+  pointer-events:none;z-index:20;max-width:180px;line-height:1.45;backdrop-filter:blur(8px);
+  transform:translateY(-8px);opacity:0;transition:opacity .2s,transform .2s}
+.tooltip.show{opacity:1;transform:translateY(0)}
+/* WILT OVERLAY */
+.wilt-overlay{position:absolute;inset:0;border-radius:16px;pointer-events:none;z-index:2;
+  opacity:0;transition:opacity 1.2s ease;
+  background:radial-gradient(ellipse at center,transparent 40%,rgba(140,60,20,.25) 100%)}
+.wilt-overlay.show{opacity:1}
+/* RESPONSIVE */
+@media(max-width:1100px){.main-wrap{grid-template-columns:240px 1fr 260px}}
+@media(max-width:880px){.main-wrap{grid-template-columns:1fr}.left-panel,.right-panel{padding:0}.right-panel{order:3}}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,212,255,.25);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(0,212,255,.45)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ðŸŒ¿ Plant Cell Vacuole â€” Scientific Simulation</h1>
+  <p>Class 9 Science Â· Cell Structure &amp; Function Â· STC</p>
+  <div class="badge-row">
+    <span class="badge">Tonoplast Membrane</span>
+    <span class="badge g">Turgor Pressure</span>
+    <span class="badge a">Osmotic Regulation</span>
+    <span class="badge">Cell Sap</span>
+    <span class="badge g">Wilting / Plasmolysis</span>
+  </div>
+</header>
+
+<div class="main-wrap">
+  <!-- LEFT PANEL -->
+  <aside class="left-panel">
+    <div class="glass-card">
+      <div class="card-title">Simulation Modes</div>
+      <div class="mode-btns">
+        <button class="mode-btn active" data-mode="normal" style="--ac:#00d4ff;--dc:#00d4ff">
+          <span class="btn-dot"></span><span style="flex:1">Normal Cell View</span><span class="btn-key">1</span>
+        </button>
+        <button class="mode-btn" data-mode="storage" style="--ac:#cf6679;--dc:#cf6679">
+          <span class="btn-dot" style="background:#cf6679;box-shadow:0 0 6px #cf6679"></span><span style="flex:1">Waste Storage</span><span class="btn-key">2</span>
+        </button>
+        <button class="mode-btn" data-mode="nutrients" style="--ac:#ffcc02;--dc:#ffcc02">
+          <span class="btn-dot" style="background:#ffcc02;box-shadow:0 0 6px #ffcc02"></span><span style="flex:1">Water, Minerals &amp; Sugar</span><span class="btn-key">3</span>
+        </button>
+        <button class="mode-btn" data-mode="pressure" style="--ac:#ff6d00;--dc:#ff6d00">
+          <span class="btn-dot" style="background:#ff6d00;box-shadow:0 0 6px #ff6d00"></span><span style="flex:1">Turgor Pressure</span><span class="btn-key">4</span>
+        </button>
+        <button class="mode-btn" data-mode="wilt" style="--ac:#ff3040;--dc:#ff3040">
+          <span class="btn-dot" style="background:#ff3040;box-shadow:0 0 6px #ff3040"></span><span style="flex:1">Wilting / Plasmolysis</span><span class="btn-key">5</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="glass-card">
+      <div class="card-title">Live Cell Metrics</div>
+      <div class="gauge-row">
+        <div class="gauge-item">
+          <div class="gauge-hdr"><span class="gauge-lbl">ðŸ’§ Water Level</span><span class="gauge-val" id="gWater">80%</span></div>
+          <div class="gauge-track"><div class="gauge-fill" id="gWaterFill" style="width:80%;background:linear-gradient(90deg,#1565c0,#29b6f6)"></div></div>
+        </div>
+        <div class="gauge-item">
+          <div class="gauge-hdr"><span class="gauge-lbl">âš¡ Turgor Pressure</span><span class="gauge-val" id="gPressure">65%</span></div>
+          <div class="gauge-track"><div class="gauge-fill" id="gPressureFill" style="width:65%;background:linear-gradient(90deg,#e65100,#ff9100)"></div></div>
+        </div>
+        <div class="gauge-item">
+          <div class="gauge-hdr"><span class="gauge-lbl">ðŸ§‚ Osmotic Conc.</span><span class="gauge-val" id="gOsmotic">42%</span></div>
+          <div class="gauge-track"><div class="gauge-fill" id="gOsmoticFill" style="width:42%;background:linear-gradient(90deg,#1b5e20,#69f0ae)"></div></div>
+        </div>
+        <div class="gauge-item">
+          <div class="gauge-hdr"><span class="gauge-lbl">ðŸŒ¡ Cell Health</span><span class="gauge-val" id="gHealth">92%</span></div>
+          <div class="gauge-track"><div class="gauge-fill" id="gHealthFill" style="width:92%;background:linear-gradient(90deg,#880e4f,#ff4cad)"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-card">
+      <div class="card-title">Molecule Legend</div>
+      <div class="legend-list">
+        <div class="legend-item"><div class="ldot" style="background:#29b6f6;box-shadow:0 0 6px #29b6f6"></div>Water molecules (Hâ‚‚O)</div>
+        <div class="legend-item"><div class="ldot" style="background:#69f0ae;box-shadow:0 0 6px #69f0ae"></div>Minerals &amp; Ions (Kâº, MgÂ²âº)</div>
+        <div class="legend-item"><div class="ldot" style="background:#ffcc02;box-shadow:0 0 6px #ffcc02"></div>Sugars (Glucose / Sucrose)</div>
+        <div class="legend-item"><div class="ldot" style="background:#cf6679;box-shadow:0 0 6px #cf6679"></div>Waste compounds / Pigments</div>
+        <div class="legend-item"><div class="ldot" style="background:#b06cff;box-shadow:0 0 6px #b06cff"></div>Tonoplast membrane proteins</div>
+      </div>
+    </div>
+
+    <div class="glass-card">
+      <div class="card-title">ðŸ”¬ Science Fact</div>
+      <div class="fact-box" id="factBox">
+        <strong>Central Vacuole:</strong> In mature plant cells, the central vacuole can occupy up to <strong>90%</strong> of the cell volume, pushing the cytoplasm and organelles to a thin peripheral layer.
+      </div>
+    </div>
+  </aside>
+
+  <!-- CENTER -->
+  <section class="canvas-wrap">
+    <div class="canvas-lbl"><span class="live-dot"></span>Live Simulation â€” Interactive Canvas</div>
+    <div style="position:relative">
+      <canvas id="mainCanvas" width="680" height="600"></canvas>
+      <div class="wilt-overlay" id="wiltOverlay"></div>
+      <div class="tooltip" id="tooltip"></div>
+    </div>
+    <div class="canvas-hint">Hover organelles for info Â· Press keys 1â€“5 to switch modes</div>
+  </section>
+
+  <!-- RIGHT PANEL -->
+  <aside class="right-panel">
+    <div class="glass-card">
+      <div class="info-sec">
+        <div class="info-title">What Does the Vacuole Store?</div>
+        <div class="mol-card">
+          <div class="mol-icon" style="background:rgba(41,182,246,.12);border-color:rgba(41,182,246,.3)">ðŸ’§</div>
+          <div class="mol-body">
+            <div class="mol-name" style="color:#29b6f6">Water &amp; Cell Sap</div>
+            <div class="mol-desc">Maintains osmotic balance. Water enters by osmosis through the tonoplast, creating hydrostatic pressure inside the vacuole.</div>
+          </div>
+        </div>
+        <div class="mol-card">
+          <div class="mol-icon" style="background:rgba(105,240,174,.12);border-color:rgba(105,240,174,.3)">ðŸ§‚</div>
+          <div class="mol-body">
+            <div class="mol-name" style="color:#69f0ae">Minerals &amp; Ions</div>
+            <div class="mol-desc">Kâº, CaÂ²âº, MgÂ²âº, NOâ‚ƒâ» stored for metabolic use. Acts as a mineral reservoir for the cell during growth.</div>
+          </div>
+        </div>
+        <div class="mol-card">
+          <div class="mol-icon" style="background:rgba(255,204,2,.12);border-color:rgba(255,204,2,.3)">ðŸ¬</div>
+          <div class="mol-body">
+            <div class="mol-name" style="color:#ffcc02">Sugars &amp; Organic Acids</div>
+            <div class="mol-desc">Glucose, sucrose, amino acids stored as energy reserves and for maintaining concentration gradients.</div>
+          </div>
+        </div>
+        <div class="mol-card">
+          <div class="mol-icon" style="background:rgba(207,102,121,.12);border-color:rgba(207,102,121,.3)">ðŸ§¹</div>
+          <div class="mol-body">
+            <div class="mol-name" style="color:#cf6679">Waste &amp; Pigments</div>
+            <div class="mol-desc">Metabolic waste, alkaloids, tannins, and anthocyanins are safely isolated here away from sensitive cytoplasm.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-card">
+      <div class="info-sec">
+        <div class="info-title">Turgor Pressure Mechanism</div>
+        <div class="pressure-display">
+          <div class="pressure-lbl">Turgor Pressure: <span id="pressureVal">65 kPa</span></div>
+          <div class="pressure-meter"><div id="pressureFill" style="width:65%"></div></div>
+        </div>
+        <div class="step-list">
+          <div class="step-item" style="--sc:#29b6f6"><span class="step-num">01</span>Water enters vacuole via osmosis across tonoplast membrane.</div>
+          <div class="step-item" style="--sc:#ff9100"><span class="step-num">02</span>Vacuole swells, pushing protoplasm against the rigid cell wall.</div>
+          <div class="step-item" style="--sc:#69f0ae"><span class="step-num">03</span>Cell wall provides wall pressure back, creating net turgor pressure keeping cell rigid.</div>
+          <div class="step-item" style="--sc:#ff3040"><span class="step-num">04</span>In drought: vacuole loses water, turgor drops, plant wilts â€” plasmolysis may occur.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-card">
+      <div class="info-sec">
+        <div class="info-title">Tonoplast Membrane</div>
+        <div class="step-list">
+          <div class="step-item" style="--sc:#b06cff"><span class="step-num">â–¸</span>Selectively permeable membrane surrounding the vacuole.</div>
+          <div class="step-item" style="--sc:#b06cff"><span class="step-num">â–¸</span>Contains aquaporins (water channels) and ion transporters.</div>
+          <div class="step-item" style="--sc:#b06cff"><span class="step-num">â–¸</span>Controls pH inside vacuole (usually acidic, pH 4â€“5).</div>
+          <div class="step-item" style="--sc:#b06cff"><span class="step-num">â–¸</span>Contains V-ATPase pumps that acidify the vacuolar lumen.</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="timeline-bar">
+  <div class="tl-track">
+    <div class="tl-step active" data-mode="normal"><span class="tl-icon">ðŸ”µ</span><span class="tl-name">Cell Overview</span></div>
+    <div class="tl-step" data-mode="storage"><span class="tl-icon">ðŸ”´</span><span class="tl-name">Waste Isolation</span></div>
+    <div class="tl-step" data-mode="nutrients"><span class="tl-icon">ðŸŸ¡</span><span class="tl-name">Nutrient Storage</span></div>
+    <div class="tl-step" data-mode="pressure"><span class="tl-icon">ðŸŸ </span><span class="tl-name">Turgor Pressure</span></div>
+    <div class="tl-step" data-mode="wilt"><span class="tl-icon">ðŸŸ¤</span><span class="tl-name">Wilting</span></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const canvas=document.getElementById('mainCanvas');
+const ctx=canvas.getContext('2d');
+const W=canvas.width,H=canvas.height,cx=W/2,cy=H/2;
+let currentMode='normal',animFrame=0,wiltProgress=0,vacuoleRadiusNow=195;
+const VAC_SIZE={normal:195,storage:178,nutrients:185,pressure:215,wilt:112};
+const METRICS={
+  normal:{water:.80,pressure:.65,osmotic:.42,health:.92},
+  storage:{water:.72,pressure:.60,osmotic:.55,health:.85},
+  nutrients:{water:.75,pressure:.68,osmotic:.70,health:.94},
+  pressure:{water:.95,pressure:.95,osmotic:.50,health:.97},
+  wilt:{water:.20,pressure:.10,osmotic:.15,health:.35}
+};
+const FACTS={
+  normal:'<strong>Central Vacuole:</strong> Occupies up to <strong>90%</strong> of a mature plant cell volume. Surrounded by the tonoplast membrane which controls all influx/efflux.',
+  storage:'<strong>Waste Isolation:</strong> The vacuole sequesters toxic metabolic byproducts â€” alkaloids, tannins, phenolic compounds â€” keeping them away from the sensitive cytoplasm.',
+  nutrients:'<strong>Cell Sap:</strong> A dilute solution of water, inorganic ions (Kâº, CaÂ²âº, MgÂ²âº), organic acids, and sugars. The vacuole acts as a dynamic nutrient reservoir.',
+  pressure:'<strong>Turgor Pressure:</strong> Water potential gradient drives water into the vacuole via osmosis. The inflated vacuole pushes cytoplasm outward â†’ cell remains rigid â†’ plant stands erect.',
+  wilt:'<strong>Wilting:</strong> Under drought/heat, the vacuole loses water to surroundings. Turgor pressure drops â†’ vacuole shrinks â†’ cell collapses inward (plasmolysis) â†’ plant wilts.'
+};
+let live={water:.80,pressure:.65,osmotic:.42,health:.92};
+
+/* ---- PARTICLES ---- */
+class Particle{
+  constructor(type,x,y){
+    this.type=type;
+    const T={water:{c:'#29b6f6',g:'rgba(41,182,246,.7)',r:4},mineral:{c:'#69f0ae',g:'rgba(105,240,174,.7)',r:3.5},sugar:{c:'#ffcc02',g:'rgba(255,204,2,.7)',r:4.5},waste:{c:'#cf6679',g:'rgba(207,102,121,.7)',r:3.8},protein:{c:'#b06cff',g:'rgba(176,108,255,.7)',r:3}};
+    const t=T[type];this.c=t.c;this.g=t.g;this.r=t.r+(Math.random()-.5)*1.2;
+    this.x=x??(cx+(Math.random()-.5)*200);this.y=y??(cy+(Math.random()-.5)*150);
+    this.vx=(Math.random()-.5)*.8;this.vy=(Math.random()-.5)*.8;
+    this.alpha=.8+Math.random()*.2;this.phase=Math.random()*Math.PI*2;
+  }
+  update(R){
+    this.phase+=.025;this.vx+=(Math.random()-.5)*.06;this.vy+=(Math.random()-.5)*.06;
+    const sp=Math.hypot(this.vx,this.vy);if(sp>1.3){this.vx*=1.3/sp;this.vy*=1.3/sp}
+    this.x+=this.vx;this.y+=this.vy;
+    const dx=this.x-cx,dy=this.y-cy,d=Math.hypot(dx,dy),mx=R-this.r-3;
+    if(d>mx){const nx=dx/d,ny=dy/d;this.x=cx+nx*mx;this.y=cy+ny*mx;const dot=this.vx*nx+this.vy*ny;this.vx-=2*dot*nx;this.vy-=2*dot*ny;}
+  }
+  draw(){
+    ctx.save();ctx.globalAlpha=this.alpha;ctx.shadowBlur=10;ctx.shadowColor=this.g;
+    ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle=this.c;ctx.fill();
+    ctx.restore();
+  }
+}
+
+class FloatP{
+  constructor(x,y){this.x=x;this.y=y;this.vx=(Math.random()-.5)*1.5;this.vy=-1-Math.random()*1.5;this.a=1;this.r=4;}
+  update(){this.x+=this.vx;this.y+=this.vy;this.a-=.018;this.r*=.99;}
+  dead(){return this.a<=0;}
+  draw(){
+    ctx.save();ctx.globalAlpha=this.a;ctx.shadowBlur=12;ctx.shadowColor='rgba(41,182,246,.8)';
+    ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle='#29b6f6';ctx.fill();ctx.restore();
+  }
+}
+
+let particles=[],floatPs=[];
+
+function spawn(mode){
+  particles=[];
+  const mk=(type,n,rMin,rMax)=>{
+    for(let i=0;i<n;i++){
+      const a=Math.random()*Math.PI*2,r=rMin+Math.random()*(rMax-rMin);
+      particles.push(new Particle(type,cx+Math.cos(a)*r,cy+Math.sin(a)*r));
+    }
+  };
+  if(mode==='normal'){mk('water',50,0,160);mk('protein',12,170,190);}
+  if(mode==='storage'){mk('waste',62,0,162);mk('water',12,0,90);mk('protein',10,170,190);}
+  if(mode==='nutrients'){mk('water',32,0,158);mk('mineral',24,0,148);mk('sugar',20,0,138);mk('protein',10,170,190);}
+  if(mode==='pressure'){mk('water',74,0,185);mk('mineral',14,0,150);mk('protein',14,172,198);}
+  if(mode==='wilt'){mk('water',18,0,95);mk('mineral',7,0,85);mk('sugar',5,0,75);mk('protein',9,170,190);}
+}
+
+function lerp(a,b,t){return a+(b-a)*t;}
+
+function rrect(x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
+
+function drawGrid(){
+  ctx.save();ctx.strokeStyle='rgba(0,150,200,.055)';ctx.lineWidth=1;
+  const s=36;
+  for(let x=0;x<W;x+=s){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=s){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  ctx.restore();
+}
+
+function drawCellWall(wp){
+  const m=22;
+  ctx.save();
+  /* cellulose wall */
+  ctx.lineWidth=10;ctx.strokeStyle=`rgba(180,210,140,${.6-wp*.2})`;
+  ctx.shadowBlur=12;ctx.shadowColor=`rgba(120,200,80,${.3-wp*.1})`;
+  rrect(m,m,W-2*m,H-2*m,40);ctx.stroke();
+  /* sheen */
+  ctx.lineWidth=2;ctx.strokeStyle=`rgba(220,255,180,${.25-wp*.1})`;ctx.shadowBlur=0;
+  rrect(m+5,m+5,W-2*(m+5),H-2*(m+5),36);ctx.stroke();
+  /* plasma membrane â€” shrinks during wilt */
+  const ps=wp*22;
+  ctx.lineWidth=3;ctx.setLineDash([6,3]);ctx.strokeStyle=`rgba(100,200,255,${.55-wp*.3})`;
+  ctx.shadowBlur=8;ctx.shadowColor='rgba(0,200,255,.3)';
+  rrect(m+14+ps,m+14+ps,W-2*(m+14+ps),H-2*(m+14+ps),30);ctx.stroke();
+  ctx.setLineDash([]);ctx.restore();
+}
+
+function drawMito(x,y,sc=1){
+  ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(-.3);
+  const g=ctx.createRadialGradient(0,0,2,0,0,18);g.addColorStop(0,'rgba(255,100,20,.9)');g.addColorStop(1,'rgba(160,40,0,.5)');
+  ctx.beginPath();ctx.ellipse(0,0,20,11,0,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+  ctx.strokeStyle='rgba(255,160,80,.7)';ctx.lineWidth=1.5;ctx.shadowBlur=10;ctx.shadowColor='rgba(255,80,0,.5)';ctx.stroke();
+  ctx.shadowBlur=0;ctx.strokeStyle='rgba(255,180,100,.45)';ctx.lineWidth=1;
+  for(let i=-10;i<=10;i+=7){ctx.beginPath();ctx.moveTo(i,-9);ctx.quadraticCurveTo(i+4,0,i,9);ctx.stroke();}
+  ctx.font='8px Outfit';ctx.fillStyle='rgba(255,180,100,.85)';ctx.textAlign='center';ctx.fillText('Mito',0,24);ctx.restore();
+}
+
+function drawChlp(x,y,sc=1){
+  ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(.4);
+  const g=ctx.createRadialGradient(0,0,3,0,0,16);g.addColorStop(0,'rgba(60,220,80,.9)');g.addColorStop(1,'rgba(10,100,30,.5)');
+  ctx.beginPath();ctx.ellipse(0,0,22,12,0,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+  ctx.strokeStyle='rgba(100,255,120,.7)';ctx.lineWidth=1.5;ctx.shadowBlur=10;ctx.shadowColor='rgba(40,200,60,.5)';ctx.stroke();
+  ctx.shadowBlur=0;ctx.strokeStyle='rgba(150,255,160,.5)';ctx.lineWidth=1;
+  for(let i=-12;i<=12;i+=6){ctx.beginPath();ctx.moveTo(i,-8);ctx.lineTo(i,8);ctx.stroke();}
+  ctx.font='8px Outfit';ctx.fillStyle='rgba(140,255,140,.85)';ctx.textAlign='center';ctx.fillText('Chlpl',0,24);ctx.restore();
+}
+
+function drawOrganelles(wp){
+  ctx.save();ctx.globalAlpha=1-wp*.4;
+  /* nucleus */
+  const nX=cx-85-wp*10,nY=cy-90-wp*5,nR=28;
+  const ng=ctx.createRadialGradient(nX-6,nY-6,2,nX,nY,nR);
+  ng.addColorStop(0,'rgba(180,100,255,.85)');ng.addColorStop(.65,'rgba(80,20,160,.7)');ng.addColorStop(1,'rgba(40,5,90,.5)');
+  ctx.beginPath();ctx.arc(nX,nY,nR,0,Math.PI*2);ctx.fillStyle=ng;ctx.fill();
+  ctx.lineWidth=2.5;ctx.strokeStyle='rgba(200,140,255,.7)';ctx.shadowBlur=14;ctx.shadowColor='rgba(160,60,255,.6)';ctx.stroke();
+  ctx.beginPath();ctx.arc(nX+3,nY+3,9,0,Math.PI*2);ctx.fillStyle='rgba(255,180,255,.55)';ctx.fill();
+  ctx.shadowBlur=0;ctx.font='9px Outfit';ctx.fillStyle='rgba(220,180,255,.9)';ctx.textAlign='center';ctx.fillText('Nucleus',nX,nY+nR+12);
+  drawMito(cx+96-wp*8,cy-86-wp*4);drawMito(cx+104-wp*8,cy+80+wp*2,.9);
+  drawChlp(cx-95+wp*8,cy+85+wp*4);drawChlp(cx-105+wp*8,cy-60-wp*3,.85);
+  /* ER squiggle */
+  ctx.globalAlpha=(1-wp*.5)*.55;
+  ctx.beginPath();ctx.moveTo(cx+130-wp*15,cy+30);
+  for(let i=0;i<6;i++){const sx=cx+130-wp*15+i*6;ctx.quadraticCurveTo(sx+3,cy+22+i*4,sx+6,cy+30+i*4);}
+  ctx.strokeStyle='rgba(255,140,80,.6)';ctx.lineWidth=2.5;ctx.shadowBlur=6;ctx.shadowColor='rgba(255,140,80,.5)';ctx.stroke();
+  ctx.shadowBlur=0;ctx.font='9px Outfit';ctx.fillStyle='rgba(255,160,100,.8)';ctx.fillText('ER',cx+160-wp*15,cy+68);
+  ctx.restore();
+}
+
+function drawVacuole(R,mode){
+  ctx.save();
+  let c0,c1,c2;
+  if(mode==='normal'){c0='rgba(0,100,180,.70)';c1='rgba(0,60,140,.50)';c2='rgba(0,30,80,.30)';}
+  else if(mode==='storage'){c0='rgba(160,40,70,.72)';c1='rgba(100,20,50,.55)';c2='rgba(50,5,25,.35)';}
+  else if(mode==='nutrients'){c0='rgba(80,60,20,.70)';c1='rgba(50,90,40,.55)';c2='rgba(20,40,90,.35)';}
+  else if(mode==='pressure'){c0='rgba(0,80,165,.88)';c1='rgba(0,50,132,.72)';c2='rgba(0,20,82,.52)';}
+  else{c0='rgba(60,40,20,.70)';c1='rgba(38,24,10,.55)';c2='rgba(18,10,5,.35)';}
+  const vg=ctx.createRadialGradient(cx-R*.25,cy-R*.25,R*.05,cx,cy,R);
+  vg.addColorStop(0,c0);vg.addColorStop(.6,c1);vg.addColorStop(1,c2);
+  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fillStyle=vg;ctx.fill();
+  /* tonoplast glow ring */
+  const tc=mode==='wilt'?'rgba(180,100,50,':'rgba(180,100,255,';
+  ctx.lineWidth=4+Math.sin(animFrame*.02)*1;ctx.strokeStyle=tc+'.75)';
+  ctx.shadowBlur=20+Math.sin(animFrame*.02)*5;ctx.shadowColor=tc+'.55)';
+  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.stroke();
+  /* specular sheen */
+  ctx.shadowBlur=0;
+  const sg=ctx.createLinearGradient(cx-R,cy-R,cx+R,cy+R);
+  sg.addColorStop(0,'rgba(255,255,255,.09)');sg.addColorStop(.5,'rgba(255,255,255,.02)');sg.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
+  /* tonoplast membrane segments */
+  const segs=64;
+  for(let i=0;i<segs;i++){
+    const a=(i/segs)*Math.PI*2,na=((i+1)/segs)*Math.PI*2;
+    const pulse=Math.sin(animFrame*.03+i*.4)*2;
+    ctx.beginPath();ctx.arc(cx,cy,R+1+pulse,a,na);ctx.arc(cx,cy,R+5+pulse,na,a,true);ctx.closePath();
+    ctx.fillStyle=(i%4===0)?'rgba(176,108,255,.55)':'rgba(176,108,255,.18)';ctx.fill();
+  }
+  /* aquaporin dots */
+  for(let i=0;i<16;i++){
+    const a=(i/16)*Math.PI*2+animFrame*.003;
+    const x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;
+    ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,212,255,.65)';ctx.shadowBlur=8;ctx.shadowColor='rgba(0,212,255,.8)';ctx.fill();
+  }
+  ctx.shadowBlur=0;
+  ctx.font='bold 13px Outfit';ctx.fillStyle='rgba(200,230,255,.55)';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('Central Vacuole',cx,cy+R*.72);
+  ctx.restore();
+}
+
+function drawPressureArrows(R,p){
+  if(p<.25)return;
+  ctx.save();
+  for(let i=0;i<12;i++){
+    const a=(i/12)*Math.PI*2,pulse=Math.sin(animFrame*.04+i)*.3;
+    const len=16+p*22+pulse*6;
+    const x1=cx+Math.cos(a)*(R+8),y1=cy+Math.sin(a)*(R+8);
+    const x2=cx+Math.cos(a)*(R+8+len),y2=cy+Math.sin(a)*(R+8+len);
+    const al=.4+p*.5+pulse*.2;
+    const rv=Math.floor(255*p),gv=Math.floor(145*(1-p));
+    ctx.strokeStyle=`rgba(${rv},${gv},0,${al})`;ctx.lineWidth=2+p*1.5;
+    ctx.shadowBlur=10;ctx.shadowColor=`rgba(${rv},${gv},0,.5)`;
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+    const ha=Math.atan2(y2-y1,x2-x1);
+    ctx.lineTo(x2-8*Math.cos(ha-.45),y2-8*Math.sin(ha-.45));ctx.moveTo(x2,y2);
+    ctx.lineTo(x2-8*Math.cos(ha+.45),y2-8*Math.sin(ha+.45));ctx.stroke();
+  }
+  ctx.shadowBlur=0;ctx.font='bold 11px Outfit';ctx.fillStyle=`rgba(255,180,0,${.5+p*.4})`;
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('Turgor: '+Math.round(p*100)+' kPa',cx,cy-R-22);
+  ctx.restore();
+}
+
+function drawWaterFlow(inward,R){
+  ctx.save();
+  for(let i=0;i<10;i++){
+    const a=(i/10)*Math.PI*2+animFrame*.015*(inward?1:-1);
+    const d=inward?(R-30)+((animFrame*1.2+i*20)%30):(R+5)+((animFrame*1.2+i*20)%30);
+    const x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d;
+    ctx.beginPath();ctx.arc(x,y,3.5,0,Math.PI*2);
+    ctx.fillStyle='rgba(41,182,246,.8)';ctx.shadowBlur=10;ctx.shadowColor='rgba(41,182,246,.9)';ctx.fill();
+  }
+  ctx.shadowBlur=0;ctx.font='10px Outfit';ctx.fillStyle='rgba(41,182,246,.8)';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(inward?'â† Osmosis in':'Water loss â†’',cx,cy+R+38);ctx.restore();
+}
+
+function drawWiltCracks(wp){
+  if(wp<.1)return;
+  ctx.save();ctx.globalAlpha=Math.min(1,wp*1.8);
+  ctx.strokeStyle='rgba(160,100,40,.7)';ctx.lineWidth=1.5;
+  [[22+40,22+30,20,15],[W-22-60,22+50,-18,18],[22+20,H-22-60,22,-16]].forEach(([x,y,dx,dy])=>{
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+dx*wp,y+dy*wp);ctx.lineTo(x+dx*wp+8*wp,y+dy*wp-6*wp);ctx.stroke();
+  });ctx.restore();
+}
+
+function updateMetrics(mode){
+  const tgt=METRICS[mode],sp=.025;
+  live.water=lerp(live.water,tgt.water,sp);live.pressure=lerp(live.pressure,tgt.pressure,sp);
+  live.osmotic=lerp(live.osmotic,tgt.osmotic,sp);live.health=lerp(live.health,tgt.health,sp);
+  const pct=v=>Math.round(v*100)+'%';
+  document.getElementById('gWater').textContent=pct(live.water);
+  document.getElementById('gPressure').textContent=pct(live.pressure);
+  document.getElementById('gOsmotic').textContent=pct(live.osmotic);
+  document.getElementById('gHealth').textContent=pct(live.health);
+  document.getElementById('gWaterFill').style.width=pct(live.water);
+  document.getElementById('gPressureFill').style.width=pct(live.pressure);
+  document.getElementById('gOsmoticFill').style.width=pct(live.osmotic);
+  document.getElementById('gHealthFill').style.width=pct(live.health);
+  document.getElementById('pressureVal').textContent=Math.round(live.pressure*100)+' kPa';
+  document.getElementById('pressureFill').style.width=pct(live.pressure);
+}
+
+function render(){
+  animFrame++;
+  ctx.clearRect(0,0,W,H);
+  const bg=ctx.createRadialGradient(cx,cy,30,cx,cy,Math.max(W,H)*.8);
+  bg.addColorStop(0,'#060e1e');bg.addColorStop(1,'#020812');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  drawGrid();
+  vacuoleRadiusNow=lerp(vacuoleRadiusNow,VAC_SIZE[currentMode],.04);
+  wiltProgress=lerp(wiltProgress,currentMode==='wilt'?1:0,.03);
+  document.getElementById('wiltOverlay').classList.toggle('show',wiltProgress>.35);
+  updateMetrics(currentMode);
+  drawCellWall(wiltProgress);
+  drawOrganelles(wiltProgress);
+  drawVacuole(vacuoleRadiusNow,currentMode);
+  particles.forEach(p=>{p.update(vacuoleRadiusNow);p.draw();});
+  if(currentMode==='pressure'){drawPressureArrows(vacuoleRadiusNow,live.pressure);drawWaterFlow(true,vacuoleRadiusNow);}
+  if(currentMode==='wilt'){
+    drawWaterFlow(false,vacuoleRadiusNow);drawWiltCracks(wiltProgress);
+    if(Math.random()<.18){const a=Math.random()*Math.PI*2;floatPs.push(new FloatP(cx+Math.cos(a)*(vacuoleRadiusNow+8),cy+Math.sin(a)*(vacuoleRadiusNow+8)));}
+  }
+  floatPs=floatPs.filter(p=>!p.dead());floatPs.forEach(p=>{p.update();p.draw();});
+  /* annotations */
+  ctx.save();ctx.font='10px JetBrains Mono';ctx.textBaseline='middle';ctx.globalAlpha=.85;
+  if(currentMode==='normal'||currentMode==='pressure'){
+    ctx.fillStyle='rgba(176,108,255,.9)';ctx.textAlign='left';ctx.fillText('â† Tonoplast',cx+vacuoleRadiusNow+15,cy-18);
+    ctx.fillStyle='rgba(0,212,255,.9)';ctx.fillText('â† Aquaporin',cx+vacuoleRadiusNow+15,cy+18);
+  }
+  if(currentMode==='storage'){ctx.fillStyle='rgba(207,102,121,.9)';ctx.textAlign='right';ctx.fillText('Waste â†’',cx-vacuoleRadiusNow-15,cy);}
+  if(currentMode==='wilt'&&wiltProgress>.5){
+    ctx.fillStyle=`rgba(255,80,50,${Math.min(1,(wiltProgress-.5)*2)})`;ctx.textAlign='center';
+    ctx.shadowBlur=12;ctx.shadowColor='rgba(255,60,30,.8)';
+    ctx.font='bold 14px Outfit';ctx.fillText('PLASMOLYSIS â€” CELL WILTING',cx,H-40);ctx.shadowBlur=0;
+  }
+  ctx.restore();
+  requestAnimationFrame(render);
+}
+
+function switchMode(mode){
+  currentMode=mode;spawn(mode);floatPs=[];
+  document.querySelectorAll('.mode-btn,.tl-step').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+  document.getElementById('factBox').innerHTML=FACTS[mode];
+}
+document.querySelectorAll('.mode-btn,.tl-step').forEach(btn=>btn.addEventListener('click',()=>switchMode(btn.dataset.mode)));
+document.addEventListener('keydown',e=>{const m={'1':'normal','2':'storage','3':'nutrients','4':'pressure','5':'wilt'};if(m[e.key])switchMode(m[e.key]);});
+
+/* Tooltip */
+const tip=document.getElementById('tooltip');
+canvas.addEventListener('mousemove',e=>{
+  const r=canvas.getBoundingClientRect();
+  const mx=(e.clientX-r.left)*(W/r.width),my=(e.clientY-r.top)*(H/r.height);
+  let t='';
+  const nX=cx-85,nY=cy-90;
+  if(Math.hypot(mx-nX,my-nY)<32)t='<strong>Nucleus</strong><br/>Controls cell activities via DNA. Surrounded by nuclear envelope with pores.';
+  else if(Math.hypot(mx-cx,my-cy)<vacuoleRadiusNow){
+    if(Math.hypot(mx-cx,my-cy)>vacuoleRadiusNow-11)t='<strong>Tonoplast</strong><br/>Selectively permeable vacuolar membrane. Contains aquaporins and ion transporters.';
+    else t='<strong>Central Vacuole</strong><br/>Filled with cell sap. Stores water, minerals, sugars, pigments & waste. Maintains turgor pressure.';
+  }else if(Math.hypot(mx-(cx+96),my-(cy-86))<24)t='<strong>Mitochondria</strong><br/>ATP synthesis via cellular respiration. Powers active ion transport across the tonoplast.';
+  else if(Math.hypot(mx-(cx-95),my-(cy+85))<24)t='<strong>Chloroplast</strong><br/>Photosynthesis organelle. Produces glucose which is stored in the vacuole.';
+  if(t){tip.innerHTML=t;tip.style.left=(e.clientX-r.left+12)+'px';tip.style.top=(e.clientY-r.top-10)+'px';tip.classList.add('show');}
+  else tip.classList.remove('show');
+});
+canvas.addEventListener('mouseleave',()=>tip.classList.remove('show'));
+
+function resize(){const w=canvas.parentElement.clientWidth;const mw=Math.min(680,w-2);canvas.style.width=mw+'px';canvas.style.height=(mw*H/W)+'px';}
+window.addEventListener('resize',resize);resize();
+spawn('normal');render();
+</script>
+</body>
+</html>
