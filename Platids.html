@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Plastids &amp; Chloroplasts &ndash; Photosynthesis Simulation (Class 9 STC)</title>
+  <meta name="description" content="Realistic interactive simulation of Plastids and Chloroplasts showing stroma, thylakoids, chlorophyll, and the complete mechanism of photosynthesis for Class 9 Science."/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #030d06;
+      --panel: #071510;
+      --panel-hover: #0d2115;
+      --border: rgba(80, 220, 80, 0.2);
+      --border-bright: rgba(80, 220, 80, 0.55);
+      --green: #4cff72;
+      --lime: #b5ff2f;
+      --teal: #00e5c8;
+      --gold: #ffd54f;
+      --yellow: #ffee58;
+      --orange: #ff9800;
+      --blue: #40c4ff;
+      --violet: #ce93d8;
+      --pink: #ff4081;
+      --red: #ff5252;
+      --text: #dffce8;
+      --text-dim: #7dbc8a;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: 'Outfit', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    header {
+      width: 100%;
+      padding: 18px 40px 14px;
+      background: linear-gradient(135deg, #020d04 0%, #081c0b 55%, #0d2211 100%);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      position: relative;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; left: 0; width: 100%; height: 3px;
+      background: linear-gradient(90deg, transparent, var(--green), var(--lime), var(--teal), var(--gold), transparent);
+    }
+    header h1 {
+      font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--green), var(--lime), var(--teal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.5px;
+    }
+    header p {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .badge-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
+    .badge {
+      background: rgba(76, 255, 114, 0.1);
+      border: 1px solid rgba(76, 255, 114, 0.3);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 0.72rem;
+      color: var(--green);
+      letter-spacing: 0.5px;
+    }
+
+    main { width: 100%; max-width: 1400px; padding: 24px 20px; display: flex; flex-direction: column; gap: 24px; }
+
+    .tabs {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 6px;
+    }
+    .tab-btn {
+      flex: 1; min-width: 130px;
+      padding: 10px 16px;
+      background: transparent;
+      border: none; border-radius: 12px;
+      color: var(--text-dim);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.84rem; font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .tab-btn:hover { background: rgba(76,255,114,0.08); color: var(--text); }
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(76,255,114,0.2), rgba(0,229,200,0.15));
+      color: var(--green);
+      border: 1px solid rgba(76,255,114,0.4);
+      box-shadow: 0 0 12px rgba(76,255,114,0.15);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: flex; flex-direction: column; gap: 20px; }
+
+    .section-title {
+      font-size: 1rem; font-weight: 700;
+      color: var(--lime);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 8px;
+    }
+    .section-title::before {
+      content: '';
+      display: inline-block; width: 14px; height: 3px;
+      background: var(--lime); border-radius: 2px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+    .card:hover { border-color: var(--border-bright); }
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--green), var(--teal), transparent);
+      opacity: 0.5;
+    }
+
+    .canvas-wrap {
+      position: relative; width: 100%;
+      background: radial-gradient(ellipse at center, #071a09 0%, #020d04 80%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    canvas { display: block; width: 100%; height: auto; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .info-tile {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      transition: all 0.3s;
+    }
+    .info-tile:hover { border-color: var(--border-bright); background: var(--panel-hover); transform: translateY(-2px); }
+    .info-tile .icon { font-size: 1.7rem; margin-bottom: 6px; }
+    .info-tile h3 { font-size: 0.85rem; font-weight: 700; color: var(--lime); margin-bottom: 4px; }
+    .info-tile p { font-size: 0.78rem; color: var(--text-dim); line-height: 1.5; }
+
+    .equation-box {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,215,79,0.4);
+      border-radius: 14px;
+      padding: 16px 22px;
+      text-align: center;
+    }
+    .equation-box .eq-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); margin-bottom: 8px; }
+    .equation-box .eq-formula { font-size: clamp(0.88rem, 2vw, 1.15rem); font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
+    .eq-formula .reactant { color: #64b5f6; }
+    .eq-formula .product { color: #a5d6a7; }
+    .eq-formula .energy { color: var(--gold); }
+    .eq-formula .catalyst { color: var(--lime); }
+    .eq-formula .arrow { color: var(--teal); margin: 0 10px; font-size: 1.3em; }
+
+    .step-list { display: flex; flex-direction: column; gap: 10px; }
+    .step-card {
+      display: flex; gap: 14px; align-items: flex-start;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      transition: all 0.3s;
+    }
+    .step-card:hover { border-color: var(--border-bright); background: var(--panel-hover); }
+    .step-num {
+      min-width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 800; color: #000;
+      flex-shrink: 0;
+    }
+    .step-card h4 { font-size: 0.88rem; font-weight: 700; color: var(--green); margin-bottom: 3px; }
+    .step-card p { font-size: 0.78rem; color: var(--text-dim); line-height: 1.5; }
+
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .ctrl-btn {
+      padding: 9px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(76,255,114,0.08);
+      color: var(--green);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.82rem; font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .ctrl-btn:hover { background: rgba(76,255,114,0.18); border-color: var(--border-bright); }
+    .ctrl-btn.active { background: linear-gradient(135deg, rgba(76,255,114,0.3), rgba(0,229,200,0.2)); border-color: var(--green); color: var(--lime); }
+
+    .slider-wrap {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 7px 14px;
+    }
+    .slider-wrap label { font-size: 0.78rem; color: var(--text-dim); white-space: nowrap; }
+    input[type=range] {
+      -webkit-appearance: none; width: 100px; height: 4px;
+      background: rgba(76,255,114,0.25); border-radius: 2px; outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px;
+      background: var(--green); border-radius: 50%; cursor: pointer;
+    }
+
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      padding: 10px 14px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--text-dim); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    .mol-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+    }
+    .mol-badge .mol-count {
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      color: #000; font-weight: 800;
+      border-radius: 6px; padding: 1px 7px;
+      font-size: 0.72rem;
+      min-width: 24px; text-align: center;
+    }
+
+    .quiz-card { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+    .quiz-question { font-size: 0.95rem; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+    .quiz-opt {
+      padding: 10px 16px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.84rem; color: var(--text-dim);
+      cursor: pointer; transition: all 0.25s;
+    }
+    .quiz-opt:hover { border-color: var(--border-bright); color: var(--text); background: var(--panel-hover); }
+    .quiz-opt.correct { border-color: var(--green); background: rgba(76,255,114,0.12); color: var(--green); }
+    .quiz-opt.wrong { border-color: var(--red); background: rgba(255,82,82,0.1); color: var(--red); }
+    .quiz-feedback { margin-top: 10px; font-size: 0.82rem; padding: 10px 14px; border-radius: 10px; display: none; }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.ok { background: rgba(76,255,114,0.1); border: 1px solid rgba(76,255,114,0.3); color: var(--green); }
+    .quiz-feedback.no { background: rgba(255,82,82,0.1); border: 1px solid rgba(255,82,82,0.3); color: var(--red); }
+
+    @keyframes glow-pulse {
+      0%,100% { box-shadow: 0 0 12px rgba(76,255,114,0.2); }
+      50% { box-shadow: 0 0 28px rgba(76,255,114,0.5); }
+    }
+    .glow-card { animation: glow-pulse 3s ease-in-out infinite; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #020d04; }
+    ::-webkit-scrollbar-thumb { background: rgba(76,255,114,0.3); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>&#127807; Plastids &amp; Chloroplasts</h1>
+  <p>Photosynthesis Simulation &middot; Class 9 Science &middot; STC</p>
+  <div class="badge-row">
+    <span class="badge">&#128300; Scientifically Accurate</span>
+    <span class="badge">&#9889; Light Reactions</span>
+    <span class="badge">&#127807; Calvin Cycle</span>
+    <span class="badge">&#127777;&#65039; Interactive</span>
+  </div>
+</header>
+
+<main>
+
+  <div class="equation-box glow-card">
+    <div class="eq-label">Overall Equation of Photosynthesis</div>
+    <div class="eq-formula">
+      <span class="reactant">6CO&#8322; + 6H&#8322;O</span>
+      <span class="energy"> + Light Energy </span>
+      <span class="arrow">&#8594;</span>
+      <span class="catalyst">[Chlorophyll]</span>
+      <span class="arrow">&#8594;</span>
+      <span class="product">C&#8326;H&#8321;&#8322;O&#8326; + 6O&#8322;</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-structure" onclick="switchTab('structure')">&#127807; Plastid Structure</button>
+    <button class="tab-btn" id="tab-light"     onclick="switchTab('light')">&#9728;&#65039; Light Reactions</button>
+    <button class="tab-btn" id="tab-calvin"    onclick="switchTab('calvin')">&#128260; Calvin Cycle</button>
+    <button class="tab-btn" id="tab-types"     onclick="switchTab('types')">&#127912; Types of Plastids</button>
+    <button class="tab-btn" id="tab-quiz"      onclick="switchTab('quiz')">&#129504; Quiz</button>
+  </div>
+
+  <!-- TAB 1: STRUCTURE -->
+  <div class="tab-panel active" id="panel-structure">
+    <div class="card">
+      <div class="section-title">Chloroplast Cross-Section</div>
+      <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:12px;">Hover over any part to learn more. Use controls to highlight layers.</p>
+      <div class="controls" style="margin-bottom:14px;">
+        <button class="ctrl-btn active" id="btn-anim" onclick="toggleAnim()">&#9208;&#65039; Pause</button>
+        <button class="ctrl-btn" onclick="highlightLayer('outer')">Outer Membrane</button>
+        <button class="ctrl-btn" onclick="highlightLayer('inner')">Inner Membrane</button>
+        <button class="ctrl-btn" onclick="highlightLayer('stroma')">Stroma</button>
+        <button class="ctrl-btn" onclick="highlightLayer('thylakoid')">Thylakoids/Grana</button>
+        <button class="ctrl-btn" onclick="highlightLayer('none')">&#128260; Reset</button>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="chloroplastCanvas" width="900" height="500"></canvas>
+      </div>
+      <div id="structure-tooltip" style="margin-top:12px; padding:12px 16px; background:rgba(0,0,0,0.45); border:1px solid var(--border); border-radius:12px; font-size:0.82rem; color:var(--text-dim); min-height:44px;">
+        &#128070; Hover over the chloroplast diagram to identify parts.
+      </div>
+    </div>
+    <div class="info-grid">
+      <div class="info-tile"><div class="icon">&#129001;</div><h3>Outer Membrane</h3><p>Smooth, permeable to small molecules. Forms the outer boundary of the chloroplast.</p></div>
+      <div class="info-tile"><div class="icon">&#128154;</div><h3>Inner Membrane</h3><p>Less permeable. Contains transporter proteins controlling which molecules enter/exit the stroma.</p></div>
+      <div class="info-tile"><div class="icon">&#127754;</div><h3>Stroma</h3><p>Fluid-filled matrix inside inner membrane. Contains Calvin Cycle enzymes, circular DNA, ribosomes, starch granules.</p></div>
+      <div class="info-tile"><div class="icon">&#128218;</div><h3>Grana (Thylakoid Stacks)</h3><p>Stacked disc-like thylakoid membranes. Each stack = a granum. Light reactions occur here.</p></div>
+      <div class="info-tile"><div class="icon">&#128167;</div><h3>Thylakoid Lumen</h3><p>Inner fluid space of thylakoids. H&#8314; ions accumulate here during light reactions to drive ATP synthesis.</p></div>
+      <div class="info-tile"><div class="icon">&#127807;</div><h3>Chlorophyll</h3><p>Green pigment in thylakoid membranes. Absorbs red (~680nm) and blue (~430nm) light to power photosynthesis.</p></div>
+      <div class="info-tile"><div class="icon">&#128279;</div><h3>Stromal Lamellae</h3><p>Unstacked connecting membranes linking grana. Allow material flow between granum stacks.</p></div>
+      <div class="info-tile"><div class="icon">&#129516;</div><h3>Chloroplast DNA</h3><p>Circular DNA in the stroma. Evidence that chloroplasts evolved from ancient cyanobacteria (endosymbiosis).</p></div>
+    </div>
+  </div>
+
+  <!-- TAB 2: LIGHT REACTIONS -->
+  <div class="tab-panel" id="panel-light">
+    <div class="card">
+      <div class="section-title">Light-Dependent Reactions (Thylakoid Membrane)</div>
+      <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:12px;">Watch photons strike chlorophyll, electrons flow through the ETC, ATP and NADPH form, and O&#8322; is released.</p>
+      <div class="controls" style="margin-bottom:14px;">
+        <button class="ctrl-btn active" id="btn-light-anim" onclick="toggleLightAnim()">&#9208;&#65039; Pause</button>
+        <div class="slider-wrap">
+          <label>Light Intensity</label>
+          <input type="range" id="lightSlider" min="1" max="5" value="3" oninput="setLightIntensity(this.value)"/>
+          <span id="lightVal" style="font-size:0.78rem;color:var(--green);min-width:20px;">3</span>
+        </div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="lightCanvas" width="900" height="420"></canvas>
+      </div>
+      <div class="legend" style="margin-top:12px;">
+        <div class="legend-item"><div class="legend-dot" style="background:#FFD700;"></div> Photon (Light)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#60EFFF;"></div> Excited Electron</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#FF6B35;"></div> H&#8314; Proton</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#4488FF;"></div> O&#8322; Released</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ffd54f;"></div> ATP Synthesized</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#b5ff2f;"></div> NADPH Formed</div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="section-title">Step-by-Step: PS II to PS I</div>
+        <div class="step-list">
+          <div class="step-card"><div class="step-num">1</div><div><h4>Photon Absorption (PS II)</h4><p>Chlorophyll in Photosystem II absorbs a photon (~680nm). This excites an electron to a higher energy level.</p></div></div>
+          <div class="step-card"><div class="step-num">2</div><div><h4>Water Splitting (Photolysis)</h4><p>To replace the lost electron, water is split: 2H&#8322;O &#8594; 4H&#8314; + 4e&#8315; + O&#8322;. Oxygen is released as a byproduct!</p></div></div>
+          <div class="step-card"><div class="step-num">3</div><div><h4>Electron Transport Chain</h4><p>Excited electrons travel through Plastoquinone, Cytochrome b6f, Plastocyanin, pumping H&#8314; ions into the thylakoid lumen.</p></div></div>
+          <div class="step-card"><div class="step-num">4</div><div><h4>Photosystem I Re-energizes</h4><p>Electrons at PS I are re-excited by another photon (~700nm), then reduce NADP&#8314; to form NADPH.</p></div></div>
+          <div class="step-card"><div class="step-num">5</div><div><h4>ATP Synthesis (Chemiosmosis)</h4><p>H&#8314; ions flow back through ATP Synthase from the lumen to stroma (like a turbine), generating ATP from ADP + Pi.</p></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">Products of Light Reactions</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+          <div class="mol-badge"><div class="mol-count" id="atp-count">0</div><span style="color:var(--gold);font-weight:700;">ATP</span></div>
+          <div class="mol-badge"><div class="mol-count" id="nadph-count">0</div><span style="color:var(--lime);font-weight:700;">NADPH</span></div>
+          <div class="mol-badge"><div class="mol-count" id="o2-count">0</div><span style="color:#64b5f6;font-weight:700;">O&#8322;</span></div>
+        </div>
+        <div class="step-list">
+          <div class="info-tile"><h3>&#127752; Why Plants are Green?</h3><p>Chlorophyll absorbs Red (~680nm) and Blue (~430nm) light. It <strong>reflects green light</strong>, making leaves appear green.</p></div>
+          <div class="info-tile"><h3>&#128167; Photolysis of Water</h3><p>Every 2 water molecules split releases 1 O&#8322; molecule. All oxygen in Earth's atmosphere came from photolysis!</p></div>
+          <div class="info-tile"><h3>&#9889; Chemiosmosis</h3><p>Proton gradient across the thylakoid membrane drives ATP Synthase &mdash; the same mechanism as in mitochondria.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: CALVIN CYCLE -->
+  <div class="tab-panel" id="panel-calvin">
+    <div class="card">
+      <div class="section-title">Calvin Cycle &ndash; Light-Independent Reactions (Stroma)</div>
+      <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:12px;">The Calvin Cycle uses ATP and NADPH to fix CO&#8322; and build glucose. It occurs in the stroma.</p>
+      <div class="controls" style="margin-bottom:14px;">
+        <button class="ctrl-btn active" id="btn-calvin-anim" onclick="toggleCalvinAnim()">&#9208;&#65039; Pause</button>
+        <div class="slider-wrap">
+          <label>CO&#8322; Supply</label>
+          <input type="range" id="co2Slider" min="1" max="5" value="3" oninput="setCO2(this.value)"/>
+          <span id="co2Val" style="font-size:0.78rem;color:var(--blue);min-width:20px;">3</span>
+        </div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="calvinCanvas" width="900" height="460"></canvas>
+      </div>
+      <div class="legend" style="margin-top:12px;">
+        <div class="legend-item"><div class="legend-dot" style="background:#64b5f6;"></div> CO&#8322; (input)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ffd54f;"></div> ATP consumed</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#b5ff2f;"></div> NADPH consumed</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ff9800;"></div> G3P (glyceraldehyde-3-phosphate)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#4cff72;"></div> Glucose C&#8326;H&#8321;&#8322;O&#8326;</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ce93d8;"></div> RuBP (CO&#8322; acceptor)</div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="section-title">3 Stages of the Calvin Cycle</div>
+        <div class="step-list">
+          <div class="step-card"><div class="step-num">1</div><div><h4>Carbon Fixation</h4><p>CO&#8322; combines with RuBP (5-carbon) via enzyme RuBisCO to form two molecules of 3-PGA (3-phosphoglycerate).</p></div></div>
+          <div class="step-card"><div class="step-num">2</div><div><h4>Reduction</h4><p>3-PGA is reduced using ATP and NADPH to form G3P (glyceraldehyde-3-phosphate), the direct sugar building block.</p></div></div>
+          <div class="step-card"><div class="step-num">3</div><div><h4>Regeneration of RuBP</h4><p>Most G3P molecules are used (with ATP) to regenerate RuBP so the cycle continues. 1 in 6 G3P exits to form glucose.</p></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">Accounting (per 1 Glucose)</div>
+        <div class="step-list">
+          <div class="step-card"><div class="step-num">&#8595;</div><div><h4>Input: 6 CO&#8322;</h4><p>Six carbon dioxide molecules are fixed. Each cycle turn fixes 1 CO&#8322;, so 6 turns = 1 glucose.</p></div></div>
+          <div class="step-card"><div class="step-num">&#8595;</div><div><h4>Input: 18 ATP + 12 NADPH</h4><p>These high-energy molecules from light reactions power the reduction and RuBP regeneration stages.</p></div></div>
+          <div class="step-card"><div class="step-num">&#8593;</div><div><h4>Output: 1 Glucose (C&#8326;H&#8321;&#8322;O&#8326;)</h4><p>Two G3P molecules combine and rearrange to form one glucose molecule &mdash; food for the plant!</p></div></div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+          <div class="mol-badge"><span style="font-size:0.7rem;color:var(--text-dim);">CO&#8322; fixed</span><div class="mol-count" id="co2-fixed">0</div></div>
+          <div class="mol-badge"><span style="font-size:0.7rem;color:var(--text-dim);">G3P made</span><div class="mol-count" id="g3p-count">0</div></div>
+          <div class="mol-badge"><span style="font-size:0.7rem;color:var(--text-dim);">Glucose</span><div class="mol-count" id="glucose-count">0</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: TYPES OF PLASTIDS -->
+  <div class="tab-panel" id="panel-types">
+    <div class="card">
+      <div class="section-title">Types of Plastids</div>
+      <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:12px;">Plastids are organelles found only in plant cells and algae. Three main types based on pigment and function.</p>
+      <div class="canvas-wrap">
+        <canvas id="typesCanvas" width="900" height="340"></canvas>
+      </div>
+    </div>
+    <div class="info-grid">
+      <div class="info-tile" style="border-color:rgba(76,255,114,0.4);"><div class="icon">&#127807;</div><h3 style="color:var(--green);">Chloroplasts</h3><p>Contain <strong>chlorophyll</strong> (green pigment). Found in leaves. Carry out photosynthesis. Most important plastid.</p></div>
+      <div class="info-tile" style="border-color:rgba(255,152,0,0.4);"><div class="icon">&#127800;</div><h3 style="color:var(--orange);">Chromoplasts</h3><p>Contain <strong>carotenoids</strong> (red, orange, yellow). Found in flowers, fruits, roots. Attract pollinators.</p></div>
+      <div class="info-tile" style="border-color:rgba(200,200,200,0.3);"><div class="icon">&#11036;</div><h3 style="color:#ddd;">Leucoplasts</h3><p>Colourless plastids. Store food: <strong>amyloplasts</strong> store starch, <strong>elaioplasts</strong> store oils, <strong>aleuroplasts</strong> store proteins.</p></div>
+      <div class="info-tile"><div class="icon">&#128260;</div><h3>Interconversion</h3><p>Plastids can convert between types. Tomatoes ripening: chloroplasts &#8594; chromoplasts (green &#8594; red). Potato in light: leucoplasts &#8594; chloroplasts.</p></div>
+      <div class="info-tile"><div class="icon">&#129516;</div><h3>Endosymbiotic Origin</h3><p>Chloroplasts evolved from ancient cyanobacteria engulfed ~1.5 billion years ago. Evidence: double membrane, own DNA, own ribosomes.</p></div>
+      <div class="info-tile"><div class="icon">&#128207;</div><h3>Size and Number</h3><p>Chloroplasts are 4&ndash;10 &#956;m long. A single cell may have 10&ndash;100 chloroplasts. They move to maximize light capture.</p></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Chlorophyll Absorption Spectrum</div>
+      <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:12px;">Chlorophyll a and b absorb specific wavelengths of light. Green light is reflected, making plants appear green.</p>
+      <div class="canvas-wrap">
+        <canvas id="spectrumCanvas" width="900" height="270"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: QUIZ -->
+  <div class="tab-panel" id="panel-quiz">
+    <div class="card">
+      <div class="section-title">Test Your Knowledge</div>
+      <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:16px;">Answer all 8 questions about plastids and photosynthesis.</p>
+      <div id="quiz-area"></div>
+      <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
+        <button class="ctrl-btn" id="quiz-next-btn" onclick="nextQuestion()" style="display:none;">Next Question &#8594;</button>
+        <button class="ctrl-btn" id="quiz-restart-btn" onclick="startQuiz()" style="display:none;">&#128260; Restart</button>
+        <span id="quiz-score-display" style="font-size:0.84rem;color:var(--text-dim);"></span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer style="padding:20px;text-align:center;font-size:0.75rem;color:var(--text-dim);border-top:1px solid var(--border);width:100%;margin-top:10px;">
+  &#127807; Plastids &amp; Photosynthesis Simulation &middot; Class 9 Science &middot; STC &middot; Scientifically Accurate Educational Tool
+</footer>
+
+<script>
+/* ==============================
+   UTILITY FUNCTIONS
+   ============================== */
+function lerp(a,b,t){ return a+(b-a)*t; }
+function rand(a,b){ return a+Math.random()*(b-a); }
+
+/* ==============================
+   TAB SWITCHING
+   ============================== */
+const panels=['structure','light','calvin','types','quiz'];
+function switchTab(id){
+  panels.forEach(p=>{
+    document.getElementById('panel-'+p).classList.toggle('active',p===id);
+    document.getElementById('tab-'+p).classList.toggle('active',p===id);
+  });
+  if(id==='types'){ drawTypesCanvas(); drawSpectrumCanvas(); }
+  if(id==='quiz') startQuiz();
+}
+
+/* ==============================
+   TAB 1: CHLOROPLAST STRUCTURE
+   ============================== */
+const csCanvas=document.getElementById('chloroplastCanvas');
+const csCtx=csCanvas.getContext('2d');
+let csAnimId, csRunning=true, csT=0, csHighlight='none', csHoverRegion=null;
+const csRegions=[];
+
+const regionInfo={
+  outer:{label:'Outer Membrane',desc:'Smooth, permeable double membrane. Outer boundary of the chloroplast. Allows free passage of small molecules and ions.'},
+  inner:{label:'Inner Membrane',desc:'Selectively permeable membrane with specific transporter proteins. Regulates which molecules enter and exit the stroma.'},
+  stroma:{label:'Stroma',desc:'Jelly-like fluid matrix inside the inner membrane. Contains Calvin Cycle enzymes, circular chloroplast DNA, 70S ribosomes, and starch granules.'},
+  granum:{label:'Granum (Thylakoid Stack)',desc:'A stack of flattened membrane discs (thylakoids). Chlorophyll is embedded in thylakoid membranes. Light reactions occur here.'},
+  thylakoid:{label:'Thylakoid Membrane',desc:'Each thylakoid is a flattened disc-like membrane sac. Contains chlorophyll, carotenoids, and protein complexes: PS I, PS II, Cytochrome b6f, ATP Synthase.'},
+  lumen:{label:'Thylakoid Lumen',desc:'Inner aqueous space of the thylakoid. H+ ions accumulate here during light reactions. The proton gradient drives ATP synthesis via chemiosmosis.'},
+  lamella:{label:'Stromal Lamella',desc:'Unstacked thylakoid membranes connecting different grana. Allow material exchange between granum stacks.'},
+  dna:{label:'Chloroplast DNA (cpDNA)',desc:'Circular DNA similar to bacterial DNA. Proves chloroplasts evolved from cyanobacteria by endosymbiosis. Encodes ~100 chloroplast proteins.'},
+  ribosome:{label:'70S Ribosomes',desc:'Prokaryote-type ribosomes present in the stroma. Synthesize proteins encoded by chloroplast DNA, supporting the endosymbiosis theory.'},
+  starch:{label:'Starch Granule',desc:'Temporary storage of glucose produced by the Calvin Cycle. Excess glucose is polymerized into starch within the stroma for later use.'},
+};
+
+function highlightLayer(layer){ csHighlight=layer; }
+
+function drawChloroplast(){
+  const W=csCanvas.width,H=csCanvas.height;
+  csCtx.clearRect(0,0,W,H);
+  csRegions.length=0;
+
+  const cx=W*0.5,cy=H*0.5;
+  const rx=W*0.43,ry=H*0.38;
+
+  // Background atmosphere
+  const bgG=csCtx.createRadialGradient(cx,cy,10,cx,cy,Math.max(W,H)*0.6);
+  bgG.addColorStop(0,'rgba(10,50,15,0.08)');
+  bgG.addColorStop(1,'rgba(2,10,4,0.0)');
+  csCtx.fillStyle=bgG; csCtx.fillRect(0,0,W,H);
+
+  // ── OUTER MEMBRANE ──
+  const outerHL=csHighlight==='outer';
+  csCtx.save();
+  if(outerHL){csCtx.shadowBlur=25;csCtx.shadowColor='#4cff72';}
+  const outerGrad=csCtx.createRadialGradient(cx,cy,ry*0.5,cx,cy,rx+16);
+  outerGrad.addColorStop(0,'rgba(15,55,18,0.18)');
+  outerGrad.addColorStop(1,'rgba(5,25,8,0.3)');
+  csCtx.beginPath();csCtx.ellipse(cx,cy,rx+14,ry+14,0,0,Math.PI*2);
+  csCtx.fillStyle=outerGrad;csCtx.fill();
+  csCtx.strokeStyle=outerHL?'#4cff72':'rgba(76,255,114,0.7)';
+  csCtx.lineWidth=outerHL?3.5:2;csCtx.stroke();
+  csCtx.restore();
+  csRegions.push({type:'outer',test:(px,py)=>
+    Math.pow((px-cx)/(rx+14),2)+Math.pow((py-cy)/(ry+14),2)<=1
+    &&Math.pow((px-cx)/(rx+2),2)+Math.pow((py-cy)/(ry+2),2)>1});
+
+  // ── INNER MEMBRANE ──
+  const innerHL=csHighlight==='inner';
+  csCtx.save();
+  if(innerHL){csCtx.shadowBlur=18;csCtx.shadowColor='#00e5c8';}
+  csCtx.beginPath();csCtx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);
+  csCtx.strokeStyle=innerHL?'#00e5c8':'rgba(0,229,200,0.75)';
+  csCtx.lineWidth=innerHL?3:2;csCtx.stroke();
+  csCtx.restore();
+  csRegions.push({type:'inner',test:(px,py)=>
+    Math.pow((px-cx)/rx,2)+Math.pow((py-cy)/ry,2)<=1
+    &&Math.pow((px-cx)/(rx-12),2)+Math.pow((py-cy)/(ry-12),2)>1});
+
+  // ── STROMA FILL ──
+  const stromaHL=csHighlight==='stroma';
+  csCtx.save();
+  const stromaGrad=csCtx.createRadialGradient(cx,cy,10,cx,cy,rx);
+  stromaGrad.addColorStop(0,stromaHL?'rgba(30,100,35,0.55)':'rgba(18,65,22,0.38)');
+  stromaGrad.addColorStop(1,stromaHL?'rgba(10,50,14,0.45)':'rgba(6,28,9,0.28)');
+  csCtx.beginPath();csCtx.ellipse(cx,cy,rx-12,ry-12,0,0,Math.PI*2);
+  csCtx.fillStyle=stromaGrad;csCtx.fill();
+  csCtx.restore();
+  csRegions.push({type:'stroma',test:(px,py)=>
+    Math.pow((px-cx)/(rx-12),2)+Math.pow((py-cy)/(ry-12),2)<=1});
+
+  // ── GRANA ──
+  const granaPos=[
+    {x:cx-rx*0.36,y:cy-ry*0.05},
+    {x:cx+rx*0.04,y:cy+ry*0.1},
+    {x:cx+rx*0.36,y:cy-ry*0.05},
+  ];
+  const numT=5,tW=70,tH=10,tGap=3;
+  const totalH=numT*(tH+tGap)-tGap;
+  const thlHL=csHighlight==='thylakoid';
+
+  granaPos.forEach((g,gi)=>{
+    // Stromal lamellae
+    if(gi<granaPos.length-1){
+      const g2=granaPos[gi+1];
+      csCtx.save();
+      csCtx.setLineDash([5,4]);
+      csCtx.beginPath();
+      csCtx.moveTo(g.x+tW/2,g.y);csCtx.lineTo(g2.x-tW/2,g2.y);
+      csCtx.strokeStyle='rgba(0,229,200,0.3)';csCtx.lineWidth=2;csCtx.stroke();
+      csCtx.setLineDash([]);csCtx.restore();
+      // lamella hover region
+      const lx1=g.x+tW/2,ly1=g.y,lx2=g2.x-tW/2,ly2=g2.y;
+      csRegions.push({type:'lamella',test:(px,py)=>{
+        const dx=lx2-lx1,dy=ly2-ly1,len=Math.hypot(dx,dy);
+        const t2=Math.max(0,Math.min(1,((px-lx1)*dx+(py-ly1)*dy)/(len*len)));
+        return Math.hypot(px-(lx1+t2*dx),py-(ly1+t2*dy))<9;
+      }});
+    }
+
+    // Thylakoid discs
+    for(let t=0;t<numT;t++){
+      const ty=g.y-totalH/2+t*(tH+tGap);
+      const tGrad=csCtx.createLinearGradient(g.x-tW/2,ty,g.x-tW/2,ty+tH);
+      if(thlHL){
+        tGrad.addColorStop(0,'rgba(76,255,114,0.75)');
+        tGrad.addColorStop(0.5,'rgba(30,180,60,0.9)');
+        tGrad.addColorStop(1,'rgba(76,255,114,0.75)');
+      } else {
+        tGrad.addColorStop(0,'rgba(45,150,55,0.65)');
+        tGrad.addColorStop(0.5,'rgba(25,100,35,0.85)');
+        tGrad.addColorStop(1,'rgba(45,150,55,0.65)');
+      }
+      csCtx.save();
+      if(thlHL){csCtx.shadowBlur=10;csCtx.shadowColor='#4cff72';}
+      csCtx.beginPath();csCtx.roundRect(g.x-tW/2,ty,tW,tH,5);
+      csCtx.fillStyle=tGrad;csCtx.fill();
+      csCtx.strokeStyle=thlHL?'#4cff72':'rgba(100,220,120,0.55)';
+      csCtx.lineWidth=thlHL?1.5:1;csCtx.stroke();
+      // lumen space
+      csCtx.beginPath();csCtx.roundRect(g.x-tW/2+5,ty+2,tW-10,tH-4,3);
+      csCtx.fillStyle='rgba(180,255,200,0.07)';csCtx.fill();
+      csCtx.restore();
+      csRegions.push({type:'thylakoid',test:(px,py)=>px>=g.x-tW/2&&px<=g.x+tW/2&&py>=ty&&py<=ty+tH});
+      csRegions.push({type:'lumen',test:(px,py)=>px>=g.x-tW/2+5&&px<=g.x+tW/2-5&&py>=ty+2&&py<=ty+tH-2});
+    }
+
+    // Granum label
+    csCtx.save();csCtx.font='bold 9px Outfit,sans-serif';
+    csCtx.fillStyle=thlHL?'#4cff72':'rgba(160,255,180,0.55)';
+    csCtx.textAlign='center';
+    csCtx.fillText('GRANUM '+(gi+1),g.x,g.y+totalH/2+16);
+    csCtx.restore();
+    csRegions.push({type:'granum',test:(px,py)=>
+      px>=g.x-tW/2&&px<=g.x+tW/2&&py>=g.y-totalH/2-5&&py<=g.y+totalH/2+22});
+
+    // Animated chlorophyll dots on membranes
+    for(let t=0;t<numT;t++){
+      const ty=g.y-totalH/2+t*(tH+tGap);
+      const numDots=6;
+      for(let d=0;d<numDots;d++){
+        const dx=g.x-tW/2+8+(d/numDots)*tW*0.85;
+        const dy=ty+tH*0.5;
+        const pulse=(Math.sin(csT*1.5+d*0.8+gi*1.2)+1)*0.5;
+        csCtx.save();
+        csCtx.beginPath();csCtx.arc(dx,dy,2,0,Math.PI*2);
+        csCtx.fillStyle=`rgba(76,255,114,${0.35+pulse*0.45})`;
+        if(pulse>0.75){csCtx.shadowBlur=8;csCtx.shadowColor='#4cff72';}
+        csCtx.fill();csCtx.restore();
+      }
+    }
+  });
+
+  // ── CHLOROPLAST DNA ──
+  const dnaPos={x:cx-rx*0.5,y:cy+ry*0.32};
+  csCtx.save();
+  csCtx.beginPath();csCtx.arc(dnaPos.x,dnaPos.y,14,0,Math.PI*2);
+  csCtx.strokeStyle='rgba(206,147,216,0.85)';csCtx.lineWidth=2.5;
+  csCtx.setLineDash([3,2]);csCtx.stroke();csCtx.setLineDash([]);
+  csCtx.font='8px Outfit,sans-serif';csCtx.fillStyle='rgba(206,147,216,0.85)';
+  csCtx.textAlign='center';csCtx.fillText('cpDNA',dnaPos.x,dnaPos.y+26);
+  csCtx.restore();
+  csRegions.push({type:'dna',test:(px,py)=>Math.hypot(px-dnaPos.x,py-dnaPos.y)<20});
+
+  // ── RIBOSOMES ──
+  [{x:cx-rx*0.25,y:cy+ry*0.38},{x:cx+rx*0.12,y:cy+ry*0.42},{x:cx+rx*0.42,y:cy+ry*0.3}].forEach(r=>{
+    csCtx.save();csCtx.beginPath();csCtx.arc(r.x,r.y,4,0,Math.PI*2);
+    csCtx.fillStyle='rgba(255,215,79,0.75)';csCtx.fill();csCtx.restore();
+    csRegions.push({type:'ribosome',test:(px,py)=>Math.hypot(px-r.x,py-r.y)<8});
+  });
+
+  // ── STARCH GRANULES ──
+  [{x:cx+rx*0.26,y:cy+ry*0.38},{x:cx-rx*0.12,y:cy-ry*0.38}].forEach(s=>{
+    csCtx.save();
+    csCtx.beginPath();csCtx.ellipse(s.x,s.y,11,8,0.3,0,Math.PI*2);
+    csCtx.fillStyle='rgba(255,236,170,0.45)';
+    csCtx.strokeStyle='rgba(255,215,79,0.4)';csCtx.lineWidth=1;
+    csCtx.fill();csCtx.stroke();csCtx.restore();
+    csRegions.push({type:'starch',test:(px,py)=>Math.pow((px-s.x)/13,2)+Math.pow((py-s.y)/10,2)<=1});
+  });
+
+  // ── LABELS ──
+  const labels=[
+    {x:cx,y:cy-ry-28,text:'Outer Membrane',color:'rgba(76,255,114,0.9)'},
+    {x:cx,y:cy-ry-11,text:'Inner Membrane',color:'rgba(0,229,200,0.9)'},
+    {x:cx+rx*0.62,y:cy-ry*0.52,text:'Stroma',color:'rgba(180,255,200,0.65)'},
+    {x:cx+rx*0.7,y:cy+ry*0.45,text:'Ribosomes (70S)',color:'rgba(255,215,79,0.7)'},
+    {x:cx+rx*0.3,y:cy+ry*0.55,text:'Starch Granule',color:'rgba(255,236,170,0.6)'},
+    {x:cx-rx*0.62,y:cy-ry*0.52,text:'Grana',color:'rgba(100,255,130,0.75)'},
+    {x:cx-rx*0.8,y:cy+ry*0.2,text:'cpDNA',color:'rgba(206,147,216,0.8)'},
+  ];
+  labels.forEach(l=>{
+    csCtx.save();csCtx.font='11px Outfit,sans-serif';
+    csCtx.fillStyle=l.color;csCtx.textAlign='center';
+    csCtx.fillText(l.text,l.x,l.y);csCtx.restore();
+  });
+
+  // Hover tooltip
+  const tip=document.getElementById('structure-tooltip');
+  if(csHoverRegion&&regionInfo[csHoverRegion]){
+    const info=regionInfo[csHoverRegion];
+    tip.innerHTML='<strong style="color:var(--green)">'+info.label+'</strong>: '+info.desc;
+  }
+}
+
+function animateCS(){ csT+=0.018; drawChloroplast(); csAnimId=requestAnimationFrame(animateCS); }
+function toggleAnim(){
+  csRunning=!csRunning;
+  const btn=document.getElementById('btn-anim');
+  if(csRunning){animateCS();btn.textContent='\u23F8\uFE0F Pause';btn.classList.add('active');}
+  else{cancelAnimationFrame(csAnimId);btn.textContent='\u25B6 Play';btn.classList.remove('active');}
+}
+animateCS();
+
+csCanvas.addEventListener('mousemove',e=>{
+  const rect=csCanvas.getBoundingClientRect();
+  const sx=csCanvas.width/rect.width,sy=csCanvas.height/rect.height;
+  const mx=(e.clientX-rect.left)*sx,my=(e.clientY-rect.top)*sy;
+  let found=null;
+  for(let i=csRegions.length-1;i>=0;i--){
+    if(csRegions[i].test(mx,my)){found=csRegions[i].type;break;}
+  }
+  csHoverRegion=found;
+  if(!found) document.getElementById('structure-tooltip').innerHTML='&#128070; Hover over the chloroplast diagram to identify parts.';
+});
+
+/* ==============================
+   TAB 2: LIGHT REACTIONS
+   ============================== */
+const lcCanvas=document.getElementById('lightCanvas');
+const lcCtx=lcCanvas.getContext('2d');
+let lcAnimId,lcRunning=true,lcT=0,lcIntensity=3;
+let atpCount=0,nadphCount=0,o2Count=0;
+const photons=[],electrons=[],protons=[],oxygens=[];
+let lastPhotonT=0,lastElecT=0,lastProtonT=0,lastO2T=0;
+
+function setLightIntensity(v){lcIntensity=parseInt(v);document.getElementById('lightVal').textContent=v;}
+function toggleLightAnim(){
+  lcRunning=!lcRunning;
+  const btn=document.getElementById('btn-light-anim');
+  if(lcRunning){animateLC();btn.textContent='\u23F8\uFE0F Pause';btn.classList.add('active');}
+  else{cancelAnimationFrame(lcAnimId);btn.textContent='\u25B6 Play';btn.classList.remove('active');}
+}
+
+function drawLightReactions(){
+  const W=lcCanvas.width,H=lcCanvas.height;
+  lcCtx.clearRect(0,0,W,H);
+  const mY=H*0.5,memH=44;
+
+  // Stroma zone
+  lcCtx.fillStyle='rgba(15,55,20,0.18)';
+  lcCtx.fillRect(0,0,W,mY-memH/2);
+  lcCtx.font='13px Outfit,sans-serif';lcCtx.fillStyle='rgba(100,200,120,0.45)';
+  lcCtx.fillText('STROMA',14,22);
+
+  // Lumen zone
+  lcCtx.fillStyle='rgba(0,40,25,0.3)';
+  lcCtx.fillRect(0,mY+memH/2,W,H-mY-memH/2);
+  lcCtx.font='13px Outfit,sans-serif';lcCtx.fillStyle='rgba(0,200,160,0.45)';
+  lcCtx.fillText('THYLAKOID LUMEN (H\u207A accumulates here)',14,H-14);
+
+  // Membrane
+  const memGrad=lcCtx.createLinearGradient(0,mY-memH/2,0,mY+memH/2);
+  memGrad.addColorStop(0,'rgba(45,150,55,0.6)');
+  memGrad.addColorStop(0.5,'rgba(25,100,35,0.9)');
+  memGrad.addColorStop(1,'rgba(45,150,55,0.6)');
+  lcCtx.fillStyle=memGrad;lcCtx.fillRect(0,mY-memH/2,W,memH);
+  lcCtx.strokeStyle='rgba(76,255,114,0.35)';lcCtx.lineWidth=1;
+  lcCtx.strokeRect(0,mY-memH/2,W,memH);
+  lcCtx.font='9px Outfit,sans-serif';lcCtx.fillStyle='rgba(150,255,180,0.4)';
+  lcCtx.textAlign='center';lcCtx.fillText('THYLAKOID MEMBRANE (Chlorophyll embedded here)',W/2,mY+5);
+
+  // Protein complexes
+  const complexes=[
+    {x:W*0.13,label:'PS II',sub:'P680',color:'#4cff72'},
+    {x:W*0.32,label:'Cyt b6f',sub:'PQ\u2192PC',color:'#00e5c8'},
+    {x:W*0.52,label:'PS I',sub:'P700',color:'#64b5f6'},
+    {x:W*0.70,label:'FNR',sub:'\u2192NADPH',color:'#b5ff2f'},
+    {x:W*0.87,label:'ATP Syn',sub:'CF\u2080CF\u2081',color:'#ffd54f'},
+  ];
+  complexes.forEach(c=>{
+    lcCtx.save();
+    lcCtx.shadowBlur=12;lcCtx.shadowColor=c.color;
+    const cGrad=lcCtx.createLinearGradient(c.x-24,mY-22,c.x+24,mY+22);
+    cGrad.addColorStop(0,c.color+'28');cGrad.addColorStop(0.5,c.color+'80');cGrad.addColorStop(1,c.color+'28');
+    lcCtx.fillStyle=cGrad;
+    lcCtx.beginPath();lcCtx.roundRect(c.x-24,mY-24,48,48,8);lcCtx.fill();
+    lcCtx.strokeStyle=c.color;lcCtx.lineWidth=1.5;lcCtx.stroke();
+    lcCtx.fillStyle='#ffffff';lcCtx.font='bold 9px Outfit,sans-serif';
+    lcCtx.textAlign='center';lcCtx.fillText(c.label,c.x,mY-9);
+    lcCtx.fillStyle=c.color+'cc';lcCtx.font='8px Outfit,sans-serif';
+    lcCtx.fillText(c.sub,c.x,mY+5);
+    lcCtx.restore();
+  });
+
+  // Water splitting below PS II
+  lcCtx.save();lcCtx.font='10px Outfit,sans-serif';
+  lcCtx.fillStyle='rgba(100,180,255,0.75)';lcCtx.textAlign='center';
+  lcCtx.fillText('2H\u2082O \u2192 4H\u207A + 4e\u207B + O\u2082',W*0.13,mY+memH/2+20);
+  lcCtx.restore();
+
+  // ETC arrows
+  [[W*0.13+24,W*0.32-24,'e\u207B'],[W*0.32+24,W*0.52-24,'e\u207B'],[W*0.52+24,W*0.70-24,'e\u207B']].forEach(([x1,x2,lbl])=>{
+    lcCtx.save();lcCtx.setLineDash([4,3]);
+    lcCtx.beginPath();lcCtx.moveTo(x1,mY);lcCtx.lineTo(x2,mY);
+    lcCtx.strokeStyle='rgba(100,230,255,0.45)';lcCtx.lineWidth=2;lcCtx.stroke();
+    lcCtx.setLineDash([]);
+    const ang=0;lcCtx.translate(x2,mY);lcCtx.rotate(ang);
+    lcCtx.beginPath();lcCtx.moveTo(-8,-4);lcCtx.lineTo(0,0);lcCtx.lineTo(-8,4);
+    lcCtx.strokeStyle='rgba(100,230,255,0.7)';lcCtx.stroke();
+    lcCtx.restore();
+    lcCtx.font='9px Outfit,sans-serif';lcCtx.fillStyle='rgba(100,230,255,0.6)';
+    lcCtx.textAlign='center';lcCtx.fillText(lbl,(x1+x2)/2,mY-10);
+  });
+
+  // H+ pumping down (Cyt b6f)
+  for(let i=0;i<3;i++){
+    const ay=mY+memH/2+10+i*14;
+    const pulse=(Math.sin(lcT*2+i*1.2)+1)/2;
+    lcCtx.save();
+    lcCtx.beginPath();lcCtx.moveTo(W*0.32,ay-6);lcCtx.lineTo(W*0.32,ay+6);
+    lcCtx.strokeStyle=`rgba(255,107,53,${0.3+pulse*0.6})`;lcCtx.lineWidth=2;lcCtx.stroke();
+    lcCtx.beginPath();lcCtx.moveTo(W*0.32-4,ay+2);lcCtx.lineTo(W*0.32,ay+6);lcCtx.lineTo(W*0.32+4,ay+2);
+    lcCtx.strokeStyle=`rgba(255,107,53,${0.4+pulse*0.5})`;lcCtx.stroke();
+    lcCtx.restore();
+  }
+  lcCtx.font='9px Outfit,sans-serif';lcCtx.fillStyle='rgba(255,107,53,0.65)';
+  lcCtx.textAlign='center';lcCtx.fillText('H\u207A',W*0.32+16,mY+memH/2+30);
+
+  // H+ flowing through ATP Synthase (upward)
+  const asX=W*0.87;
+  for(let i=0;i<3;i++){
+    const ay=mY+memH/2+40-i*14;
+    const pulse=(Math.sin(lcT*2.5-i*1.4)+1)/2;
+    lcCtx.save();
+    lcCtx.beginPath();lcCtx.moveTo(asX,ay+6);lcCtx.lineTo(asX,ay-6);
+    lcCtx.strokeStyle=`rgba(255,213,79,${0.3+pulse*0.6})`;lcCtx.lineWidth=2;lcCtx.stroke();
+    lcCtx.beginPath();lcCtx.moveTo(asX-4,ay-2);lcCtx.lineTo(asX,ay-6);lcCtx.lineTo(asX+4,ay-2);
+    lcCtx.strokeStyle=`rgba(255,213,79,${0.4+pulse*0.5})`;lcCtx.stroke();
+    lcCtx.restore();
+  }
+  lcCtx.font='9px Outfit,sans-serif';lcCtx.fillStyle='rgba(255,213,79,0.65)';
+  lcCtx.textAlign='center';lcCtx.fillText('H\u207A\u2192ATP',asX,mY-memH/2-14);
+
+  // ── PHOTONS ──
+  if(lcRunning&&lcT-lastPhotonT>1.1/lcIntensity){
+    lastPhotonT=lcT;
+    photons.push({x:W*0.13+(Math.random()-0.5)*W*0.28,y:0,vy:2.2+Math.random()*1.8,
+      color:Math.random()<0.5?'#FFD700':'#FFA500',life:1});
+  }
+  photons.forEach((p,i)=>{
+    p.y+=p.vy;p.life-=0.009;
+    if(p.y>mY-memH/2-4||p.life<=0){photons.splice(i,1);return;}
+    lcCtx.save();lcCtx.shadowBlur=16;lcCtx.shadowColor=p.color;
+    lcCtx.beginPath();lcCtx.arc(p.x,p.y,4,0,Math.PI*2);
+    lcCtx.fillStyle=p.color+Math.floor(p.life*255).toString(16).padStart(2,'0');lcCtx.fill();
+    for(let r=0;r<6;r++){
+      const ang=r*Math.PI/3+lcT*2;
+      lcCtx.beginPath();lcCtx.moveTo(p.x,p.y);
+      lcCtx.lineTo(p.x+Math.cos(ang)*8,p.y+Math.sin(ang)*8);
+      lcCtx.strokeStyle=p.color+'50';lcCtx.lineWidth=1;lcCtx.stroke();
+    }
+    lcCtx.restore();
+  });
+
+  // ── ELECTRONS ──
+  if(lcRunning&&lcT-lastElecT>0.75/lcIntensity){
+    lastElecT=lcT;electrons.push({x:W*0.13+24,y:mY,t:0,life:1});
+  }
+  const stops=[W*0.13+24,W*0.32,W*0.52,W*0.70];
+  electrons.forEach((e,i)=>{
+    e.t+=0.014*lcIntensity;e.life-=0.005;
+    const seg=Math.min(Math.floor(e.t*3),2);
+    const prog=(e.t*3)%1;
+    e.x=lerp(stops[seg],stops[seg+1]||stops[seg],prog);
+    e.y=mY+Math.sin(e.t*12)*4;
+    if(e.t>=1||e.life<=0){electrons.splice(i,1);nadphCount++;document.getElementById('nadph-count').textContent=nadphCount;return;}
+    lcCtx.save();lcCtx.shadowBlur=14;lcCtx.shadowColor='#60EFFF';
+    lcCtx.beginPath();lcCtx.arc(e.x,e.y,4,0,Math.PI*2);
+    lcCtx.fillStyle=`rgba(96,239,255,${e.life})`;lcCtx.fill();lcCtx.restore();
+  });
+
+  // ── PROTONS ──
+  if(lcRunning&&lcT-lastProtonT>0.55/lcIntensity){
+    lastProtonT=lcT;
+    protons.push({x:W*0.32+(Math.random()-0.5)*30,y:mY+memH/2,vy:1.8,life:1});
+  }
+  protons.forEach((p,i)=>{
+    p.y+=p.vy;p.life-=0.016;
+    if(p.life<=0){protons.splice(i,1);atpCount++;document.getElementById('atp-count').textContent=atpCount;return;}
+    lcCtx.save();lcCtx.beginPath();lcCtx.arc(p.x,p.y,3,0,Math.PI*2);
+    lcCtx.fillStyle=`rgba(255,107,53,${p.life})`;lcCtx.fill();lcCtx.restore();
+  });
+
+  // ── O2 ──
+  if(lcRunning&&lcT-lastO2T>2.2/lcIntensity){
+    lastO2T=lcT;
+    oxygens.push({x:W*0.13+(Math.random()-0.5)*35,y:mY+memH/2+8,
+      vx:(Math.random()-0.5)*1.8,vy:-2.2,life:1});
+  }
+  oxygens.forEach((o,i)=>{
+    o.x+=o.vx;o.y+=o.vy;o.life-=0.013;
+    if(o.life<=0){oxygens.splice(i,1);o2Count++;document.getElementById('o2-count').textContent=o2Count;return;}
+    lcCtx.save();lcCtx.font=`bold ${10+4*o.life}px Outfit,sans-serif`;
+    lcCtx.fillStyle=`rgba(100,180,255,${o.life})`;lcCtx.textAlign='center';
+    lcCtx.fillText('O\u2082',o.x,o.y);lcCtx.restore();
+  });
+
+  // Sun label
+  lcCtx.save();
+  const sp=0.7+0.3*Math.sin(lcT*1.5);
+  lcCtx.font=`bold ${13+2*sp}px Outfit,sans-serif`;
+  lcCtx.fillStyle=`rgba(255,220,50,${sp})`;lcCtx.textAlign='center';
+  lcCtx.fillText('\u2600 LIGHT (Photons)',W*0.5,18);lcCtx.restore();
+}
+function animateLC(){lcT+=0.02;drawLightReactions();lcAnimId=requestAnimationFrame(animateLC);}
+animateLC();
+
+/* ==============================
+   TAB 3: CALVIN CYCLE
+   ============================== */
+const ccCanvas=document.getElementById('calvinCanvas');
+const ccCtx=ccCanvas.getContext('2d');
+let ccAnimId,ccRunning=true,ccT=0,co2Supply=3;
+let co2Fixed=0,g3pMade=0,glucoseMade=0;
+const calvinParticles=[];
+
+function setCO2(v){co2Supply=parseInt(v);document.getElementById('co2Val').textContent=v;}
+function toggleCalvinAnim(){
+  ccRunning=!ccRunning;
+  const btn=document.getElementById('btn-calvin-anim');
+  if(ccRunning){animateCC();btn.textContent='\u23F8\uFE0F Pause';btn.classList.add('active');}
+  else{cancelAnimationFrame(ccAnimId);btn.textContent='\u25B6 Play';btn.classList.remove('active');}
+}
+
+function drawCalvinCycle(){
+  const W=ccCanvas.width,H=ccCanvas.height;
+  ccCtx.clearRect(0,0,W,H);
+
+  const bg=ccCtx.createRadialGradient(W*0.4,H/2,20,W*0.4,H/2,Math.max(W,H)*0.6);
+  bg.addColorStop(0,'rgba(18,65,22,0.22)');bg.addColorStop(1,'rgba(3,12,5,0.0)');
+  ccCtx.fillStyle=bg;ccCtx.fillRect(0,0,W,H);
+  ccCtx.font='13px Outfit,sans-serif';ccCtx.fillStyle='rgba(100,200,120,0.38)';
+  ccCtx.fillText('STROMA',14,22);
+
+  const cx=W*0.4,cy=H*0.5,R=H*0.31;
+
+  // Cycle ring (dashed)
+  ccCtx.save();ccCtx.beginPath();ccCtx.arc(cx,cy,R,0,Math.PI*2);
+  ccCtx.strokeStyle='rgba(76,255,114,0.13)';ccCtx.lineWidth=3;
+  ccCtx.setLineDash([6,4]);ccCtx.stroke();ccCtx.setLineDash([]);ccCtx.restore();
+
+  const stages=[
+    {angle:-Math.PI/2,    label:'Carbon\nFixation',  sub:'CO\u2082+RuBP\u21922\xD73-PGA',color:'#64b5f6',icon:'\ud83d\udd35'},
+    {angle:-Math.PI/2+2.094,label:'Reduction',      sub:'3-PGA\u2192G3P\n(ATP+NADPH)',  color:'#ff9800',icon:'\ud83d\udfe0'},
+    {angle:-Math.PI/2+4.189,label:'RuBP\nRegen.',   sub:'G3P\u2192RuBP\n(ATP)',          color:'#ce93d8',icon:'\ud83d\udfe3'},
+  ];
+
+  stages.forEach((s,i)=>{
+    const sx=cx+R*Math.cos(s.angle),sy=cy+R*Math.sin(s.angle);
+
+    // Node
+    ccCtx.save();ccCtx.shadowBlur=18;ccCtx.shadowColor=s.color;
+    ccCtx.beginPath();ccCtx.arc(sx,sy,30,0,Math.PI*2);
+    const nG=ccCtx.createRadialGradient(sx-6,sy-6,2,sx,sy,30);
+    nG.addColorStop(0,s.color+'50');nG.addColorStop(1,s.color+'18');
+    ccCtx.fillStyle=nG;ccCtx.fill();
+    ccCtx.strokeStyle=s.color;ccCtx.lineWidth=2;ccCtx.stroke();ccCtx.restore();
+
+    // Icon
+    ccCtx.font='17px serif';ccCtx.textAlign='center';ccCtx.textBaseline='middle';
+    ccCtx.fillText(s.icon,sx,sy);
+
+    // Label position
+    const offX=sx>cx+10?52:(sx<cx-10?-52:0);
+    const offY=sy>cy+10?40:(sy<cy-10?-40:0);
+    const lx=sx+offX,ly=sy+offY;
+    const lines=s.label.split('\n');
+    ccCtx.font='bold 12px Outfit,sans-serif';ccCtx.fillStyle=s.color;ccCtx.textAlign='center';
+    lines.forEach((ln,li)=>ccCtx.fillText(ln,lx,ly+li*15-(lines.length-1)*7));
+    const subLines=s.sub.split('\n');
+    ccCtx.font='9px Outfit,sans-serif';ccCtx.fillStyle=s.color+'99';
+    subLines.forEach((sl,li)=>ccCtx.fillText(sl,lx,ly+lines.length*15-3+li*12));
+
+    // Animated flow dots around cycle
+    const nextS=stages[(i+1)%stages.length];
+    const nAngle=nextS.angle+(nextS.angle<s.angle?Math.PI*2:0);
+    for(let d=0;d<5;d++){
+      const phase=(ccT*0.35+i*0.33+d/5)%1;
+      const ang=lerp(s.angle,nAngle,phase);
+      const dotX=cx+R*Math.cos(ang),dotY=cy+R*Math.sin(ang);
+      const pulse=(Math.sin(ccT*3+d)*0.5+0.5);
+      ccCtx.save();ccCtx.beginPath();ccCtx.arc(dotX,dotY,2.5,0,Math.PI*2);
+      ccCtx.fillStyle=`rgba(76,255,114,${0.28+pulse*0.55})`;
+      if(pulse>0.75){ccCtx.shadowBlur=9;ccCtx.shadowColor='#4cff72';}
+      ccCtx.fill();ccCtx.restore();
+    }
+  });
+
+  // Center
+  ccCtx.save();ccCtx.textAlign='center';ccCtx.textBaseline='alphabetic';
+  ccCtx.font='bold 14px Outfit,sans-serif';ccCtx.fillStyle='rgba(76,255,114,0.8)';
+  ccCtx.fillText('Calvin',cx,cy-8);ccCtx.fillText('Cycle',cx,cy+9);
+  ccCtx.font='9px Outfit,sans-serif';ccCtx.fillStyle='rgba(180,255,200,0.38)';
+  ccCtx.fillText('(6 turns = 1 Glucose)',cx,cy+24);ccCtx.restore();
+
+  // Right info panel
+  const px=W*0.72,py=H*0.08,pW=W*0.26,pH=H*0.84;
+  ccCtx.save();ccCtx.fillStyle='rgba(8,28,10,0.5)';
+  ccCtx.strokeStyle='rgba(76,255,114,0.12)';ccCtx.lineWidth=1;
+  ccCtx.beginPath();ccCtx.roundRect(px,py,pW,pH,12);ccCtx.fill();ccCtx.stroke();ccCtx.restore();
+
+  const items=[
+    {label:'INPUTS',bold:true,color:'rgba(100,180,255,0.9)'},
+    {label:'6 CO\u2082',color:'#64b5f6'},
+    {label:'18 ATP',color:'#ffd54f'},
+    {label:'12 NADPH',color:'#b5ff2f'},
+    {label:'',color:'transparent'},
+    {label:'OUTPUTS',bold:true,color:'rgba(76,255,114,0.9)'},
+    {label:'Glucose C\u2086H\u2081\u2082O\u2086',color:'#4cff72'},
+    {label:'18 ADP+Pi',color:'#ffd54f88'},
+    {label:'12 NADP\u207A',color:'#b5ff2f88'},
+  ];
+  ccCtx.textAlign='left';
+  items.forEach((item,i)=>{
+    if(!item.label)return;
+    ccCtx.font=(item.bold?'bold ':'')+'11px Outfit,sans-serif';
+    ccCtx.fillStyle=item.color;ccCtx.fillText(item.label,px+14,py+24+i*28);
+  });
+
+  // Glucose molecule (pulsing)
+  const gluX=px+pW/2,gluY=py+pH-55;
+  const gp=0.5+0.5*Math.sin(ccT*1.8);
+  ccCtx.save();ccCtx.shadowBlur=20*gp;ccCtx.shadowColor='#4cff72';
+  ccCtx.font=`bold ${13+4*gp}px Outfit,sans-serif`;
+  ccCtx.fillStyle=`rgba(76,255,${100+60*gp},${0.6+0.3*gp})`;
+  ccCtx.textAlign='center';ccCtx.fillText('C\u2086H\u2081\u2082O\u2086',gluX,gluY);
+  ccCtx.font='9px Outfit,sans-serif';ccCtx.fillStyle='rgba(76,255,114,0.45)';
+  ccCtx.fillText('GLUCOSE',gluX,gluY+16);ccCtx.restore();
+
+  // Particle emitters
+  if(ccRunning){
+    if(Math.random()<0.045*co2Supply){
+      calvinParticles.push({type:'co2',x:0,y:cy+(Math.random()-0.5)*70,
+        vx:2.2+Math.random()*2,vy:(Math.random()-0.5)*0.5,life:1,color:'#64b5f6'});
+    }
+    if(Math.random()<0.028*co2Supply){
+      calvinParticles.push({type:'g3p',x:cx+R*0.65,y:cy+(Math.random()-0.5)*35,
+        vx:2.5,vy:-0.5+(Math.random()-0.5)*1,life:1,color:'#ff9800'});
+    }
+  }
+  calvinParticles.forEach((p,i)=>{
+    p.x+=p.vx;p.y+=p.vy;p.life-=0.015;
+    if(p.life<=0){
+      calvinParticles.splice(i,1);
+      if(p.type==='co2'){co2Fixed++;document.getElementById('co2-fixed').textContent=co2Fixed;}
+      if(p.type==='g3p'){g3pMade++;document.getElementById('g3p-count').textContent=g3pMade;
+        if(g3pMade%6===0){glucoseMade++;document.getElementById('glucose-count').textContent=glucoseMade;}}
+      return;
+    }
+    ccCtx.save();ccCtx.font=`${9+3*p.life}px Outfit,sans-serif`;
+    ccCtx.fillStyle=p.color+(Math.floor(p.life*255).toString(16).padStart(2,'0'));
+    ccCtx.textAlign='center';ccCtx.fillText(p.type==='co2'?'CO\u2082':'G3P',p.x,p.y);ccCtx.restore();
+  });
+}
+function animateCC(){ccT+=0.02;drawCalvinCycle();ccAnimId=requestAnimationFrame(animateCC);}
+animateCC();
+
+/* ==============================
+   TAB 4: TYPES OF PLASTIDS
+   ============================== */
+function drawTypesCanvas(){
+  const canvas=document.getElementById('typesCanvas');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  const types=[
+    {name:'Chloroplast',color:'#4cff72',bg:'#0a2a0d',desc:'Green pigment.\nSite of photosynthesis.',x:W*0.17},
+    {name:'Chromoplast',color:'#ff9800',bg:'#2a1500',desc:'Orange/red pigments.\nColors fruits & flowers.',x:W*0.5},
+    {name:'Leucoplast',color:'#cccccc',bg:'#1a1a1a',desc:'Colourless.\nStores starch, oils, proteins.',x:W*0.83},
+  ];
+
+  types.forEach(t=>{
+    const cx=t.x,cy=H*0.45;
+    ctx.save();ctx.shadowBlur=28;ctx.shadowColor=t.color;
+    ctx.beginPath();ctx.ellipse(cx,cy,65,48,0,0,Math.PI*2);
+    const g=ctx.createRadialGradient(cx-15,cy-15,5,cx,cy,65);
+    g.addColorStop(0,t.bg);g.addColorStop(0.6,t.color+'20');g.addColorStop(1,t.color+'40');
+    ctx.fillStyle=g;ctx.fill();ctx.strokeStyle=t.color;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+
+    if(t.name==='Chloroplast'){
+      for(let g2=0;g2<3;g2++){
+        const gx=cx-28+g2*28,gy=cy;
+        for(let th=0;th<4;th++){
+          ctx.save();ctx.fillStyle='rgba(20,150,40,0.85)';
+          ctx.strokeStyle='rgba(76,255,114,0.5)';ctx.lineWidth=0.5;
+          ctx.beginPath();ctx.roundRect(gx-10,gy-18+th*10,20,8,3);
+          ctx.fill();ctx.stroke();ctx.restore();
+        }
+      }
+    } else if(t.name==='Chromoplast'){
+      for(let d=0;d<12;d++){
+        const dx=cx+Math.cos(d*0.523)*32,dy=cy+Math.sin(d*0.523)*22;
+        ctx.save();ctx.beginPath();ctx.arc(dx,dy,4.5,0,Math.PI*2);
+        ctx.fillStyle=d%2===0?'#ff9800':'#ff6d00';ctx.fill();ctx.restore();
+      }
+    } else {
+      for(let s=0;s<5;s++){
+        const sx=cx+Math.cos(s*1.26)*28,sy=cy+Math.sin(s*1.26)*20;
+        ctx.save();ctx.beginPath();ctx.ellipse(sx,sy,9,7,s*0.3,0,Math.PI*2);
+        ctx.fillStyle='rgba(220,200,150,0.5)';
+        ctx.strokeStyle='rgba(200,180,120,0.6)';ctx.lineWidth=1;
+        ctx.fill();ctx.stroke();ctx.restore();
+      }
+    }
+
+    ctx.save();ctx.font='bold 13px Outfit,sans-serif';ctx.fillStyle=t.color;
+    ctx.textAlign='center';ctx.fillText(t.name,cx,cy+68);
+    ctx.font='10px Outfit,sans-serif';ctx.fillStyle=t.color+'99';
+    t.desc.split('\n').forEach((l,i)=>ctx.fillText(l,cx,cy+82+i*14));
+    ctx.restore();
+  });
+
+  // Interconversion arrows
+  ctx.save();ctx.setLineDash([5,4]);ctx.strokeStyle='rgba(200,200,200,0.22)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(W*0.28,H*0.45);ctx.lineTo(W*0.41,H*0.45);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(W*0.59,H*0.45);ctx.lineTo(W*0.72,H*0.45);ctx.stroke();
+  ctx.setLineDash([]);ctx.font='9px Outfit,sans-serif';ctx.fillStyle='rgba(200,200,200,0.35)';
+  ctx.textAlign='center';ctx.fillText('interconvert',W*0.345,H*0.45-8);
+  ctx.fillText('interconvert',W*0.655,H*0.45-8);ctx.restore();
+}
+
+function drawSpectrumCanvas(){
+  const canvas=document.getElementById('spectrumCanvas');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  const specX=W*0.1,specW=W*0.76,specY=H*0.65,specH=26;
+  const sG=ctx.createLinearGradient(specX,0,specX+specW,0);
+  sG.addColorStop(0,'#8B00FF');sG.addColorStop(0.1,'#4B0082');sG.addColorStop(0.2,'#0000FF');
+  sG.addColorStop(0.35,'#00FF00');sG.addColorStop(0.5,'#FFFF00');
+  sG.addColorStop(0.65,'#FF7F00');sG.addColorStop(0.8,'#FF0000');sG.addColorStop(1,'#8B0000');
+  ctx.fillStyle=sG;ctx.beginPath();ctx.roundRect(specX,specY,specW,specH,4);ctx.fill();
+
+  // Wavelength ticks
+  [{nm:400,l:'400'},{nm:450,l:'450\n(Blue)'},{nm:500,l:'500'},{nm:550,l:'550'},{nm:600,l:'600'},{nm:650,l:'650'},{nm:680,l:'680\nRed'},{nm:700,l:'700'}].forEach(w=>{
+    const x=specX+((w.nm-380)/(760-380))*specW;
+    ctx.save();ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(x,specY);ctx.lineTo(x,specY+specH);ctx.stroke();
+    ctx.font='9px Outfit,sans-serif';ctx.fillStyle='rgba(200,200,200,0.65)';ctx.textAlign='center';
+    w.l.split('\n').forEach((l,i)=>ctx.fillText(l,x,specY+specH+12+i*11));
+    ctx.restore();
+  });
+
+  // Absorption curves
+  function chlA(nm){ return Math.min(1,[{c:430,w:28,h:0.88},{c:680,w:24,h:1.0},{c:650,w:14,h:0.28},{c:462,w:14,h:0.28}].reduce((s,p)=>s+p.h*Math.exp(-0.5*Math.pow((nm-p.c)/p.w,2)),0)); }
+  function chlB(nm){ return Math.min(1,[{c:453,w:22,h:0.82},{c:642,w:20,h:0.88}].reduce((s,p)=>s+p.h*Math.exp(-0.5*Math.pow((nm-p.c)/p.w,2)),0)); }
+  const bot=specY-6,top=22,chartH=bot-top;
+
+  // Chl a
+  ctx.save();ctx.beginPath();
+  for(let nm=380;nm<=760;nm+=2){
+    const x=specX+((nm-380)/(760-380))*specW;
+    const y=bot-chlA(nm)*chartH;
+    nm===380?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.strokeStyle='rgba(76,255,114,0.88)';ctx.lineWidth=2.5;ctx.shadowBlur=8;ctx.shadowColor='#4cff72';ctx.stroke();
+  ctx.lineTo(specX+specW,bot);ctx.lineTo(specX,bot);ctx.closePath();
+  const fA=ctx.createLinearGradient(0,top,0,bot);
+  fA.addColorStop(0,'rgba(76,255,114,0.22)');fA.addColorStop(1,'rgba(76,255,114,0.02)');
+  ctx.fillStyle=fA;ctx.fill();ctx.restore();
+
+  // Chl b
+  ctx.save();ctx.beginPath();
+  for(let nm=380;nm<=760;nm+=2){
+    const x=specX+((nm-380)/(760-380))*specW;
+    const y=bot-chlB(nm)*chartH;
+    nm===380?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.strokeStyle='rgba(100,200,255,0.72)';ctx.lineWidth=2;ctx.setLineDash([5,3]);ctx.stroke();ctx.setLineDash([]);ctx.restore();
+
+  // Legend
+  ctx.save();
+  ctx.beginPath();ctx.moveTo(W*0.88,top+14);ctx.lineTo(W*0.88+22,top+14);
+  ctx.strokeStyle='rgba(76,255,114,0.88)';ctx.lineWidth=2.5;ctx.stroke();
+  ctx.font='10px Outfit,sans-serif';ctx.fillStyle='rgba(76,255,114,0.88)';ctx.fillText('Chlorophyll a',W*0.88+36,top+18);
+  ctx.setLineDash([5,3]);ctx.beginPath();ctx.moveTo(W*0.88,top+30);ctx.lineTo(W*0.88+22,top+30);
+  ctx.strokeStyle='rgba(100,200,255,0.72)';ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(100,200,255,0.72)';ctx.fillText('Chlorophyll b',W*0.88+36,top+34);
+  ctx.restore();
+
+  ctx.save();ctx.font='bold 12px Outfit,sans-serif';ctx.fillStyle='rgba(180,255,200,0.65)';
+  ctx.textAlign='left';ctx.fillText('Absorbance',specX,top+10);ctx.restore();
+}
+
+/* ==============================
+   TAB 5: QUIZ
+   ============================== */
+const quizData=[
+  {q:'Where exactly do the light-dependent reactions of photosynthesis take place?',
+   opts:['In the stroma','On the thylakoid membranes','In the cytoplasm','In the nucleus'],ans:1,
+   exp:'Light reactions occur on the thylakoid membranes where chlorophyll is embedded in the protein complexes PS I and PS II.'},
+  {q:'What is produced when water is split during the light reactions (photolysis)?',
+   opts:['Carbon dioxide + ATP','Oxygen + electrons + H\u207A ions','Glucose + water','NADPH + CO\u2082'],ans:1,
+   exp:'Photolysis: 2H\u2082O \u2192 4H\u207A + 4e\u207B + O\u2082. Oxygen is a byproduct \u2014 the source of all O\u2082 in our atmosphere!'},
+  {q:'What does NADPH do in the Calvin Cycle?',
+   opts:['Fixes CO\u2082 into RuBP','Acts as reducing agent to convert 3-PGA into G3P','Produces O\u2082','Stores starch'],ans:1,
+   exp:'NADPH donates electrons (reducing power) to convert 3-phosphoglycerate (3-PGA) into glyceraldehyde-3-phosphate (G3P).'},
+  {q:'Which enzyme fixes CO\u2082 in the Calvin Cycle?',
+   opts:['ATP Synthase','Hexokinase','RuBisCO','Amylase'],ans:2,
+   exp:'RuBisCO (Ribulose-1,5-bisphosphate carboxylase/oxygenase) is the most abundant enzyme on Earth. It combines CO\u2082 with RuBP.'},
+  {q:'Why do leaves appear green?',
+   opts:['They absorb green light and reflect red','They reflect green light and absorb red and blue','They produce green glucose','They have green cell walls'],ans:1,
+   exp:'Chlorophyll absorbs red (~680nm) and blue (~430nm) light. It reflects green light, which our eyes detect.'},
+  {q:'How many turns of the Calvin Cycle are needed to produce one glucose molecule?',
+   opts:['1 turn','3 turns','6 turns','12 turns'],ans:2,
+   exp:'Each turn of the Calvin Cycle fixes 1 CO\u2082. Since glucose (C\u2086H\u2081\u2082O\u2086) has 6 carbons, 6 turns are needed.'},
+  {q:'Which type of plastid stores starch?',
+   opts:['Chloroplast','Chromoplast','Amyloplast (Leucoplast)','Elaioplast'],ans:2,
+   exp:'Amyloplasts are colourless leucoplasts that store starch. They are found in storage organs like potato tubers and seeds.'},
+  {q:'What drives ATP synthesis in the thylakoid membrane (chemiosmosis)?',
+   opts:['Direct electron flow through ATP Synthase','Proton gradient: H\u207A ions flow from lumen to stroma through ATP Synthase','CO\u2082 fixation releasing energy','NADPH oxidation'],ans:1,
+   exp:'H\u207A ions accumulate in the thylakoid lumen during the ETC. They flow back through ATP Synthase (like a turbine) to generate ATP.'},
+];
+
+let qIndex=0,score=0,answered=false;
+function startQuiz(){
+  qIndex=0;score=0;answered=false;
+  document.getElementById('quiz-restart-btn').style.display='none';
+  document.getElementById('quiz-next-btn').style.display='none';
+  document.getElementById('quiz-score-display').textContent='';
+  showQuestion();
+}
+function showQuestion(){
+  const q=quizData[qIndex];answered=false;
+  document.getElementById('quiz-area').innerHTML=`
+    <div class="quiz-card">
+      <div class="quiz-question">Q${qIndex+1}/${quizData.length}: ${q.q}</div>
+      <div class="quiz-options">${q.opts.map((o,i)=>`<div class="quiz-opt" id="opt-${i}" onclick="answerQ(${i})">${o}</div>`).join('')}</div>
+      <div class="quiz-feedback" id="quiz-fb"></div>
+    </div>`;
+  document.getElementById('quiz-next-btn').style.display='none';
+}
+function answerQ(i){
+  if(answered)return;answered=true;
+  const q=quizData[qIndex];
+  document.querySelectorAll('.quiz-opt').forEach((el,idx)=>{
+    if(idx===q.ans)el.classList.add('correct');
+    else if(idx===i&&i!==q.ans)el.classList.add('wrong');
+  });
+  const fb=document.getElementById('quiz-fb');
+  if(i===q.ans){score++;fb.className='quiz-feedback show ok';fb.innerHTML='\u2705 Correct! '+q.exp;}
+  else{fb.className='quiz-feedback show no';fb.innerHTML=`\u274C Incorrect. Answer: <strong>${q.opts[q.ans]}</strong>. ${q.exp}`;}
+  document.getElementById('quiz-score-display').textContent=`Score: ${score}/${qIndex+1}`;
+  if(qIndex<quizData.length-1)document.getElementById('quiz-next-btn').style.display='inline-block';
+  else{document.getElementById('quiz-restart-btn').style.display='inline-block';
+    document.getElementById('quiz-score-display').textContent=`Final Score: ${score}/${quizData.length} \u2013 ${score>=6?'\u2B50 Excellent!':score>=4?'\uD83D\uDC4D Good':'\uD83D\uDCDA Keep Studying!'}`;}
+}
+function nextQuestion(){qIndex++;showQuestion();}
+startQuiz();
+</script>
+
+</body>
+</html>
